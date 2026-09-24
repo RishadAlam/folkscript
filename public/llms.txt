@@ -1,0 +1,21 @@
+# Folkscript
+
+> Written by the people, read by everyone. Folkscript is an independent publishing community for thoughtful writing, fresh perspectives, and curious readers.
+
+## Find stories
+- [Home](/): The latest editorial selection.
+- [Explore](/explore): Discover topics, writers, and published stories.
+- [Search](/search): Search the public collection.
+- [RSS feed](/feed.xml): Recently published story summaries.
+- [Sitemap](/sitemap.xml): Public stories, author profiles, and topic archives.
+
+## Reading and attribution
+Credit the named author and link to each story's canonical URL. Drafts and account pages are private. Member-only stories expose a public summary; their full text requires an eligible membership. Summaries are not the complete article.
+
+## Machine-readable access
+- [Public story API](/api/v1/posts): Paginated public metadata. Premium bodies are excluded.
+- Author feeds: `/@{username}/feed.xml`.
+- Topic feeds: `/topic/{slug}/feed.xml`.
+- Public article URLs: `/@{username}/{story-slug}`.
+
+This file is a navigation aid, not a license or a guarantee of search inclusion. Published pages provide their own canonical links and structured data.

@@ -1,0 +1,47 @@
+{
+  "id": "/",
+  "name": "Folkscript \u2014 Independent stories",
+  "short_name": "Folkscript",
+  "description": "Written by the people, read by everyone.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F6F3EC",
+  "theme_color": "#1E2A47",
+  "categories": [
+    "news",
+    "books",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/folkscript-icon-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Explore stories",
+      "url": "/explore"
+    },
+    {
+      "name": "Your reading list",
+      "url": "/bookmarks"
+    }
+  ]
+}

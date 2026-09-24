@@ -1,0 +1,102 @@
+name: folkscript
+
+x-app-environment: &app-environment
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_KEY: ${APP_KEY:?Set APP_KEY in .env before starting Docker}
+  APP_URL: ${APP_URL:-http://localhost:8080}
+  DB_CONNECTION: pgsql
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_DATABASE: folkscript
+  DB_USERNAME: folkscript
+  DB_PASSWORD: ${DOCKER_DB_PASSWORD:-local-development-change-me}
+  REDIS_HOST: redis
+  CACHE_STORE: redis
+  SESSION_DRIVER: redis
+  QUEUE_CONNECTION: redis
+  SCOUT_DRIVER: meilisearch
+  MEILISEARCH_HOST: http://meilisearch:7700
+  MEILISEARCH_KEY: ${MEILISEARCH_KEY:-local-search-change-me}
+
+services:
+  app:
+    build: .
+    image: folkscript:local
+    restart: unless-stopped
+    env_file: .env
+    environment: *app-environment
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue:
+    image: folkscript:local
+    restart: unless-stopped
+    env_file: .env
+    environment: *app-environment
+    command: php artisan horizon
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      - app
+
+  scheduler:
+    image: folkscript:local
+    restart: unless-stopped
+    env_file: .env
+    environment: *app-environment
+    command: php artisan schedule:work
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      - app
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: folkscript
+      POSTGRES_USER: folkscript
+      POSTGRES_PASSWORD: ${DOCKER_DB_PASSWORD:-local-development-change-me}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U folkscript -d folkscript"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.15
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY:-local-search-change-me}
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meilisearch:/meili_data
+
+volumes:
+  storage:
+  postgres:
+  redis:
+  meilisearch:
