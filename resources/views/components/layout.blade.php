@@ -1,4 +1,4 @@
-@props(['title' => 'Good stories. A wider world.', 'description' => 'Discover independent voices, thoughtful perspectives, and stories worth your time. Folkscript is written by the people, read by everyone.', 'post' => null, 'author' => null, 'collection' => null, 'wide' => false])
+@props(['title' => 'Good stories. A wider world.', 'description' => 'Discover independent voices, thoughtful perspectives, and stories worth your time. Folkscript is written by the people, read by everyone.', 'post' => null, 'author' => null, 'collection' => null, 'wide' => false, 'admin' => false])
 @php($errors ??= new \Illuminate\Support\ViewErrorBag)
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ menuOpen: false, dark: document.documentElement.classList.contains('dark'), toggleTheme() { this.dark = !this.dark; try { localStorage.setItem('folkscript-theme', this.dark ? 'dark' : 'light') } catch(e) {} } }" :class="{ 'dark': dark }">
@@ -15,8 +15,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body>
-<a href="#main" class="skip-link">{{ __('Skip to content') }}</a>
+<body @class(['admin-body' => $admin])>
+<a href="{{ $admin ? '#admin-content' : '#main' }}" class="skip-link">{{ __('Skip to content') }}</a>
+@unless($admin)
 <header class="site-header" @click.outside="menuOpen=false" @keydown.escape.window="if(menuOpen){menuOpen=false;$refs.mobileToggle.focus()}">
   <div class="masthead page-shell">
     <a href="/" class="brand" aria-label="{{ __('Folkscript home') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="190" height="42"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="190" height="42"></a>
@@ -39,12 +40,15 @@
   </div>
   <nav id="mobile-menu" class="mobile-menu" x-show="menuOpen" x-cloak aria-label="{{ __('Mobile navigation') }}"><a href="/explore">{{ __('Explore stories') }}</a><a href="/trending">{{ __('Trending') }}</a><a href="/membership">{{ __('Membership') }}</a><a href="/write">{{ __('Write a story') }}</a><a href="/bookmarks">{{ __('Saved stories') }}</a><button @click="toggleTheme()"><x-icon name="moon" size="17" /><span x-text="dark ? 'Use light theme' : 'Use dark theme'"></span></button>@guest<a href="/login">{{ __('Sign in') }}</a>@endguest</nav>
 </header>
+@endunless
 @if(session('success') || session('status'))<div class="toast" role="status" x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,6500)"><x-icon name="check-circle" /><span>{{ session('success') ?? session('status') }}</span><button @click="show=false" aria-label="{{ __('Dismiss message') }}"><x-icon name="x" size="16" /></button></div>@endif
+@unless($admin)
 @if(session('error'))<div class="page-shell notice notice-error" role="alert">{{ session('error') }}</div>@endif
 @if(collect($errors->getBags())->contains(fn ($bag) => $bag->any()))<div class="page-shell"><div class="notice notice-error" role="alert">@foreach($errors->getBags() as $bag) @foreach($bag->all() as $error)<p>{{ $error }}</p>@endforeach @endforeach</div></div>@endif
+@endunless
 @if(session('impersonator_id'))<div class="page-shell"><div class="notice"><form method="POST" action="/support/stop" class="inline-form" style="margin:0;justify-content:space-between">@csrf<span>{{ __('Read-only support session ·') }} {{ auth()->user()->name }}</span><button class="btn btn-outline btn-small">{{ __('Return to administrator') }}</button></form></div></div>@endif
 <main id="main" tabindex="-1">{{ $slot }}</main>
-<footer class="site-footer"><div class="page-shell footer-inner"><div><a href="/" class="footer-wordmark"><strong>Folk</strong>script<span>.</span></a><p>{{ config('folkscript.tagline', 'Written by the people, read by everyone.') }}</p></div><nav aria-label="{{ __('Footer navigation') }}"><a href="/about">{{ __('Our story') }}</a><a href="/explore">{{ __('Explore') }}</a><a href="/write">{{ __('Start writing') }}</a><a href="/feed.xml">{{ __('RSS') }} <x-icon name="rss" size="13" /></a></nav><div class="footer-fine"><span>© {{ date('Y') }} Folkscript</span><a href="/privacy">{{ __('Privacy') }}</a><a href="/terms">{{ __('Terms') }}</a><span>{{ app()->isLocal() ? __('Preview edition · Sample stories') : __('Independent writing, open to everyone.') }}</span></div></div></footer>
+@unless($admin)<footer class="site-footer"><div class="page-shell footer-inner"><div><a href="/" class="footer-wordmark"><strong>Folk</strong>script<span>.</span></a><p>{{ config('folkscript.tagline', 'Written by the people, read by everyone.') }}</p></div><nav aria-label="{{ __('Footer navigation') }}"><a href="/about">{{ __('Our story') }}</a><a href="/explore">{{ __('Explore') }}</a><a href="/write">{{ __('Start writing') }}</a><a href="/feed.xml">{{ __('RSS') }} <x-icon name="rss" size="13" /></a></nav><div class="footer-fine"><span>© {{ date('Y') }} Folkscript</span><a href="/privacy">{{ __('Privacy') }}</a><a href="/terms">{{ __('Terms') }}</a><span>{{ app()->isLocal() ? __('Preview edition · Sample stories') : __('Independent writing, open to everyone.') }}</span></div></div></footer>@endunless
 <div id="action-feedback" class="action-feedback" role="status" aria-live="polite" hidden></div>
 @livewireScriptConfig
 @stack('scripts')

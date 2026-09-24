@@ -1,9 +1,10 @@
-<x-layout title="{{ __('Approved earnings administration') }}">
-<div class="page-shell platform-page">
-    <header class="page-heading"><div><h1>{{ __('Approved earnings') }}</h1><p class="muted">{{ __('Record allocations and manage transfers to writers.') }}</p></div><a href="{{ route('admin') }}" class="btn btn-outline">{{ __('Administration') }}</a></header>
-    <p class="platform-intro">{{ __('This ledger records earnings approved by an administrator. Reads, reactions, and memberships do not automatically generate allocations. A transfer moves existing platform funds to a writer’s Stripe account; Stripe manages the later bank payout.') }}</p>
-    @unless($ready)<div class="notice">{{ __('Transfers are disabled. Stripe credentials and the explicit platform payout switch must be configured in the deployment environment. You can record approved allocations now.') }}</div>@endunless
-    <details class="platform-disclosure" @if($errors->has('author_id') || $errors->has('amount_cents') || $errors->has('reference') || $errors->has('allocation_confirmed') || $errors->has('currency')) open @endif>
+<x-admin-layout title="{{ __('Writer earnings') }}" section="earnings" description="{{ __('Record approved allocations and review transfers to writers.') }}">
+<div class="platform-page admin-earnings-page">
+    <div class="admin-earnings-context">
+        <p class="platform-intro">{{ __('Earnings are entered after accounting approval. Reads, reactions, and memberships do not create automatic allocations.') }}</p>
+        @unless($ready)<div class="notice admin-service-notice" role="status"><strong>{{ __('Transfers are disabled') }}</strong><p>{{ __('You can record allocations. Sending funds requires configured Stripe credentials and the platform payout switch.') }}</p></div>@endunless
+    </div>
+    <details class="platform-disclosure" @if($payouts->isEmpty() || $errors->has('author_id') || $errors->has('amount_cents') || $errors->has('reference') || $errors->has('allocation_confirmed') || $errors->has('currency')) open @endif>
         <summary>{{ __('Record an approved allocation') }}</summary>
         <form method="post" action="{{ route('payouts.store') }}" class="platform-allocation-form">
             @csrf
@@ -14,7 +15,8 @@
             <button class="btn btn-primary" type="submit">{{ __('Record allocation') }}</button>
         </form>
     </details>
-    <section aria-labelledby="ledger-title"><h2 class="platform-ledger-heading" id="ledger-title">{{ __('Transfer ledger') }}</h2>
+    <section aria-labelledby="ledger-title">
+        <div class="admin-ledger-heading"><h2 class="platform-ledger-heading" id="ledger-title">{{ __('Transfer ledger') }}</h2><p class="muted">{{ __('Transfers go to a writer’s connected Stripe account. Stripe handles the later bank payout.') }}</p></div>
         @if($payouts->isNotEmpty())
         <div class="table-wrap admin-ledger-wrap" role="region" tabindex="0" aria-label="{{ __('Approved earnings ledger') }}"><table class="data-table platform-ledger"><caption class="sr-only">{{ __('Approved writer earnings and transfer status') }}</caption><thead><tr><th scope="col">{{ __('Writer & reference') }}</th><th scope="col">{{ __('Amount') }}</th><th scope="col">{{ __('Status') }}</th><th scope="col">{{ __('Action') }}</th></tr></thead><tbody>
             @foreach($payouts as $payout)
@@ -31,7 +33,7 @@
             </td></tr>
             @endforeach
         </tbody></table></div><div class="pagination-wrap">{{ $payouts->links() }}</div>
-        @else<div class="empty-state"><h3>{{ __('No approved earnings yet.') }}</h3><p>{{ __('When an allocation is approved in your accounting process, record it above. Nothing is calculated from demo readership or story engagement.') }}</p></div>@endif
+        @else<div class="empty-state"><h3>{{ __('No approved earnings yet.') }}</h3><p>{{ __('Record your first approved allocation using the form above. No funds move until a transfer is confirmed.') }}</p></div>@endif
     </section>
 </div>
-</x-layout>
+</x-admin-layout>
