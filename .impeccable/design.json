@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-24T19:33:43.036887+00:00",
+  "generatedAt": "2026-09-24T20:30:18.180522+00:00",
   "title": "Design System: Folkscript",
   "extensions": {
     "shadows": [
@@ -57,12 +57,20 @@
         "value": "640px"
       },
       {
+        "name": "writing-studio-stack",
+        "value": "700px"
+      },
+      {
         "name": "platform-stack",
         "value": "800px"
       },
       {
         "name": "navigation-and-editorial-stack",
         "value": "900px"
+      },
+      {
+        "name": "editor-compact",
+        "value": "1100px"
       },
       {
         "name": "compact-desktop",
@@ -72,7 +80,25 @@
         "name": "wide-desktop",
         "value": "1500px"
       }
-    ]
+    ],
+    "typographyMeta": {
+      "display": {
+        "displayName": "Editorial display",
+        "purpose": "Homepage invitation; mobile uses a fluid 46–62px range."
+      },
+      "title": {
+        "displayName": "Story title",
+        "purpose": "Discovery story titles; homepage rows use 24px on mobile."
+      },
+      "body": {
+        "displayName": "Interface body",
+        "purpose": "Default interface copy; article prose retains its separate reading role."
+      },
+      "label": {
+        "displayName": "Control label",
+        "purpose": "Shared field labels and buttons; do not substitute smaller metadata sizes."
+      }
+    }
   },
   "components": [
     {
@@ -81,7 +107,7 @@
       "refersTo": "button-primary",
       "description": "Main reading, writing, and form action.",
       "html": "<button class=\"ds-primary\" type=\"button\">Start writing</button>",
-      "css": ".ds-primary{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:var(--ink,#1e2a47);color:var(--paper,#f6f3ec);}.ds-primary:hover{transform:translateY(-1px);opacity:.9;}.ds-primary:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-primary:disabled{cursor:wait;opacity:.55}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover{transform:none}}"
+      "css": ".ds-primary{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:var(--ink,#1e2a47);color:var(--paper,#f6f3ec);}.ds-primary:hover{transform:translateY(-1px);opacity:.9;}.ds-primary:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-primary:disabled{cursor:wait;opacity:.6;transform:none}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover{transform:none}}"
     },
     {
       "name": "Outline button",
@@ -89,15 +115,15 @@
       "refersTo": "button-outline",
       "description": "Secondary action on paper.",
       "html": "<button class=\"ds-outline\" type=\"button\">Explore stories</button>",
-      "css": ".ds-outline{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:transparent;color:var(--ink,#1e2a47);border-color:var(--rule,#d9d8d1);}.ds-outline:hover{transform:translateY(-1px);background:var(--soft,#ebe8e0);border-color:var(--muted,#626771);}.ds-outline:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-outline:disabled{cursor:wait;opacity:.55}@media(prefers-reduced-motion:reduce){.ds-outline{transition:none}.ds-outline:hover{transform:none}}"
+      "css": ".ds-outline{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:transparent;color:var(--ink,#1e2a47);border-color:var(--rule,#d9d8d1);}.ds-outline:hover{transform:translateY(-1px);background:var(--soft,#ebe8e0);border-color:var(--muted,#626771);}.ds-outline:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-outline:disabled{cursor:wait;opacity:.6;transform:none}@media(prefers-reduced-motion:reduce){.ds-outline{transition:none}.ds-outline:hover{transform:none}}"
     },
     {
       "name": "Paper button",
       "kind": "button",
       "refersTo": "button-paper",
       "description": "Reversed action for navy editorial blocks.",
-      "html": "<button class=\"ds-paper\" type=\"button\">Put it into words</button>",
-      "css": ".ds-paper{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:var(--paper,#f6f3ec);color:var(--ink,#1e2a47);border:0;}.ds-paper:hover{transform:translateY(-1px);}.ds-paper:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-paper:disabled{cursor:wait;opacity:.55}@media(prefers-reduced-motion:reduce){.ds-paper{transition:none}.ds-paper:hover{transform:none}}"
+      "html": "<button class=\"ds-paper\" type=\"button\">Start a draft</button>",
+      "css": ".ds-paper{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:var(--paper,#f6f3ec);color:var(--ink,#1e2a47);border:0;}.ds-paper:hover{transform:translateY(-1px);}.ds-paper:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-paper:disabled{cursor:wait;opacity:.6;transform:none}@media(prefers-reduced-motion:reduce){.ds-paper{transition:none}.ds-paper:hover{transform:none}}"
     },
     {
       "name": "Danger button",
@@ -105,15 +131,15 @@
       "refersTo": "button-danger",
       "description": "Destructive account or moderation action.",
       "html": "<button class=\"ds-danger\" type=\"button\">Delete</button>",
-      "css": ".ds-danger{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:var(--error,#aa3e36);color:var(--paper,#f6f3ec);}.ds-danger:hover{transform:translateY(-1px);}.ds-danger:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-danger:disabled{cursor:wait;opacity:.55}@media(prefers-reduced-motion:reduce){.ds-danger{transition:none}.ds-danger:hover{transform:none}}"
+      "css": ".ds-danger{font-family:'Fraunces Variable',Georgia,serif;min-height:44px;padding:10px 20px;border:1px solid transparent;border-radius:5px;display:inline-flex;gap:13px;align-items:center;justify-content:center;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;transition:background .2s,transform .2s;background:var(--error,#aa3e36);color:var(--paper,#f6f3ec);}.ds-danger:hover{transform:translateY(-1px);}.ds-danger:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}.ds-danger:disabled{cursor:wait;opacity:.6;transform:none}@media(prefers-reduced-motion:reduce){.ds-danger{transition:none}.ds-danger:hover{transform:none}}"
     },
     {
       "name": "Text field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Visible label, paper field, and ink focus ring.",
+      "description": "Visible label, 16px field text, and ink focus ring; errors sit beside their field.",
       "html": "<label class=\"ds-field\"><span>Email address</span><input class=\"ds-input\" type=\"email\" autocomplete=\"email\" placeholder=\"you@example.com\"></label>",
-      "css": ".ds-field{display:block;font-family:'Fraunces Variable',Georgia,serif;color:var(--ink,#1e2a47)}.ds-field>span{display:block;font-size:13px;font-weight:500;margin-bottom:8px}.ds-input{font-family:'Fraunces Variable',Georgia,serif;display:block;box-sizing:border-box;width:100%;padding:12px 14px;background:var(--paper,#f6f3ec);color:var(--ink,#1e2a47);border:1px solid var(--rule,#d9d8d1);border-radius:4px;min-height:46px;font-size:14px;outline:none;caret-color:var(--ink,#1e2a47)}.ds-input::placeholder{color:var(--muted,#626771)}.ds-input:focus{border-color:var(--ink,#1e2a47);box-shadow:0 0 0 1px var(--ink,#1e2a47)}@media(max-width:600px){.ds-input{font-size:16px}}"
+      "css": ".ds-field{display:block;font-family:'Fraunces Variable',Georgia,serif;color:var(--ink,#1e2a47)}.ds-field>span{display:block;font-size:14px;font-weight:500;margin-bottom:8px}.ds-input{font-family:'Fraunces Variable',Georgia,serif;display:block;box-sizing:border-box;width:100%;padding:12px 14px;background:var(--paper,#f6f3ec);color:var(--ink,#1e2a47);border:1px solid var(--rule,#d9d8d1);border-radius:4px;min-height:46px;font-size:16px;outline:none;caret-color:var(--ink,#1e2a47)}.ds-input::placeholder{color:var(--muted,#626771)}.ds-input:focus{border-color:var(--ink,#1e2a47);box-shadow:0 0 0 1px var(--ink,#1e2a47)}"
     },
     {
       "name": "Text navigation",
@@ -127,24 +153,24 @@
       "kind": "chip",
       "refersTo": "topic",
       "description": "Compact topic navigation link.",
-      "html": "<a class=\"ds-topic\" href=\"#topic\">For the curious</a>",
-      "css": ".ds-topic{display:inline-block;font-family:'Fraunces Variable',Georgia,serif;font-size:12px;line-height:1.55;padding:7px 15px;border:1px solid var(--rule,#d9d8d1);border-radius:30px;text-decoration:none;background:transparent;color:var(--ink,#1e2a47);}.ds-topic:hover{background:var(--soft,#ebe8e0);color:var(--ink,#1e2a47)}.ds-topic:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}"
+      "html": "<a class=\"ds-topic\" href=\"#topic\">Culture</a>",
+      "css": ".ds-topic{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;font-family:'Fraunces Variable',Georgia,serif;font-size:14px;line-height:1.55;padding:7px 15px;border:1px solid var(--rule,#d9d8d1);border-radius:30px;text-decoration:none;background:transparent;color:var(--ink,#1e2a47);}.ds-topic:hover{background:var(--soft,#ebe8e0);color:var(--ink,#1e2a47)}.ds-topic:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}"
     },
     {
       "name": "Selected topic",
       "kind": "chip",
       "refersTo": "topic-selected",
       "description": "Current feed selector.",
-      "html": "<a class=\"ds-topic-selected\" href=\"#topic\" aria-current=\"page\">For the curious</a>",
-      "css": ".ds-topic-selected{display:inline-block;font-family:'Fraunces Variable',Georgia,serif;font-size:12px;line-height:1.55;padding:7px 15px;border:1px solid var(--ink,#1e2a47);border-radius:30px;text-decoration:none;background:var(--ink,#1e2a47);color:var(--paper,#f6f3ec);}.ds-topic-selected:hover{background:var(--soft,#ebe8e0);color:var(--ink,#1e2a47)}.ds-topic-selected:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}"
+      "html": "<a class=\"ds-topic-selected\" href=\"#topic\" aria-current=\"page\">Culture</a>",
+      "css": ".ds-topic-selected{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;font-family:'Fraunces Variable',Georgia,serif;font-size:14px;line-height:1.55;padding:7px 15px;border:1px solid var(--ink,#1e2a47);border-radius:30px;text-decoration:none;background:var(--ink,#1e2a47);color:var(--paper,#f6f3ec);}.ds-topic-selected:hover{background:var(--soft,#ebe8e0);color:var(--ink,#1e2a47)}.ds-topic-selected:focus-visible{outline:2px solid var(--ink,#1e2a47);outline-offset:5px}"
     },
     {
       "name": "Form panel",
       "kind": "card",
       "refersTo": "panel",
       "description": "A restrained container for related form controls and settings.",
-      "html": "<section class=\"ds-panel\"><h2>Profile details</h2><p>Make a little room for your voice.</p></section>",
-      "css": ".ds-panel{font-family:'Fraunces Variable',Georgia,serif;background:var(--surface,#fcfaf6);color:var(--ink,#1e2a47);padding:28px;border:1px solid var(--rule,#d9d8d1);border-radius:7px}.ds-panel h2{font-weight:500;font-size:25px;line-height:1.15;letter-spacing:-.025em;margin:0 0 19px}.ds-panel p{font-size:15px;line-height:1.55;margin:0;color:var(--muted,#626771)}@media(max-width:600px){.ds-panel{padding:22px}}"
+      "html": "<section class=\"ds-panel\"><h2>Profile details</h2><p>Choose the name and introduction readers see.</p></section>",
+      "css": ".ds-panel{font-family:'Fraunces Variable',Georgia,serif;background:var(--surface,#fcfaf6);color:var(--ink,#1e2a47);padding:28px;border:1px solid var(--rule,#d9d8d1);border-radius:7px}.ds-panel h2{font-weight:500;font-size:25px;line-height:1.15;letter-spacing:-.025em;margin:0 0 19px}.ds-panel p{font-size:16px;line-height:1.55;margin:0;color:var(--muted,#626771)}@media(max-width:600px){.ds-panel{padding:22px}}"
     },
     {
       "name": "Article quotation",
@@ -187,7 +213,9 @@
       "**Do** give stories and authors visual priority through type, photography, and spacing.",
       "**Do** maintain the 680px desktop article measure and responsive reading gutters.",
       "**Do** use rules and soft surfaces for grouping, with shadows only for floating UI.",
-      "**Do** preserve visible focus, explicit form labels, meaningful action states, and reduced-motion behavior."
+      "**Do** preserve visible focus, explicit form labels, meaningful action states, and reduced-motion behavior.",
+      "**Do** write task-specific instructions and recovery copy; use the next useful action in empty states.",
+      "**Do** distinguish draft autosave from deliberate publication changes."
     ],
     "donts": [
       "**Don't** introduce a second interface type family or decorative paper textures.",

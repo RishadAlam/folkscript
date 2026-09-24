@@ -16,6 +16,7 @@ class PublishingController extends Controller
 {
     public function home(Request $request)
     {
+        $this->validateDiscoveryQuery($request);
         $featured = Post::published()->withCard()->where('slug', 'the-quiet-art-of-paying-attention')->first() ?? Post::published()->withCard()->latest('published_at')->first();
         $feed = Post::published()->withCard();
         $personalized = $request->query('feed') === 'following' && $request->user();
@@ -34,12 +35,13 @@ class PublishingController extends Controller
             ? $feed->latest('published_at')->paginate(6)->withQueryString()
             : app(PublicDiscoveryCache::class)->paginate($request, 'home', 6, fn () => $feed->latest('published_at'), ['featured' => $featured?->id]);
         $topics = $this->topics();
-        $suggestedAuthors = User::whereHas('posts', fn (Builder $q) => $q->published())->whereNull('suspended_at')->withCount(['followers', 'posts'])->limit(4)->get();
+        $suggestedAuthors = User::whereHas('posts', fn (Builder $q) => $q->published())->whereNull('suspended_at')->when($request->user(), fn ($q) => $q->whereKeyNot($request->user()->id))->withCount(['followers', 'posts' => fn ($q) => $q->published()])->withExists(['followers as is_followed' => fn ($q) => $q->where('follower_id', $request->user()?->id ?? 0)])->limit(4)->get();
         return view('home', compact('featured', 'posts', 'topics', 'suggestedAuthors'));
     }
 
     public function discover(Request $request)
     {
+        $this->validateDiscoveryQuery($request);
         $query = mb_substr(trim((string) $request->query('q', '')), 0, 200);
         $posts = app(PublicDiscoveryCache::class)->paginate($request, $request->routeIs('trending') ? 'trending' : 'discover', 12, function () use ($request, $query) {
             $posts = Post::published();
@@ -180,6 +182,16 @@ class PublishingController extends Controller
         $uploads = app(\App\Services\MediaUpload::class);
         $media = $uploads->store($request->user(), $request->file('image'), 'stories');
         return response()->json(['url' => $uploads->url($media)]);
+    }
+
+    private function validateDiscoveryQuery(Request $request): void
+    {
+        foreach (['q', 'topic', 'type', 'feed', 'page'] as $key) {
+            $value = $request->query($key);
+            abort_if($value !== null && ! is_string($value), 400, 'Search parameters must be plain text.');
+        }
+        $page = $request->query('page');
+        abort_if($page !== null && (! ctype_digit($page) || (int) $page < 1 || (int) $page > 100000), 400, 'Choose a valid results page.');
     }
 
     private function topics()

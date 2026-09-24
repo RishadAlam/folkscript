@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'writer_count' => '{0} 0 writers|{1} :count writer|[2,*] :count writers',
     'story_count' => '{0} 0 stories|{1} :count story|[2,*] :count stories',
     'follower_count' => '{0} 0 followers|{1} :count follower|[2,*] :count followers',
     'open_report_count' => '{0} 0 open reports|{1} :count open report|[2,*] :count open reports',

@@ -81,9 +81,9 @@ class EngagementController extends Controller
         }
         $comment = $post->comments()->create(['user_id' => $request->user()->id, 'body' => trim(strip_tags($data['body'])), 'parent_id' => $data['parent_id'] ?? null, 'status' => 'visible']);
         if ($post->author_id !== $request->user()->id) {
-            $this->notify($post->author, $request->user()->name.' responded to “'.$post->title.'”.', $post->url.'#comments', 'comment');
+            $this->notify($post->author, $request->user()->name.' responded to “'.$post->title.'”.', $post->url.'#responses', 'comment');
         }
-        return $request->expectsJson() ? response()->json(['comment' => ['id' => $comment->id, 'body' => $comment->body, 'parent_id' => $comment->parent_id, 'created_at' => $comment->created_at, 'user' => $request->user()->only(['id', 'name', 'username', 'avatar'])]], 201) : redirect($post->url.'#comments')->with('success', 'Your response is part of the conversation.');
+        return $request->expectsJson() ? response()->json(['comment' => ['id' => $comment->id, 'body' => $comment->body, 'parent_id' => $comment->parent_id, 'created_at' => $comment->created_at, 'user' => $request->user()->only(['id', 'name', 'username', 'avatar'])]], 201) : redirect($post->url.'#responses')->with('success', 'Your response is part of the conversation.');
     }
 
     public function deleteComment(Comment $comment)

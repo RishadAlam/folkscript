@@ -35,16 +35,21 @@ class AccountController extends Controller
             'newsletter_enabled' => ['nullable', 'boolean'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096', 'dimensions:max_width=6000,max_height=6000'],
             'cover_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:6144', 'dimensions:max_width=8000,max_height=8000'],
+            'remove_avatar' => ['nullable', 'boolean'],
+            'remove_cover_image' => ['nullable', 'boolean'],
         ]);
         $data['social_links'] = array_filter(['website' => $data['website'] ?? null, 'github' => $data['github'] ?? null, 'linkedin' => $data['linkedin'] ?? null]);
         $data['newsletter_enabled'] = $request->boolean('newsletter_enabled');
         unset($data['website'], $data['github'], $data['linkedin']);
         foreach (['avatar', 'cover_image'] as $field) {
-            unset($data[$field]);
+            unset($data[$field], $data['remove_'.$field]);
             if ($request->hasFile($field)) {
                 $uploads = app(\App\Services\MediaUpload::class);
                 $media = $uploads->store($user, $request->file($field), $field);
                 $data[$field] = $uploads->url($media);
+            } elseif ($request->boolean('remove_'.$field)) {
+                $user->clearMediaCollection($field);
+                $data[$field] = null;
             }
         }
         DB::transaction(function () use ($user, $data) {
@@ -76,7 +81,7 @@ class AccountController extends Controller
 
     public function password(Request $request)
     {
-        $data = $request->validate(['current_password' => ['required', 'current_password'], 'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()]]);
+        $data = $request->validateWithBag('passwordChange', ['current_password' => ['required', 'current_password'], 'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()]]);
         $request->user()->forceFill(['password' => Hash::make($data['password'])])->save();
         Auth::logoutOtherDevices($data['password']);
         if (config('session.driver') === 'database') {
@@ -94,7 +99,7 @@ class AccountController extends Controller
 
     public function confirmTwoFactor(Request $request, ConfirmTwoFactorAuthentication $confirm)
     {
-        $data = $request->validate(['code' => ['required', 'digits:6']]);
+        $data = $request->validateWithBag('confirmTwoFactorAuthentication', ['code' => ['required', 'digits:6']]);
         $confirm($request->user(), $data['code']);
         return back()->with('status', 'Two-factor authentication is enabled. Save your recovery codes somewhere private.');
     }
@@ -115,7 +120,9 @@ class AccountController extends Controller
     public function createToken(Request $request)
     {
         $data = $request->validate(['token_name' => ['required', 'string', 'max:60']]);
-        abort_if($request->user()->tokens()->count() >= 10, 422, 'Revoke an existing token before creating another.');
+        if ($request->user()->tokens()->count() >= 10) {
+            return back()->withInput()->withErrors(['token_name' => 'You have reached the limit of 10 tokens. Revoke an unused token before creating another.']);
+        }
         $token = $request->user()->createToken($data['token_name'], ['profile:read', 'posts:read'], now()->addDays(90));
         return back()->with('token', $token->plainTextToken)->with('status', 'Your read-only API token is ready. Copy it now; it will only be shown once. It expires in 90 days.');
     }
@@ -128,10 +135,10 @@ class AccountController extends Controller
 
     public function destroy(Request $request)
     {
-        $request->validate(['password' => ['required', 'current_password'], 'confirmation' => ['required', 'in:DELETE']]);
+        $request->validateWithBag('accountDeletion', ['password' => ['required', 'current_password'], 'confirmation' => ['required', 'in:DELETE']]);
         $user = $request->user();
         if ($user->subscribed('default') || $user->hasRole('super-admin')) {
-            return back()->withErrors(['confirmation' => 'Cancel your membership or transfer platform ownership before deleting this account.']);
+            return back()->withErrors(['confirmation' => 'Cancel your membership or transfer platform ownership before deleting this account.'], 'accountDeletion');
         }
         $user->tokens()->delete();
         Auth::logout();

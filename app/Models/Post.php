@@ -37,7 +37,7 @@ class Post extends Model
 
     public function scopeWithCard(Builder $query): Builder
     {
-        return $query->with(['author', 'tags', 'categories'])->withCount(['reactions', 'bookmarks', 'comments' => fn (Builder $q) => $q->where('status', 'visible')]);
+        return $query->with(['author', 'tags', 'categories'])->withCount(['reactions', 'bookmarks', 'comments' => fn (Builder $q) => $q->where('status', 'visible')])->withExists(['bookmarks as is_bookmarked' => fn (Builder $q) => $q->where('user_id', auth()->id() ?? 0)]);
     }
 
     public function getUrlAttribute(): string { return '/@'.$this->author->username.'/'.$this->slug; }

@@ -19,6 +19,17 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    public function loginPage(Request $request)
+    {
+        $returnTo = $request->query('return_to');
+        if (is_string($returnTo) && str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')
+            && ! preg_match('/[\\\\\x00-\x20]/', $returnTo)) {
+            $request->session()->put('url.intended', $returnTo);
+        }
+
+        return view('auth.login');
+    }
+
     public function login(Request $request)
     {
         $data = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
@@ -96,7 +107,7 @@ class AuthController extends Controller
     {
         $request->validate(['password' => ['required', 'current_password']]);
         $request->session()->passwordConfirmed();
-        return redirect()->intended('/settings');
+        return redirect()->intended('/settings')->with('status', 'Password confirmed. You can now continue with your changes.');
     }
 
     public function twoFactor(Request $request)
@@ -114,7 +125,13 @@ class AuthController extends Controller
         } elseif (! empty($data['code'])) {
             $valid = app(TwoFactorAuthenticationProvider::class)->verify(decrypt($user->two_factor_secret), $data['code']);
         }
-        if (! $valid) { throw ValidationException::withMessages(['code' => 'That code is not valid. Try the current code from your authenticator.']); }
+        if (! $valid) {
+            $field = ! empty($data['recovery_code']) ? 'recovery_code' : 'code';
+            $message = $field === 'recovery_code'
+                ? 'That recovery code is invalid or has already been used. Try another saved code.'
+                : 'That code is not valid. Try the current six-digit code from your authenticator.';
+            throw ValidationException::withMessages([$field => $message]);
+        }
         $remember = (bool) $request->session()->get('login.remember');
         $request->session()->forget(['login.id', 'login.remember', 'login.expires']);
         return $this->authenticate($request, $user, $remember);

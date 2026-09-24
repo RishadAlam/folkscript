@@ -19,6 +19,7 @@ class PostEditor extends Component
     public array $bodyJson = [];
     public string $slug = '';
     public string $coverImage = '';
+    #[Locked]
     public string $status = 'draft';
     public bool $isPremium = false;
     public string $publishedAt = '';
@@ -51,35 +52,70 @@ class PostEditor extends Component
         }
     }
 
-    public function saveDraft(): void { $this->persist('draft'); }
-    public function autosave(): void { if (trim($this->title) !== '' && $this->post?->status !== 'published') { $this->persist($this->post?->status ?? 'draft'); } }
-    public function publish() { $this->persist('published'); return $this->redirect($this->post->url); }
-    public function schedule() { $this->persist('scheduled'); session()->flash('success', 'Your story is scheduled.'); return $this->redirect(route('dashboard')); }
-
-    private function persist(string $status): void
+    public function saveDraft(): array
     {
-        $this->post = app(PostService::class)->save(auth()->user(), ['title' => $this->title, 'excerpt' => $this->excerpt, 'body_html' => $this->bodyHtml, 'body_json' => $this->bodyJson, 'slug' => $this->slug ?: null, 'cover_image' => $this->coverImage ?: null, 'status' => $status, 'is_premium' => $this->isPremium, 'published_at' => $this->publishedAt ?: null, 'meta_title' => $this->metaTitle ?: null, 'meta_description' => $this->metaDescription ?: null, 'canonical_url' => $this->canonicalUrl ?: null, 'category_ids' => $this->categoryIds, 'tag_names' => $this->tagNames], $this->post);
+        return $this->persist('draft');
+    }
+
+    public function autosave(): array
+    {
+        // Scheduled and published stories change only through an explicit action.
+        if (($this->post && $this->post->fresh()?->status !== 'draft') || mb_strlen(trim($this->title)) < 3) {
+            return ['saved' => false];
+        }
+
+        return $this->persist('draft');
+    }
+
+    public function publish(): array
+    {
+        return $this->persist('published') + ['redirect' => $this->post->url];
+    }
+
+    public function schedule(): array
+    {
+        $result = $this->persist('scheduled');
+        session()->flash('success', 'Your story is scheduled.');
+
+        return $result + ['redirect' => route('dashboard')];
+    }
+
+    private function persist(string $status): array
+    {
+        $this->resetErrorBag();
+        try {
+            $this->post = app(PostService::class)->save(auth()->user(), ['title' => $this->title, 'excerpt' => $this->excerpt, 'body_html' => $this->bodyHtml, 'body_json' => $this->bodyJson, 'slug' => $this->slug ?: null, 'cover_image' => $this->coverImage ?: null, 'status' => $status, 'is_premium' => $this->isPremium, 'published_at' => $this->publishedAt ?: null, 'meta_title' => $this->metaTitle ?: null, 'meta_description' => $this->metaDescription ?: null, 'canonical_url' => $this->canonicalUrl ?: null, 'category_ids' => $this->categoryIds, 'tag_names' => $this->tagNames], $this->post);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $fields = ['body_html' => 'bodyHtml', 'cover_image' => 'coverImage', 'published_at' => 'publishedAt', 'meta_title' => 'metaTitle', 'meta_description' => 'metaDescription', 'canonical_url' => 'canonicalUrl', 'category_ids' => 'categoryIds', 'tag_names' => 'tagNames'];
+            throw \Illuminate\Validation\ValidationException::withMessages(collect($exception->errors())->mapWithKeys(fn ($messages, $key) => [$fields[$key] ?? (str_starts_with($key, 'category_ids.') ? 'categoryIds' : $key) => $messages])->all());
+        }
         $this->status = $this->post->status;
         $this->slug = $this->post->slug;
         $this->savedAt = now()->format('g:i A');
-        $this->dispatch('story-saved', time: $this->savedAt);
+
+        return ['saved' => true, 'time' => $this->savedAt, 'savedAt' => now()->toIso8601String(), 'editUrl' => route('posts.edit', $this->post), 'status' => $this->status];
     }
 
-    public function restoreRevision(int $id): void
+    public function restoreRevision(int $id): array
     {
         abort_unless($this->post, 404);
         Gate::authorize('update', $this->post);
         $revision = $this->post->revisions()->findOrFail($id);
+        $this->validate(['title' => 'string|max:200', 'bodyHtml' => 'string|max:500000', 'bodyJson' => 'array']);
+        if ($this->title !== $revision->title || $this->bodyHtml !== ($revision->body_html ?? '')) {
+            $this->post->revisions()->create(['edited_by' => auth()->id(), 'title' => $this->title, 'body_html' => app(PostService::class)->sanitize($this->bodyHtml), 'body_json' => $this->bodyJson]);
+        }
         $this->title = $revision->title;
         $this->bodyHtml = $revision->body_html ?? '';
         $this->bodyJson = $revision->body_json ?? [];
-        $this->dispatch('revision-restored', html: $this->bodyHtml);
+        return ['title' => $this->title, 'html' => $this->bodyHtml];
     }
 
     public function render()
     {
-        $title = $this->metaTitle ?: $this->title;
-        $seoChecks = ['title' => mb_strlen($title) >= 50 && mb_strlen($title) <= 60, 'description' => mb_strlen($this->metaDescription) >= 150 && mb_strlen($this->metaDescription) <= 160, 'image_alt' => preg_match('/<img[^>]+alt=["\'][^"\']+["\']/i', $this->bodyHtml) === 1, 'internal_link' => str_contains($this->bodyHtml, 'href="/@') || str_contains($this->bodyHtml, config('app.url').'/@'), 'opening' => preg_match('/\\b(is|are|means|helps|gives|makes|allows|begins|starts|can|should)\\b/i', implode(' ', array_slice(preg_split('/\\s+/', strip_tags($this->bodyHtml)), 0, 40))) === 1];
-        return view('livewire.post-editor', ['categories' => Category::all(), 'revisions' => $this->post?->revisions()->limit(10)->get() ?? collect(), 'seoChecks' => $seoChecks]);
+        return view('livewire.post-editor', [
+            'categories' => Category::orderBy('name')->get(),
+            'revisions' => $this->post?->revisions()->latest()->limit(10)->get() ?? collect(),
+        ]);
     }
 }

@@ -46,12 +46,6 @@ class PostService
             if (mb_strlen($plain) < 40) {
                 throw ValidationException::withMessages(['body_html' => 'Write at least 40 characters before publishing your story.']);
             }
-            if (! empty($data['meta_title']) && mb_strlen($data['meta_title']) < 50) {
-                throw ValidationException::withMessages(['meta_title' => 'Use 50–60 characters for your search title.']);
-            }
-            if (! empty($data['meta_description']) && mb_strlen($data['meta_description']) < 150) {
-                throw ValidationException::withMessages(['meta_description' => 'Use 150–160 characters for your search description.']);
-            }
         }
         if ($data['status'] === 'scheduled' && (empty($data['published_at']) || ! \Carbon\Carbon::parse($data['published_at'])->isFuture())) {
             throw ValidationException::withMessages(['published_at' => 'Choose a future date and time to schedule your story.']);
@@ -72,8 +66,8 @@ class PostService
         } elseif ($data['status'] !== 'scheduled') {
             $data['published_at'] = null;
         }
-        $data['meta_title'] = ($data['meta_title'] ?? null) ?: Str::limit($data['title'].' — Independent stories and perspectives on Folkscript', 60, '');
-        $data['meta_description'] = ($data['meta_description'] ?? null) ?: Str::limit($data['excerpt'].' '.$plain.' Explore original stories and thoughtful perspectives from independent writers on Folkscript. Written by the people, read by everyone.', 160, '');
+        $data['meta_title'] = ($data['meta_title'] ?? null) ?: null;
+        $data['meta_description'] = ($data['meta_description'] ?? null) ?: null;
 
         $tagsChanged = false;
         $categoriesChanged = false;

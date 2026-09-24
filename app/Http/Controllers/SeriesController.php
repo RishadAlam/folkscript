@@ -31,7 +31,7 @@ class SeriesController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('create', Series::class);
-        $data = $request->validate(['title' => ['required', 'string', 'max:100'], 'description' => ['nullable', 'string', 'max:1000']]);
+        $data = $request->validateWithBag('collectionCreate', ['title' => ['required', 'string', 'max:100'], 'description' => ['nullable', 'string', 'max:1000']]);
         $data['author_id'] = $request->user()->id;
         $data['slug'] = Str::limit(Str::slug($data['title']), 100, '') ?: 'collection';
         if (Series::where('slug', $data['slug'])->exists()) { $data['slug'] .= '-'.Str::lower(Str::random(6)); }
@@ -44,7 +44,7 @@ class SeriesController extends Controller
     public function update(Request $request, Series $series)
     {
         Gate::authorize('update', $series);
-        $series->update($request->validate(['title' => ['required', 'string', 'max:100'], 'description' => ['nullable', 'string', 'max:1000']]));
+        $series->update($request->validateWithBag('collectionUpdate', ['title' => ['required', 'string', 'max:100'], 'description' => ['nullable', 'string', 'max:1000']]));
         return back()->with('status', 'Collection details saved.');
     }
 
