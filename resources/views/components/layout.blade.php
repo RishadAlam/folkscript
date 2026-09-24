@@ -1,4 +1,5 @@
 @props(['title' => 'Good stories. A wider world.', 'description' => 'Discover independent voices, thoughtful perspectives, and stories worth your time. Folkscript is written by the people, read by everyone.', 'post' => null, 'author' => null, 'collection' => null, 'wide' => false])
+@php($errors ??= new \Illuminate\Support\ViewErrorBag)
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ menuOpen: false, dark: document.documentElement.classList.contains('dark'), toggleTheme() { this.dark = !this.dark; try { localStorage.setItem('folkscript-theme', this.dark ? 'dark' : 'light') } catch(e) {} } }" :class="{ 'dark': dark }">
 <head>

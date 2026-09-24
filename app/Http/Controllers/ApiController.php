@@ -13,7 +13,8 @@ class ApiController extends Controller
     {
         $input = $request->validate(['q' => ['nullable', 'string', 'max:150'], 'page' => ['nullable', 'integer', 'min:1'], 'per_page' => ['nullable', 'integer', 'min:1', 'max:50']]);
         $query = Post::query()->published()->with(['author', 'tags', 'categories'])->latest('published_at');
-        if ($term = $input['q'] ?? null) {
+        $term = $input['q'] ?? '';
+        if ($term !== '') {
             $query->where(fn ($q) => $q->where('title', 'like', '%'.addcslashes($term, '%_\\').'%')->orWhere('excerpt', 'like', '%'.addcslashes($term, '%_\\').'%'));
         }
         $posts = $query->paginate($input['per_page'] ?? 20)->withQueryString();

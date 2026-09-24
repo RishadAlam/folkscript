@@ -4,13 +4,13 @@ Folkscript runs locally without paid services. Production email, OAuth, billing,
 
 ## Local development
 
-Requirements: PHP 8.3 or later with SQLite, GD, mbstring, XML, cURL, intl and ZIP; Composer 2; Node 22.12 or later; npm. Use the PHP version allowed by `composer.json`.
+Requirements: a running local MySQL server; PHP 8.3 or later with `pdo_mysql`, GD, mbstring, XML, cURL, intl and ZIP; Composer 2; Node 22.12 or later; npm. Use the PHP version allowed by `composer.json`.
 
 ```sh
-composer install
 cp .env.example .env
+mysql --host=127.0.0.1 --port=3306 --user=root --execute="CREATE DATABASE IF NOT EXISTS folkscript CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+composer install
 php artisan key:generate
-touch database/database.sqlite
 php artisan migrate --seed
 php artisan storage:link
 npm ci
@@ -20,7 +20,7 @@ php artisan serve
 
 In two additional terminals, run `php artisan queue:work` and `php artisan schedule:work`. For frontend development, run `npm run dev`. The seeded stories, writers, and any demonstration metrics are sample content. See the main README for the generated demonstration accounts. Do not expose a seeded demonstration installation as a production site.
 
-The default SQLite database, database queue/cache, and log mail are intended to make the application usable without external credentials. Mail written to the log is not delivered. Use an SMTP or transactional mail provider for verification, password resets and notifications on a public site.
+The default local MySQL connection uses database `folkscript`, host `127.0.0.1`, port `3306`, user `root`, and a blank password. The database queue/cache and log mail make the application usable without paid external services. SQLite remains available as an alternative; see [MySQL setup](MYSQL_SETUP.md) for configuration and existing-data migration notes. Mail written to the log is not delivered. Use an SMTP or transactional mail provider for verification, password resets and notifications on a public site.
 
 ## Docker
 

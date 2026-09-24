@@ -5,5 +5,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/posts/{post}/quote-card', QuoteCardController::class)
     ->whereNumber('post')
-    ->middleware('throttle:15,1')
+    ->middleware('throttle:15,1,quote-card')
     ->name('posts.quote-card');

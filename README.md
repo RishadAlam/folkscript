@@ -12,8 +12,12 @@ The development instance is available at **http://127.0.0.1:8000** while its PHP
 | --- | --- | --- |
 | Writer | `writer@folkscript.test` | `Folkscript2026!` |
 | Administrator | `admin@folkscript.test` | `Folkscript2026!` |
+| Platform owner | `owner@folkscript.test` | `Folkscript2026!` |
+| Editor | `editor@folkscript.test` | `Folkscript2026!` |
+| Reader | `reader@folkscript.test` | `Folkscript2026!` |
+| Premium member | `premium@folkscript.test` | `Folkscript2026!` |
 
-These are local demonstration accounts, with original sample stories and illustrative readership counts. Production seeding creates roles without demonstration users or stories unless explicitly enabled. Do not expose these shared demo credentials on a public installation.
+These are local demonstration accounts, with original sample stories and illustrative readership counts. `unverified@folkscript.test` and `suspended@folkscript.test` use the same password for restricted-account scenarios. Production seeding creates roles without demonstration users or stories unless explicitly enabled. Do not expose these shared demo credentials on a public installation.
 
 ## What is included
 
@@ -27,13 +31,13 @@ These are local demonstration accounts, with original sample stories and illustr
 
 ## Run from a fresh checkout
 
-Use PHP 8.3+ with SQLite, GD, mbstring, XML, cURL, intl, ZIP and the extensions required by Composer; Composer 2; Node 22.12+ and npm.
+Use a running local MySQL server; PHP 8.3+ with `pdo_mysql`, GD, mbstring, XML, cURL, intl, ZIP and the extensions required by Composer; Composer 2; Node 22.12+ and npm. The example environment connects to `127.0.0.1:3306`, database `folkscript`, user `root`, with an empty password.
 
 ```sh
-composer install
 cp .env.example .env
+mysql --host=127.0.0.1 --port=3306 --user=root --execute="CREATE DATABASE IF NOT EXISTS folkscript CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+composer install
 php artisan key:generate
-touch database/database.sqlite
 php artisan migrate --seed
 php artisan storage:link
 npm ci
@@ -41,7 +45,9 @@ npm run build
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-Run `php artisan queue:work --timeout=120` and `php artisan schedule:work` in separate terminals for background jobs and scheduled publishing. Use `npm run dev` when editing frontend assets. The default environment uses SQLite and a database queue/cache; it needs no paid service. Local verification and reset emails go to `storage/logs/laravel.log`.
+Run `php artisan queue:work --timeout=120` and `php artisan schedule:work` in separate terminals for background jobs and scheduled publishing. Use `npm run dev` when editing frontend assets. The default environment uses local MySQL and a database queue/cache; it needs no paid service. Local verification and reset emails go to `storage/logs/laravel.log`.
+
+SQLite remains an option: install `pdo_sqlite`, set `DB_CONNECTION=sqlite` and `DB_DATABASE` to the absolute path of `database/database.sqlite` in `.env`, create that file with `touch database/database.sqlite`, then run the same migrations. Changing the connection alone does not move existing data. See [MySQL setup and migration notes](docs/MYSQL_SETUP.md) for the current local migration, demo fixtures, and connection checks.
 
 ## Production setup
 

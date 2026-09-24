@@ -75,13 +75,18 @@ class EngagementController extends Controller
         if (mb_strlen($data['body']) < 3) {
             throw \Illuminate\Validation\ValidationException::withMessages(['body' => 'Write a response of at least 3 characters.']);
         }
+        $parent = null;
         if (! empty($data['parent_id'])) {
             $parent = $post->comments()->where('status', 'visible')->findOrFail($data['parent_id']);
+            abort_if($parent->parent_id && $parent->parent?->status !== 'visible', 404);
             $data['parent_id'] = $parent->parent_id ?? $parent->id;
         }
         $comment = $post->comments()->create(['user_id' => $request->user()->id, 'body' => trim(strip_tags($data['body'])), 'parent_id' => $data['parent_id'] ?? null, 'status' => 'visible']);
         if ($post->author_id !== $request->user()->id) {
             $this->notify($post->author, $request->user()->name.' responded to “'.$post->title.'”.', $post->url.'#responses', 'comment');
+        }
+        if ($parent && ! in_array($parent->user_id, [$post->author_id, $request->user()->id], true)) {
+            $this->notify($parent->user, $request->user()->name.' replied to your response on “'.$post->title.'”.', $post->url.'#responses', 'reply');
         }
         return $request->expectsJson() ? response()->json(['comment' => ['id' => $comment->id, 'body' => $comment->body, 'parent_id' => $comment->parent_id, 'created_at' => $comment->created_at, 'user' => $request->user()->only(['id', 'name', 'username', 'avatar'])]], 201) : redirect($post->url.'#responses')->with('success', 'Your response is part of the conversation.');
     }
@@ -90,15 +95,32 @@ class EngagementController extends Controller
     {
         Gate::authorize('delete', $comment);
         $comment->update(['status' => 'hidden']);
-        return back()->with('success', 'Response removed.');
+        return redirect($comment->post->url.'#responses')->with('success', 'Response removed.');
     }
 
     public function report(Request $request, Post $post)
     {
         $this->ensurePublished($post);
-        $data = $request->validate(['reason' => ['required', 'string', 'min:10', 'max:2000']]);
+        $data = $request->validateWithBag('storyReport', ['reason' => ['required', 'string', 'min:10', 'max:2000']]);
         Report::firstOrCreate(['user_id' => $request->user()->id, 'reportable_type' => Post::class, 'reportable_id' => $post->id, 'status' => 'open'], ['reason' => $data['reason']]);
-        return back()->with('success', 'Thank you. Our editorial team will review this report.');
+        return redirect($post->url.'#responses')->with('success', 'Thank you. Our editorial team will review this report.');
+    }
+
+    public function reportComment(Request $request, Comment $comment)
+    {
+        $post = $comment->post;
+        $this->ensurePublished($post);
+        abort_unless($comment->status === 'visible' && (! $comment->parent_id || $comment->parent?->status === 'visible'), 404);
+        abort_unless(! $post->is_premium || $request->user()->hasPremiumAccess() || $post->author_id === $request->user()->id, 403);
+
+        $request->merge(['comment_id' => (string) $comment->id]);
+        $data = $request->validateWithBag('commentReport', ['reason' => ['required', 'string', 'min:10', 'max:2000']]);
+        Report::firstOrCreate(
+            ['user_id' => $request->user()->id, 'reportable_type' => Comment::class, 'reportable_id' => $comment->id, 'status' => 'open'],
+            ['reason' => $data['reason']],
+        );
+
+        return redirect($post->url.'#responses')->with('success', 'Thank you. Our editorial team will review this response.');
     }
 
     private function ensurePublished(Post $post): void

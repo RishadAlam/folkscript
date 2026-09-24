@@ -4,6 +4,7 @@
 @import './platform.css';
 @import './refinements.css';
 @import './editor.css';
+@import './admin.css';
 @source '../views';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

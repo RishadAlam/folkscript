@@ -5,7 +5,7 @@
 web
 
 ## Stack
-Laravel 13, Livewire 3, Alpine, Blade, Tailwind 4, TipTap. SQLite locally; configurable production database, queues, search, object storage and Stripe.
+Laravel 13, Livewire 3, Alpine, Blade, Tailwind 4, TipTap. Local MySQL at `127.0.0.1:3306`, database `folkscript`, user `root`, blank password; SQLite remains an optional development fallback. Configurable production database, queues, search, object storage and Stripe.
 
 ## Users
 Readers discover independent writing, save stories and follow writers. Verified writers publish and manage stories. Editors and administrators manage trust and content.
@@ -29,4 +29,4 @@ Writing and reading lead. Authors own their voice. Powerful tools stay understan
 Responsive web, keyboard access, WCAG AA contrast, reduced motion and dark mode.
 
 ## Assumptions
-Proceed code-first for the requested speed; an editorial discovery homepage is the primary entry. Local demo uses SQLite and log mail without external services. Production pricing is configuration, not an asserted business decision.
+Proceed code-first for the requested speed; an editorial discovery homepage is the primary entry. The local demo uses MySQL, database-backed queues/cache/sessions, and log mail without external services. Root with a blank password is a local-only development configuration. The original SQLite file is retained as a pre-migration copy; switching connections does not synchronize data. Production pricing is configuration, not an asserted business decision.

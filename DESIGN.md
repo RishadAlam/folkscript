@@ -148,7 +148,7 @@ Preserve the supplied Folkscript SVG assets. The interface uses one serif family
 - Large story headlines, visible authorship, and a narrow article measure.
 - Small amber cues for membership, engagement, and reading progress.
 
-This document records the CSS import order in `resources/css/app.css`: `editorial.css`, `accounts.css`, `platform.css`, `refinements.css`, then `editor.css`, together with the Blade components. Later rules intentionally refine the original foundation. Tokens above describe the shared roles; responsive and component exceptions are below. The September 2026 refinement review covered public, reader, writer, and account screens at desktop, tablet, and mobile widths, including dark mode. See `docs/UX_REVIEW.md` for evidence and limits; this is not a comprehensive accessibility audit.
+This document records the CSS import order in `resources/css/app.css`: `editorial.css`, `accounts.css`, `platform.css`, `refinements.css`, `editor.css`, then `admin.css`, together with the Blade components. Later rules intentionally refine the original foundation. Tokens above describe the shared roles; responsive and component exceptions are below. The September 2026 refinement review covered public, reader, writer, and account screens at desktop, tablet, and mobile widths, including dark mode. See `docs/UX_REVIEW.md` and the subsequent `docs/MYSQL_REVIEW.md` for evidence and limits; these are not comprehensive accessibility audits.
 
 ## Colors
 
@@ -193,7 +193,7 @@ The homepage uses a split lead feature (1.45:1 columns), a horizontally scrollab
 
 Article prose has a 740px outer maximum with 30px side padding, leaving a 680px reading measure. The title block is wider at 850px and the cover at 1050px. Small screens use 23px prose gutters and a full-width cover. Never stretch prose to the general page width.
 
-Authentication uses two columns with a ruled editorial aside and a form panel capped at 460px. At 640px the aside hides and the form becomes the single focus. Settings use a sticky 220px navigation rail and a 760px content limit; the rail becomes a horizontal strip at 640px. Mobile collections place creation controls before the compact explanatory empty state. Platform configuration sections stack at 800px. The writing studio converts each table row into a stacked entry below 700px, keeping edit and archive actions visible. Administrative and financial tables retain labelled, keyboard-focusable horizontal scrolling where a tabular comparison is necessary.
+Authentication uses two columns with a ruled editorial aside and a form panel capped at 460px. At 640px the aside hides and the form becomes the single focus. Settings use a sticky 220px navigation rail and a 760px content limit; the rail becomes a horizontal strip at 640px. Mobile collections place creation controls before the compact explanatory empty state. Platform configuration sections stack at 800px. The writing studio converts each table row into a stacked entry below 700px, keeping edit and archive actions visible. Administration story, people, and payout tables become labelled stacked entries below 760px so their actions stay visible. Other comparison tables retain labelled, keyboard-focusable horizontal scrolling where needed.
 
 The editor uses a distinct 1370px frame, a 310px settings column, and a writing area capped at 75 characters per line. The settings column becomes 280px below 1100px, moves beneath the editor in two columns at 900px, and becomes one column at 600px. The mobile top bar separates the title, two main save/publication actions, and the save-status line. Preserve these task-specific frames instead of forcing every page into the homepage composition.
 
@@ -244,6 +244,14 @@ Image hover zoom is contained: lead images scale to 1.025 over 700ms and story c
 Drafts autosave after an idle period; the status distinguishes unsaved, saving, saved, and failed work. Published and scheduled stories require explicit updates. Creating a first draft updates the URL so refresh returns to that same draft. The toolbar reports active formatting and undo/redo availability. Link, video, image-description, and Markdown tools open inline labelled panels rather than browser prompts. Topic selection uses checkboxes. Revision restoration asks for confirmation and preserves the current text first.
 
 Optional search metadata stays optional. Character counts and contextual guidance help the author without manufacturing a numeric quality score or silently padding text. Account forms use plain section names, distinct authenticator/recovery flows, and actionable service-unavailable messages. OAuth providers appear only when configured; unavailable payment connections do not masquerade as working actions.
+
+### Administration and recovery
+
+The administration page groups reports, comments, published stories, categories and tags, people and access, and recent activity behind a section navigation. Counts link to the relevant work. Report entries show the reported story or response, the reason, and distinct outcomes: dismiss, mark reviewed, or hide content. Hiding content and unpublishing a story use inline disclosure confirmations that explain the effect before the final button.
+
+Comment filters distinguish Flagged, Hidden, and Visible states. A hidden response offers Restore comment; visible responses offer Hide comment. Pagination keeps every moderation item reachable and preserves the selected filter. Completed actions return to their section; field validation preserves the submitted values and identifies the affected form. Account rows distinguish verified, unverified, and suspended users, and show protected-access explanations instead of unusable controls.
+
+`admin.css` keeps the shared Fraunces, ink, paper, rules, and status colors. Page headings use 42px type, reducing to 34px on small screens. Moderation content and its action column stack below 900px; tables become stacked entries below 760px, with labels and controls retained. Section navigation and primary actions use 44px minimum targets. Platform settings use section links and unavailable-service explanations; payout rows keep amount, status, reference, and action context together without suggesting that an unconfigured transfer can run.
 
 ## Do's and Don'ts
 

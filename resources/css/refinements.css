@@ -210,3 +210,13 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 @media (prefers-reduced-motion: reduce) {
  .btn:hover { transform: none; }
 }
+
+/* Responses and nested replies expose the same available moderation actions. */
+.comment-actions { flex-wrap: wrap; align-items: flex-start; }
+.comment-tools { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; font-size: 14px; }
+.comment-tools button:not(.btn), .comment-report summary { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; }
+.comment-report summary { text-decoration: underline; text-underline-offset: 4px; }
+.comment-report[open] { flex-basis: 100%; width: 100%; }
+.comment-report form { margin-top: 12px; max-width: 580px; gap: 12px; }
+.comment-report small { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.comment-actions:has(.comment-report[open])>.comment-tools { flex-basis: 100%; }

@@ -47,13 +47,11 @@ class DatabaseSeeder extends Seeder
             ['alex', 'Alex Morgan', 'writer@folkscript.test', 'A curious mind with a notebook. Writing about what matters, one story at a time.', 'Brooklyn, New York'],
         ] as [$username, $name, $email, $bio, $location]) {
             $author = User::firstOrCreate(['email' => $email], ['username' => $username, 'name' => $name, 'password' => Hash::make('Folkscript2026!'), 'email_verified_at' => now(), 'bio' => $bio, 'location' => $location, 'avatar' => null, 'newsletter_enabled' => true]);
-            if (! $author->hasVerifiedEmail()) { $author->forceFill(['email_verified_at' => now()])->save(); }
-            $author->assignRole('author');
+            if ($author->wasRecentlyCreated) { $author->assignRole('author'); }
             $authors[$username] = $author;
         }
         $admin = User::firstOrCreate(['email' => 'admin@folkscript.test'], ['username' => 'admin', 'name' => 'Folkscript Editorial', 'password' => Hash::make('Folkscript2026!'), 'email_verified_at' => now(), 'bio' => 'The people behind Folkscript. A place for curious minds and independent voices.', 'avatar' => null]);
-        if (! $admin->hasVerifiedEmail()) { $admin->forceFill(['email_verified_at' => now()])->save(); }
-        $admin->assignRole('admin');
+        if ($admin->wasRecentlyCreated) { $admin->assignRole('admin'); }
 
         $categories = [];
         foreach ([
@@ -83,10 +81,12 @@ class DatabaseSeeder extends Seeder
             $author = $authors[$authorKey];
             $body = $this->storyBody($excerpt, $category, $image);
             $post = Post::firstOrCreate(['author_id' => $author->id, 'slug' => Str::slug($title)], ['title' => $title, 'excerpt' => $excerpt, 'body_html' => $body, 'body_json' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $excerpt]]]]], 'cover_image' => '/images/story-'.$image.'.jpg', 'status' => 'published', 'is_premium' => $premium, 'published_at' => now()->subHours($hours), 'reading_time' => 5 + $index % 4, 'meta_title' => Str::limit($title.' — Stories and ideas on Folkscript', 60, ''), 'meta_description' => Str::limit($excerpt.' Discover independent perspectives on Folkscript, written by the people and read by everyone.', 160, ''), 'views' => 1250 - $index * 87]);
-            $post->categories()->syncWithoutDetaching([$categories[$category]->id]);
-            foreach (explode(', ', $tagNames) as $tagName) {
-                $tag = Tag::firstOrCreate(['slug' => Str::slug($tagName)], ['name' => $tagName]);
-                $post->tags()->syncWithoutDetaching([$tag->id]);
+            if ($post->wasRecentlyCreated) {
+                $post->categories()->attach($categories[$category]->id);
+                foreach (explode(', ', $tagNames) as $tagName) {
+                    $tag = Tag::firstOrCreate(['slug' => Str::slug($tagName)], ['name' => $tagName]);
+                    $post->tags()->attach($tag->id);
+                }
             }
             $seeded[] = $post;
         }
@@ -102,8 +102,9 @@ class DatabaseSeeder extends Seeder
         Comment::firstOrCreate(['post_id' => $seeded[0]->id, 'user_id' => $authors['oliver']->id, 'body' => 'I have been taking the same walk each morning for a month. It is surprising how much changes when you stop trying to get somewhere.'], ['status' => 'visible']);
         foreach ([1, 2, 3] as $index) { Bookmark::firstOrCreate(['user_id' => $authors['alex']->id, 'post_id' => $seeded[$index]->id]); }
         $series = Series::firstOrCreate(['slug' => 'a-more-considered-life'], ['title' => 'A more considered life', 'author_id' => $authors['elena']->id, 'description' => 'Notes on attention, intention, and the things that last.']);
-        $series->posts()->syncWithoutDetaching([$seeded[0]->id => ['order' => 1], $seeded[4]->id => ['order' => 2]]);
+        if ($series->wasRecentlyCreated) { $series->posts()->attach([$seeded[0]->id => ['order' => 1], $seeded[4]->id => ['order' => 2]]); }
         Post::firstOrCreate(['author_id' => $authors['alex']->id, 'slug' => 'notes-from-a-sunday-morning'], ['title' => 'Notes from a Sunday morning', 'excerpt' => 'A few things I have been thinking about lately.', 'body_html' => '<p>There is a particular kind of quiet on Sunday mornings. Before the week begins again, I like to sit by the window with a notebook and see what finds its way onto the page.</p>', 'status' => 'draft', 'reading_time' => 1]);
+        $this->call(LocalDemoSeeder::class);
     }
 
     private function storyBody(string $excerpt, string $category, string $image): string
