@@ -1,5 +1,7 @@
 # Usability follow-up — September 25, 2026
 
+**Follow-up correction:** this pass missed field/action alignment and some expanded form states, including the Create token button beside helper text. Its overflow and accessible-name checks did not establish that every element was visually aligned. The subsequent [alignment review](ALIGNMENT_REVIEW_2026_09_25.md) records the missed issues, structural fixes, and direct rendered measurements.
+
 This audit follows the [platform review](PLATFORM_REVIEW_2026_09_25.md). It covers the public website, reader account, writer workspace, authentication, settings, and administration. Impeccable guided the review. The existing Lexend typography, editorial layout, white light theme, navy dark theme, and free publication model were preserved.
 
 The audit combined source review, Chrome interaction testing, responsive geometry checks, representative visual inspection, and the existing isolated test suite. It is a record of observed coverage, not a claim that every possible input, device, browser, or production configuration is defect-free.
