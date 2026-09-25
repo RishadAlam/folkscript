@@ -3,7 +3,7 @@
     <p class="muted">{{ __('An optional banner above your name on your public profile. It is separate from the covers on your stories.') }}</p>
     <div class="settings-cover-frame">
         <!-- impeccable-disable-next-line broken-image: This preview is hidden until a saved cover or a selected local image supplies its source. -->
-        <img class="settings-cover-preview" @if($user->cover_image) src="{{ $user->cover_image }}" @else hidden @endif alt="{{ __('Profile cover preview') }}" data-cover-preview>
+        <img data-image-tones class="settings-cover-preview" @if($user->cover_image) src="{{ $user->cover_image }}" @else hidden @endif alt="{{ __('Profile cover preview') }}" data-cover-preview>
         <div class="settings-cover-empty" data-cover-empty @if($user->cover_image) hidden @endif><x-icon name="image" :size="24" /><span>{{ __('Your cover preview will appear here') }}</span></div>
     </div>
     <label class="field">{{ __('Choose a cover image') }}

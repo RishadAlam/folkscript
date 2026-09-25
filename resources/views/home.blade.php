@@ -6,7 +6,7 @@
  <section class="home-intro"><h1>Good stories.<br>A <em>wider</em> world.</h1><div><p>{{ __('Essays, ideas, and observations from independent writers. Every story is free to read.') }}</p><a class="text-link" href="#latest">{{ __('Browse the latest stories') }} <x-icon name="arrow-down" size="17" /></a></div></section>
  @if($featured)
  <section class="lead-story" aria-label="{{ __('Featured story') }}">
-   <a class="lead-image" href="{{ $featured->url }}" tabindex="-1" aria-hidden="true"><img src="{{ $featured->cover_url }}" alt="" width="1000" height="700" fetchpriority="high"></a>
+   <a class="lead-image" href="{{ $featured->url }}" tabindex="-1" aria-hidden="true"><img data-image-tones src="{{ $featured->cover_url }}" alt="" width="1000" height="700" fetchpriority="high"></a>
    <div class="lead-copy"><div class="lead-title-group"><h2><a href="{{ $featured->url }}">{{ $featured->title }}</a></h2><p>{{ $featured->excerpt }}</p></div><div><a class="lead-author" href="{{ '/@'.$featured->author->username }}"><x-avatar :user="$featured->author" /><div><strong>{{ $featured->author->name }}</strong><span>{{ $featured->published_at?->format('M j') }} <span>·</span> {{ trans_choice('ui.reading_minutes', $featured->reading_time) }}</span></div></a><div class="lead-bottom"><span>{{ __('Featured story') }}</span><a href="{{ $featured->url }}" class="text-link">{{ __('Read story') }} <x-icon name="arrow-up-right" size="19" /></a></div></div></div>
  </section>
  @endif

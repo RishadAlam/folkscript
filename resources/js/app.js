@@ -1,3 +1,4 @@
+import './image-tones';
 import './community';
 import './settings';
 import readerTools from './reader-tools';
