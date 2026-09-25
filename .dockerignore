@@ -8,11 +8,12 @@ public/build
 public/hot
 public/storage
 database/*.sqlite*
+bootstrap/cache/*.php
+auth.json
+storage/*.key
 storage/logs/*
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
-storage/app/public/*
+storage/framework/*
+storage/app/*
 .DS_Store
 .codex
 .agents
