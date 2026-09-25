@@ -62,7 +62,7 @@ try {
         throw new RuntimeException('Use PHP 8.3+ with the ZIP extension and proc_open enabled to build the archive.');
     }
     if (count($argv) > 1) {
-        throw new RuntimeException('Usage: composer build:cpanel (output: dist/folkscript-cpanel.zip)');
+        throw new RuntimeException('Usage: composer build:prod-zip (output: dist/folkscript-cpanel.zip)');
     }
 
     // Keep OS/network tooling configuration, but never inherit app secrets or VITE_* values.

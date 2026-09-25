@@ -1,6 +1,6 @@
 # Deploy Folkscript through cPanel
 
-Run `composer build:cpanel` on your development machine to create `dist/folkscript-cpanel.zip`. Upload and extract that archive through cPanel File Manager, then configure and initialize the application through Terminal or SSH. The host does not need Composer, npm, or Node.js for the default installation. This is a deployment package, not a browser installer.
+Run `composer build:prod-zip` on your development machine to create `dist/folkscript-cpanel.zip`. Upload and extract that archive through cPanel File Manager, then configure and initialize the application through Terminal or SSH. The host does not need Composer, npm, or Node.js for the default installation. This is a deployment package, not a browser installer.
 
 ## 1. Check the hosting account
 
@@ -26,7 +26,7 @@ Build from a Git checkout with PHP 8.3 or later compatible with the lockfile, PH
 From the project root:
 
 ```sh
-composer build:cpanel
+composer build:prod-zip
 ```
 
 The builder uses an allowlist of Git-tracked application files and reads their current working-tree contents. Add newly created application files to Git before building; untracked files are not included. Existing uncommitted edits to tracked application files are included, so review the intended changes first.

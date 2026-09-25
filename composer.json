@@ -54,7 +54,7 @@
         }
     },
     "scripts": {
-        "build:cpanel": [
+        "build:prod-zip": [
             "Composer\\Config::disableProcessTimeout",
             "@php scripts/build-cpanel.php"
         ],
@@ -94,7 +94,7 @@
         ]
     },
     "scripts-descriptions": {
-        "build:cpanel": "Build dist/folkscript-cpanel.zip with production dependencies and compiled assets for manual upload."
+        "build:prod-zip": "Build dist/folkscript-cpanel.zip with production dependencies and compiled assets for manual upload."
     },
     "extra": {
         "laravel": {
