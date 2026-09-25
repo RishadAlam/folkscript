@@ -1,7 +1,14 @@
 /* Only public, versioned assets are cached. Story, account and API responses stay on the network. */
-const CACHE = 'folkscript-public-v2';
+const CACHE = 'folkscript-public-v3';
 const OFFLINE = '/offline.html';
-const SHELL = [OFFLINE, '/favicon.svg', '/manifest.webmanifest'];
+const SHELL = [
+    OFFLINE,
+    '/favicon.svg',
+    '/manifest.webmanifest',
+    '/fonts/lexend-latin-wght-normal.woff2',
+    '/fonts/lexend-latin-ext-wght-normal.woff2',
+    '/fonts/lexend-vietnamese-wght-normal.woff2',
+];
 
 self.addEventListener('install', event => {
     event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));

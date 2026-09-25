@@ -32,3 +32,7 @@ The in-app browser loaded the actual self-hosted Lexend face. Inspected article,
 Checks covered 1280px desktop, 960px tablet, 390px phone, and selected 320px narrow layouts, including light and dark states. No page-level horizontal overflow was observed. The existing navigation, menus, and theme controls remained usable. These are typography and layout checks, not a new audit of every business action or every browser engine.
 
 The production asset build passed. Impeccable's scoped typography scan reported no findings. No new test suite was added for the CSS change.
+
+Standalone offline pages, downloadable quote cards, and default/generated social-image templates also use Lexend. Quote SVGs include the font data and its license; their response policy permits only the specific font style and embedded font data, with scripts and network access blocked. The service worker caches the three font subsets with the offline shell.
+
+The browser confirmed embedded Lexend on a sample quote SVG and the offline page. The default social PNG was visually inspected. Two existing quote-card tests passed (22 assertions); PHP formatting and service-worker syntax checks passed. Long quote and caption bounds were checked with the actual font's metrics. Production screenshot-generation workers and a simulated network outage were not exercised during this font update.
