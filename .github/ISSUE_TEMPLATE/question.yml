@@ -1,0 +1,27 @@
+name: Setup or usage question
+description: Ask for help installing, configuring, or using Folkscript.
+title: "[Help]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read README.md and SUPPORT.md and search existing issues first. Never share your .env file, passwords, tokens, or private content. For account problems on someone else's site, contact that site's operator.
+  - type: textarea
+    id: question
+    attributes:
+      label: What are you trying to do?
+      description: Explain where you are stuck and what you have already tried.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Folkscript version or commit, OS, PHP and Node versions, database, and hosting method.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant output
+      description: Include the command or action and any error text, with secrets and personal information removed.

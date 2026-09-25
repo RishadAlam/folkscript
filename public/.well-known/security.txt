@@ -1,4 +1,4 @@
-Contact: mailto:security@folkscript.com
+Contact: https://github.com/RishadAlam/folkscript/security/advisories/new
 Expires: 2027-09-25T00:00:00.000Z
 Preferred-Languages: en
-Canonical: https://folkscript.com/.well-known/security.txt
+Policy: https://github.com/RishadAlam/folkscript/blob/main/SECURITY.md

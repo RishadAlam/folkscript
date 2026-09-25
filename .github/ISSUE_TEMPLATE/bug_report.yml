@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible problem with Folkscript.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Report vulnerabilities privately through SECURITY.md. Remove secrets and personal information from examples, logs, and screenshots.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: The Folkscript release tag or commit you are running.
+      placeholder: v0.1.0 or a commit hash
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, PHP and Node versions, database, and browser when relevant. Do not paste your .env file.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Explain the action and account role needed, using test data.
+      placeholder: |
+        1. Sign in as an author.
+        2. Open...
+        3. Select...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include relevant error text or screenshots with sensitive details removed.
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Note workarounds, related issues, and whether the problem occurs in a fresh installation.

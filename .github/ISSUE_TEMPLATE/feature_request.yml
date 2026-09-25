@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an improvement to reading, publishing, or managing Folkscript.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing requests first. Folkscript is free and open source; all published stories remain freely readable. Describe the user need before proposing a solution.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Who is affected, and what are they trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: Explain how the experience would change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include existing approaches or workarounds, if any.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Optional examples, sketches, accessibility considerations, or related issues.
