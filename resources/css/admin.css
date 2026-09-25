@@ -145,9 +145,9 @@
 .admin-people-filters { display:grid; grid-template-columns:minmax(190px,1fr) minmax(155px,.65fr) minmax(175px,.7fr) auto; gap:14px; align-items:end; margin-bottom:22px; }
 .admin-people-filters .field { min-width:0; margin:0; }
 .admin-people-filters .field>span { display:block; font-size:0.875rem; margin-bottom:7px; }
-.admin-people-filters .form-input { width:100%; }
+.admin-people-filters .form-input { width:100%; min-height:50px; }
 .admin-filter-actions { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
-.admin-filter-actions .btn { white-space:nowrap; }
+.admin-filter-actions .btn { white-space:nowrap; min-height:50px; }
 .admin-access-help { color:var(--muted); font-size:0.875rem; line-height:1.65; }
 .admin-page .admin-table { min-width:0; width:100%; table-layout:fixed; margin:0; }
 .admin-page .admin-table th { padding:13px 14px; background:var(--soft); font-size:0.875rem; font-weight:550; }
@@ -201,7 +201,8 @@
 .admin-taxonomy-create>summary::-webkit-details-marker { display:none; }
 .admin-taxonomy-create[open] { background:var(--surface); padding:12px 18px 20px; border:1px solid var(--rule); border-radius:7px; }
 .admin-taxonomy-form { display:flex; flex-direction:column; gap:18px; align-items:flex-start; margin-top:18px; }
-.admin-taxonomy-form .field { font-size:0.875rem; width:100%; }
+.admin-taxonomy-form .field { font-size:0.875rem; width:100%; margin:0; }
+.admin-taxonomy-form .field-error { display:block; }
 .admin-taxonomy-form .form-input { margin-top:7px; }
 .admin-taxonomy-form textarea { min-height:90px; }
 .admin-page .audit-list>div { grid-template-columns:120px minmax(0,1fr); gap:24px; font-size:0.875rem; padding:18px 0; }

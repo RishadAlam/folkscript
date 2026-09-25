@@ -129,7 +129,8 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .comment-head>span:not(.avatar) { font-size:0.875rem; }
 .comment-actions { font-size:0.875rem; }
 .comment-actions button { min-height: 44px; }
-.comments-section form>label { font-size:0.9375rem; font-weight: 500; }
+.comments-section form>label, .comments-section .comment-field>label { font-size:0.9375rem; font-weight: 500; }
+.comments-section .comment-field { margin-bottom: 0; }
 .comment-reply-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .comment-reply { margin-left: 18px; padding-left: 18px; }
 .report-disclosure { font-size:0.875rem; margin-top: 28px; color: var(--muted); }
@@ -269,7 +270,7 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .comment-tools button:not(.btn), .comment-report summary { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; }
 .comment-report summary { text-decoration: underline; text-underline-offset: 4px; }
 .comment-report[open] { flex-basis: 100%; width: 100%; }
-.comment-report form { margin-top: 12px; max-width: 580px; gap: 12px; }
+.comment-report form { margin-top: 12px; max-width: 580px; gap: 22px; }
 .comment-report small { font-size:0.875rem; line-height: 1.5; color: var(--muted); }
 .comment-actions:has(.comment-report[open])>.comment-tools { flex-basis: 100%; }
 
