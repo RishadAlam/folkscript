@@ -28,7 +28,7 @@ class SeoController extends Controller
         $title = 'Folkscript';
         $link = url('/');
         if ($username) {
-            $author = User::query()->where('username', $username)->firstOrFail();
+            $author = User::query()->whereNull('suspended_at')->where('username', $username)->firstOrFail();
             $query->where('author_id', $author->id);
             $title = $author->name.' on Folkscript';
             $link = url('/@'.$username);
@@ -44,7 +44,7 @@ class SeoController extends Controller
             $title = $topic->name.' on Folkscript';
             $link = url('/topic/'.$slug);
         }
-        $escape = fn ($value) => htmlspecialchars((string) $value, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+        $escape = fn ($value) => htmlspecialchars((string) $value, ENT_XML1 | ENT_COMPAT | ENT_SUBSTITUTE | ENT_DISALLOWED, 'UTF-8');
         $xml = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>'.$escape($title).'</title><link>'.$escape($link).'</link><description>Written by the people, read by everyone.</description><language>en</language><atom:link href="'.$escape(request()->url()).'" rel="self" type="application/rss+xml"/>';
         foreach ($query->limit(40)->get() as $post) {
             $xml .= '<item><title>'.$escape($post->title).'</title><link>'.$escape(SeoData::postUrl($post)).'</link><guid isPermaLink="true">'.$escape(SeoData::postUrl($post)).'</guid><description>'.$escape(strip_tags($post->excerpt ?? '')).'</description><dc:creator>'.$escape($post->author->name).'</dc:creator><pubDate>'.$post->published_at->toRssString().'</pubDate></item>';
