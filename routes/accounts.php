@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::view('/confirm-password', 'auth.confirm-password')->name('password.confirm');
     Route::post('/confirm-password', [AuthController::class, 'confirmPassword'])->middleware('throttle:6,1,password-confirm');
     Route::get('/settings', [AccountController::class, 'edit'])->name('settings');
+    Route::get('/settings/confirm-access', [AccountController::class, 'confirmAccess'])->name('settings.confirm-access');
+    Route::patch('/settings/preferences', [AccountController::class, 'preferences'])->name('settings.preferences');
     Route::post('/settings/pinned-story', [AccountController::class, 'pinStory'])->middleware('verified')->name('settings.pinned-story');
     Route::patch('/settings', [AccountController::class, 'update'])->name('settings.update');
     Route::put('/settings/password', [AccountController::class, 'password'])->middleware('throttle:6,1,password-change')->name('settings.password');

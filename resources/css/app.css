@@ -9,6 +9,7 @@
 @import './typography.css';
 @import './avatar.css';
 @import './reader-tools.css';
+@import './settings.css';
 @source '../views';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

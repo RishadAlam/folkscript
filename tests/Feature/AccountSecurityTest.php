@@ -276,8 +276,8 @@ class AccountSecurityTest extends SecurityTestCase
     {
         $user = $this->twoFactorAccount();
         $code = $user->recoveryCodes()[0];
-        $this->actingAs($user)->get('/settings')->assertOk()->assertDontSee($code);
-        $this->confirmPassword()->get('/settings')->assertOk()->assertSee($code);
+        $this->actingAs($user)->get('/settings?section=security')->assertOk()->assertDontSee($code);
+        $this->confirmPassword()->get('/settings?section=security')->assertOk()->assertSee($code);
     }
 
     public function test_two_factor_login_requires_a_valid_code_and_consumes_recovery_codes_once(): void

@@ -18,7 +18,71 @@ class AccountController extends Controller
 {
     public function edit(Request $request)
     {
-        return view('settings', ['user' => $request->user(), 'tokens' => $request->user()->tokens()->latest()->get(), 'pinnablePosts' => $request->user()->posts()->published()->latest('published_at')->get(['id', 'title'])]);
+        $user = $request->user();
+        $pinnablePosts = $user->posts()->published()->latest('published_at')->get(['id', 'title']);
+        $activeVerified = ! $user->suspended_at && $user->hasVerifiedEmail();
+        $canFeatureStory = $activeVerified && ($user->canWrite() || $pinnablePosts->isNotEmpty() || $user->pinned_post_id);
+        $section = $request->query('section', 'profile');
+        if (! is_string($section) || ! in_array($section, ['profile', 'preferences', 'publishing', 'security', 'developer', 'account'], true)) {
+            $section = 'profile';
+        }
+
+        // Validation failures must return to the form that needs attention.
+        $errors = $request->session()->get('errors', new \Illuminate\Support\ViewErrorBag);
+        if ($errors->getBag('passwordChange')->any() || $errors->getBag('confirmTwoFactorAuthentication')->any()) {
+            $section = 'security';
+        } elseif ($errors->getBag('accountDeletion')->any()) {
+            $section = 'account';
+        } elseif ($errors->has('post_id')) {
+            $section = 'publishing';
+        } elseif ($errors->has('token_name') || $request->session()->has('token')) {
+            $section = 'developer';
+        } elseif ($errors->has('newsletter_enabled')) {
+            $section = 'preferences';
+        } elseif ($errors->any()) {
+            $section = 'profile';
+        }
+        if ($section === 'publishing' && ! $canFeatureStory) {
+            $section = 'profile';
+        }
+
+        $accountRoleLabel = 'Reader';
+        foreach (['super-admin' => 'Owner', 'admin' => 'Administrator', 'editor' => 'Editor', 'author' => 'Writer'] as $role => $label) {
+            if ($user->hasRole($role)) {
+                $accountRoleLabel = $label;
+                break;
+            }
+        }
+
+        return view('settings', [
+            'user' => $user,
+            'tokens' => $user->tokens()->latest()->get(),
+            'pinnablePosts' => $pinnablePosts,
+            'section' => $section,
+            'canFeatureStory' => $canFeatureStory,
+            'canModerate' => $activeVerified && $user->hasAnyRole(['editor', 'admin', 'super-admin']),
+            'canManagePublication' => $activeVerified && $user->hasAnyRole(['admin', 'super-admin']) && $user->can('settings.manage'),
+            'accountRoleLabel' => $accountRoleLabel,
+            'hasRecentPasswordConfirmation' => time() - $request->session()->get('auth.password_confirmed_at', 0) <= config('auth.password_timeout', 10800),
+            'emailDeliveryAvailable' => ! in_array(config('mail.default'), ['log', 'array'], true),
+        ]);
+    }
+
+    public function preferences(Request $request)
+    {
+        $request->validate(['newsletter_enabled' => ['required', 'boolean']]);
+        $request->user()->update(['newsletter_enabled' => $request->boolean('newsletter_enabled')]);
+
+        return redirect()->route('settings', ['section' => 'preferences'])->with('status', 'Your email preferences have been saved.');
+    }
+
+    public function confirmAccess(Request $request)
+    {
+        $section = $request->query('section');
+        $section = in_array($section, ['security', 'developer'], true) ? $section : 'security';
+        $request->session()->put('url.intended', route('settings', ['section' => $section]));
+
+        return redirect()->route('password.confirm');
     }
 
     public function update(Request $request)
@@ -37,9 +101,11 @@ class AccountController extends Controller
             'cover_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:6144', 'dimensions:max_width=8000,max_height=8000'],
             'remove_avatar' => ['nullable', 'boolean'],
             'remove_cover_image' => ['nullable', 'boolean'],
-        ]);
+        ], ['username.not_in' => 'This username is reserved. Choose a different username.']);
         $data['social_links'] = array_filter(['website' => $data['website'] ?? null, 'github' => $data['github'] ?? null, 'linkedin' => $data['linkedin'] ?? null]);
-        $data['newsletter_enabled'] = $request->boolean('newsletter_enabled');
+        if ($request->has('newsletter_enabled')) {
+            $data['newsletter_enabled'] = $request->boolean('newsletter_enabled');
+        }
         unset($data['website'], $data['github'], $data['linkedin']);
         foreach (['avatar', 'cover_image'] as $field) {
             unset($data[$field], $data['remove_'.$field]);

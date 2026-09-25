@@ -337,3 +337,8 @@ Account access controls open inside the selected person's row, leaving names, ro
 - **Don't** add rounded, shadowed containers around ordinary story cards.
 - **Don't** stretch article prose across the broad discovery-page frame.
 - **Don't** treat responsive source rules or a limited rendered review as proof of a complete accessibility audit.
+
+
+### Personal settings
+
+The personal Settings workspace uses native section links and one content pane per task. A 216px sidebar sits beside a form area capped at 760px, becoming a two-column navigation grid at 700px. Labels, focus, errors, separate save actions, and capability-based workspace links take priority over decoration. See `docs/SETTINGS_WORKSPACE.md`.
