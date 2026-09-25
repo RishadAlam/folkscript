@@ -51,7 +51,7 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .home-story-list .story-card { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 26px; padding: 27px 0; border-bottom: 1px solid var(--rule); }
 .home-story-list .story-card:first-child { padding-top: 0; }
 .home-story-list .story-image { aspect-ratio: 1.28; grid-column: 2; grid-row: 1; align-self: center; margin: 0; }
-.home-story-list .story-image img { height: 100%; object-fit: cover; }
+.home-story-list .story-image img { height: 100%; object-fit: contain; }
 .home-story-list .story-card-copy { grid-column: 1; grid-row: 1; min-width: 0; }
 .story-title, .story-card h2 { font-size:1.6875rem; line-height: 1.22; margin: 12px 0; font-weight: 500; }
 .story-author { flex-wrap: wrap; row-gap: 8px; }
