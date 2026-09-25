@@ -61,27 +61,39 @@
 <body @class(['admin-body' => $admin])>
 <a href="{{ $admin ? '#admin-content' : '#main' }}" class="skip-link">{{ __('Skip to content') }}</a>
 @unless($admin)
-<header class="site-header" @click.outside="menuOpen=false" @keydown.escape.window="if(menuOpen){menuOpen=false;$refs.mobileToggle.focus()}">
+<header class="site-header" @click.outside="menuOpen=false" @focusout="if (!$el.contains($event.relatedTarget)) menuOpen=false" @keydown.escape.window="if(menuOpen){menuOpen=false;$refs.mobileToggle.focus()}">
   <div class="masthead page-shell">
     <a href="/" class="brand" aria-label="{{ __('Folkscript home') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="190" height="42"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="190" height="42"></a>
-    <nav class="desktop-nav" aria-label="{{ __('Main navigation') }}"><a href="/explore" @class(['active' => request()->is('explore')])>{{ __('Explore') }}</a><a href="/trending" @class(['active' => request()->is('trending')])>{{ __('Trending') }}</a><a href="/about" @class(['active' => request()->is('about')])>{{ __('Our story') }}</a></nav>
+    <nav class="desktop-nav" aria-label="{{ __('Main navigation') }}"><a href="/explore" @class(['active' => request()->is('explore')]) @if(request()->is('explore')) aria-current="page" @endif>{{ __('Explore') }}</a><a href="/trending" @class(['active' => request()->is('trending')]) @if(request()->is('trending')) aria-current="page" @endif>{{ __('Trending') }}</a><a href="/about" @class(['active' => request()->is('about')]) @if(request()->is('about')) aria-current="page" @endif>{{ __('Our story') }}</a></nav>
     <div class="header-actions">
       <a class="icon-button" href="/explore" aria-label="{{ __('Search stories') }}"><x-icon name="search" /></a>
       <button class="icon-button theme-toggle" :aria-pressed="dark" title="{{ __('Switch between light and dark theme') }}" @click="toggleTheme()" aria-label="{{ __('Toggle color theme') }}"><span x-show="!dark"><x-icon name="moon" /></span><span x-show="dark" x-cloak><x-icon name="sun" /></span></button>
       @auth
         <a class="icon-button notification-link" href="/notifications" aria-label="{{ __('Notifications') }}"><x-icon name="bell" />@if(auth()->user()->unreadNotifications()->exists())<span class="notification-dot"></span>@endif</a>
         @if(auth()->user()->canWrite())<a href="/write" class="write-link"><x-icon name="pen-line" size="17" /> {{ __('Write') }}</a>@endif
-        <div class="account-menu" x-data="{ open:false }" @click.outside="open=false" @keydown.escape.window="if(open){open=false;$refs.accountToggle.focus()}">
-          <button x-ref="accountToggle" class="avatar-button" @click="open=!open" :aria-expanded="open" aria-controls="account-navigation" aria-label="{{ __('Account menu') }}"><x-avatar :user="auth()->user()" size="small" /></button>
-          <nav id="account-navigation" aria-label="{{ __('Your account') }}" class="account-dropdown" x-show="open" x-cloak><strong>{{ auth()->user()->name }}</strong>@if(auth()->user()->canWrite())<a href="/dashboard">{{ __('Writing studio') }}</a><a href="/series">{{ __('Your collections') }}</a>@endif<a href="/bookmarks">{{ __('Saved stories') }}</a><a href="/notifications">{{ __('Notifications') }}</a><a href="{{ '/@'.auth()->user()->username }}">{{ __('Your profile') }}</a><a href="/settings">{{ __('Settings') }}</a>@if(auth()->user()->canWrite() && auth()->user()->hasAnyRole(['admin','super-admin','editor']))<a href="{{ route('admin') }}">{{ __('Admin dashboard') }}</a>@endif<form method="POST" action="/logout">@csrf<button type="submit">{{ __('Sign out') }}</button></form></nav>
+        <div class="account-menu" x-data="{ open:false }" @click.outside="open=false" @focusout="if (!$el.contains($event.relatedTarget)) open=false" @folkscript:navigation.window="open=false" @keydown.escape.window="if(open){open=false;$refs.accountToggle.focus()}">
+          <button type="button" x-ref="accountToggle" class="avatar-button" @click="menuOpen=false;open=!open" @keydown.arrow-down.prevent="menuOpen=false;open=true;$nextTick(() => $refs.accountNavigation.querySelector('a')?.focus())" :aria-expanded="open" aria-controls="account-navigation" aria-label="{{ __('Account menu') }}"><x-avatar :user="auth()->user()" size="small" /></button>
+          <nav id="account-navigation" x-ref="accountNavigation" aria-label="{{ __('Your account') }}" class="account-dropdown" x-show="open" x-cloak>
+            <strong>{{ auth()->user()->name }}</strong>
+            @if(auth()->user()->canWrite())
+              <a href="/dashboard" @if(request()->is('dashboard')) aria-current="page" @endif>{{ __('Writing studio') }}</a>
+              <a href="/series" @if(request()->is('series')) aria-current="page" @endif>{{ __('Your collections') }}</a>
+            @endif
+            <a href="/bookmarks" @if(request()->is('bookmarks')) aria-current="page" @endif>{{ __('Saved stories') }}</a>
+            <a href="/notifications" @if(request()->is('notifications')) aria-current="page" @endif>{{ __('Notifications') }}</a>
+            <a href="{{ '/@'.auth()->user()->username }}" @if(request()->is('@'.auth()->user()->username)) aria-current="page" @endif>{{ __('Your profile') }}</a>
+            <a href="/settings" @if(request()->is('settings')) aria-current="page" @endif>{{ __('Settings') }}</a>
+            @if(auth()->user()->canWrite() && auth()->user()->hasAnyRole(['admin','super-admin','editor']))<a href="{{ route('admin') }}">{{ __('Admin dashboard') }}</a>@endif
+            <form method="POST" action="/logout">@csrf<button type="submit">{{ __('Sign out') }}</button></form>
+          </nav>
         </div>
       @else
         <a href="/login" class="signin-link">{{ __('Sign in') }}</a><a href="/register" class="btn btn-primary header-join">{{ __('Start writing') }} <x-icon name="arrow-up-right" size="16" /></a>
       @endauth
-      <button class="icon-button mobile-menu-toggle" x-ref="mobileToggle" @click="menuOpen=!menuOpen" :aria-expanded="menuOpen" aria-controls="mobile-menu" :aria-label="menuOpen ? 'Close navigation' : 'Open navigation'"><span x-show="!menuOpen"><x-icon name="menu" /></span><span x-show="menuOpen" x-cloak><x-icon name="x" /></span></button>
+      <button type="button" class="icon-button mobile-menu-toggle" x-ref="mobileToggle" @click="$dispatch('folkscript:navigation');menuOpen=!menuOpen" :aria-expanded="menuOpen" aria-controls="mobile-menu" :aria-label="menuOpen ? 'Close navigation' : 'Open navigation'"><span x-show="!menuOpen"><x-icon name="menu" /></span><span x-show="menuOpen" x-cloak><x-icon name="x" /></span></button>
     </div>
   </div>
-  <nav id="mobile-menu" class="mobile-menu" x-show="menuOpen" x-cloak aria-label="{{ __('Mobile navigation') }}"><a href="/explore">{{ __('Explore stories') }}</a><a href="/trending">{{ __('Trending') }}</a><a href="/about">{{ __('Our story') }}</a>@if(!auth()->check() || auth()->user()->canWrite())<a href="/write">{{ __('Write a story') }}</a>@endif<a href="/bookmarks">{{ __('Saved stories') }}</a><button @click="toggleTheme()"><x-icon name="moon" size="17" /><span x-text="dark ? 'Use light theme' : 'Use dark theme'"></span></button>@guest<a href="/login">{{ __('Sign in') }}</a>@endguest</nav>
+  <nav id="mobile-menu" class="mobile-menu" x-show="menuOpen" x-cloak aria-label="{{ __('Mobile navigation') }}"><a href="/explore" @if(request()->is('explore')) aria-current="page" @endif>{{ __('Explore stories') }}</a><a href="/trending" @if(request()->is('trending')) aria-current="page" @endif>{{ __('Trending') }}</a><a href="/about" @if(request()->is('about')) aria-current="page" @endif>{{ __('Our story') }}</a>@if(!auth()->check() || auth()->user()->canWrite())<a href="/write">{{ __('Write a story') }}</a>@endif<a href="/bookmarks" @if(request()->is('bookmarks')) aria-current="page" @endif>{{ __('Saved stories') }}</a><button @click="toggleTheme()"><x-icon name="moon" size="17" /><span x-text="dark ? 'Use light theme' : 'Use dark theme'"></span></button>@guest<a href="/login">{{ __('Sign in') }}</a>@endguest</nav>
 </header>
 @endunless
 @if(session('success') || session('status'))<div class="toast" role="status" x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,6500)" @folkscript:feedback.window="show=false"><x-icon name="check-circle" /><span>{{ session('success') ?? session('status') }}</span><button @click="show=false" aria-label="{{ __('Dismiss message') }}"><x-icon name="x" size="16" /></button></div>@endif

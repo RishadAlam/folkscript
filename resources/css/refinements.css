@@ -31,6 +31,7 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .desktop-nav a.active::after { content: ''; position: absolute; inset-inline: 0; bottom: -13px; border-bottom: 2px solid var(--ink); }
 .mobile-menu button, .mobile-menu a { min-height: 44px; display: flex; align-items: center; }
 .account-dropdown { min-width: 235px; max-height: min(75vh, 620px); overflow-y: auto; }
+.account-dropdown a[aria-current="page"], .mobile-menu a[aria-current="page"] { background: var(--soft); font-weight: 600; text-decoration: underline; text-underline-offset: 5px; }
 .account-dropdown a, .account-dropdown button { min-height: 44px; display: flex; align-items: center; font-size:0.9375rem; }
 .account-dropdown strong { overflow-wrap: anywhere; font-size:0.9375rem; }
 .search-form:focus-within { outline: 2px solid var(--ink); outline-offset: 3px; }

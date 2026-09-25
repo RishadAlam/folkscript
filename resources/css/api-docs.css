@@ -4,7 +4,7 @@
 .api-docs-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .api-docs-actions .btn { min-height: 44px; }
 .api-docs-layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 48px; align-items: start; }
-.api-docs-navigation { position: sticky; top: 100px; display: grid; align-content: start; gap: 2px; }
+.api-docs-navigation { position: sticky; top: 100px; display: grid; align-content: start; gap: 2px; max-height: calc(100svh - 124px); overflow-y: auto; overscroll-behavior: contain; padding: 4px; scrollbar-width: thin; scrollbar-color: var(--muted) var(--surface); }
 .api-docs-navigation strong { margin-bottom: 10px; padding-inline: 12px; font-size: .875rem; }
 .api-docs-navigation a { min-height: 44px; display: flex; align-items: center; padding: 8px 12px; border-radius: 4px; font-size: .875rem; line-height: 1.5; }
 .api-docs-navigation a:hover { background: var(--soft); }
@@ -34,7 +34,7 @@
     .api-docs { padding-block: 32px 56px; }
     .api-docs-heading h1 { font-size: 2rem; }
     .api-docs-layout { display: block; }
-    .api-docs-navigation { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
+    .api-docs-navigation { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; overflow: visible; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
     .api-docs-navigation strong { grid-column: 1 / -1; }
     .api-docs-content h2 { margin-top: 40px; font-size: 1.5rem; scroll-margin-top: 88px; }
     .api-docs-content h3 { font-size: 1.125rem; }
