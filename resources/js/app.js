@@ -1,4 +1,6 @@
+import './image-tones';
 import './community';
+import './settings';
 import readerTools from './reader-tools';
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import { createIcons, Search, Moon, Sun, Bell, PenLine, ArrowUpRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Menu, Plus, X, CheckCircle, Check, CheckCheck, Bookmark, BookmarkCheck, BookOpen, Feather, Sparkles, Heart, MessageCircle, Share2, Rss, ChevronRight, Archive, Bold, Italic, Strikethrough, Heading2, Heading3, Quote, List, ListOrdered, Code, Link, Image as ImageIcon, ImagePlus, Minus, Undo2, Redo2, Calendar, History, Circle, UserPlus, Shield, Lock, Mail, Settings, LogOut, Eye, Download, ExternalLink, FileText, Video, Copy, ChevronDown } from 'lucide';

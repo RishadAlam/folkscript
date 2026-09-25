@@ -1,11 +1,13 @@
-/* Reading and task typography share a restrained editorial identity. */
+/* One reading-first family across publication, writing, and administration. */
 :root {
-    --font-ui: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-reading: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+    --font-ui: 'Lexend Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-reading: var(--font-ui);
     --text-body: 1rem;
     --text-small: .875rem;
     --text-reading: 1.25rem;
     --reading-leading: 1.75;
+    /* Lexend has no italic face. Preserve authored emphasis without fake bold. */
+    font-synthesis: style;
 }
 
 body {
@@ -18,12 +20,14 @@ body {
 h1, h2, h3, h4, .editor-title, .footer-wordmark {
     font-family: var(--font-reading);
     font-weight: 600;
-    letter-spacing: -.02em;
+    letter-spacing: -.01em;
     text-wrap: balance;
 }
-.home-intro h1 { letter-spacing: -.025em; font-weight: 500; }
+.home-intro h1 { letter-spacing: -.015em; font-weight: 500; line-height: 1.12; }
 .home-intro h1 em { font-weight: 500; }
-.lead-copy h2, .article-top h1, .editor-title { letter-spacing: -.02em; }
+.lead-copy h2, .article-top h1, .editor-title { letter-spacing: -.01em; }
+.auth-aside .auth-aside-title, .auth-form-panel h1, .auth-single h1,
+.section-heading h2, .profile-header h1, .footer-wordmark { letter-spacing: -.01em; }
 .article-top h1 { font-weight: 600; line-height: 1.16; }
 .story-title, .story-card h2, .story-card h3 { font-weight: 600; line-height: 1.3; }
 .desktop-nav, .mobile-menu, .account-dropdown, .btn, .text-link,

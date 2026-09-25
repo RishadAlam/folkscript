@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -27,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'social_links' => 'array', 'newsletter_enabled' => 'boolean', 'two_factor_confirmed_at' => 'datetime', 'suspended_at' => 'datetime'];
+        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'social_links' => 'array', 'newsletter_enabled' => 'boolean', 'two_factor_confirmed_at' => 'datetime', 'suspended_at' => 'datetime', 'access_role_assigned_at' => 'datetime'];
     }
 
     public function pinnedPost(): BelongsTo { return $this->belongsTo(Post::class, 'pinned_post_id')->published(); }
@@ -45,9 +46,17 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
 
     public function markEmailAsVerified(): bool
     {
-        $result = $this->forceFill(['email_verified_at' => $this->freshTimestamp()])->save();
-        $this->assignRole('author');
-        return $result;
+        return DB::transaction(function () {
+            $account = static::lockForUpdate()->findOrFail($this->getKey());
+            $result = $account->forceFill(['email_verified_at' => $account->freshTimestamp()])->save();
+            // Verification completes normal onboarding but must not undo an administrator's explicit role choice.
+            if (! $account->access_role_assigned_at) {
+                $account->assignRole('author');
+            }
+            $this->refresh();
+
+            return $result;
+        });
     }
 
     public function initials(): string
@@ -55,6 +64,49 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
         $parts = preg_split('/\s+/u', trim($this->name ?? ''), -1, PREG_SPLIT_NO_EMPTY);
 
         return collect($parts)->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: '?';
+    }
+
+    /** @return array<int, array{label: string, url: string}> */
+    public function publicProfileLinks(): array
+    {
+        $links = $this->social_links;
+        if (! is_array($links)) {
+            return [];
+        }
+
+        $publicLinks = [];
+        foreach ($links as $key => $link) {
+            if (is_array($link)) {
+                $label = $link['label'] ?? null;
+                $url = $link['url'] ?? null;
+            } else {
+                // Older profiles stored platform names as JSON object keys.
+                $label = match ($key) {
+                    'website' => 'Website',
+                    'github' => 'GitHub',
+                    'linkedin' => 'LinkedIn',
+                    default => $key,
+                };
+                $url = $link;
+            }
+
+            if (! is_string($label) || trim($label) === '' || preg_match('/[\x00-\x1F\x7F]/', $label) || ! is_string($url)) {
+                continue;
+            }
+            $url = trim($url);
+            if (! filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+            $parts = parse_url($url);
+            if (! is_array($parts) || ! in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)
+                || array_key_exists('user', $parts) || array_key_exists('pass', $parts)) {
+                continue;
+            }
+
+            $publicLinks[] = ['label' => $label, 'url' => $url];
+        }
+
+        return $publicLinks;
     }
 
     public function getAvatarUrlAttribute(): ?string

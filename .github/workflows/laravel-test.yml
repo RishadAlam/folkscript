@@ -1,0 +1,14 @@
+name: Laravel Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  laravel-tests:
+    uses: ./.github/workflows/ci.yml
