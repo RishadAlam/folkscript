@@ -6,7 +6,7 @@
         'stories' => [__('Stories'), __('Find and manage writing across the publication.')],
         'people' => [__('Users & access'), __('Find an account, choose what it can do, and manage its access to Folkscript.')],
         'topics' => [__('Categories & tags'), __('Help readers discover stories by subject.')],
-        'activity' => [__('Activity log'), __('Recent changes to content, accounts, and publication settings. Times shown in UTC.')],
+        'activity' => [__('Activity log'), __('Recent changes to content, accounts, and publication settings. Times shown in :timezone.', ['timezone' => config('app.timezone')])],
     ];
     $returnQuery = request()->only(['view', 'q', 'story_q', 'user_status', 'user_role', 'report_status', 'comment_status', 'story_status', 'users_page', 'reports_page', 'comments_page', 'posts_page']);
     $returnQuery['view'] = $section;

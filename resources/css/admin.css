@@ -307,9 +307,11 @@
  .admin-recent-story>.admin-row-action { font-size:0.875rem; }
  .admin-page .audit-list>div { grid-template-columns:1fr; gap:7px; padding:16px 0; font-size:0.875rem; }
  .admin-footer { flex-direction:column; gap:5px; }
- .admin-content .platform-save { gap:10px; align-items:stretch; }
- .admin-content .platform-save p { display:none; }
+ .admin-content .platform-save { flex-direction:column; gap:10px; align-items:stretch; }
+ .admin-content .platform-save p { margin:0; }
  .admin-content .platform-save .btn { width:100%; }
  .platform-settings-nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:16px; row-gap:0; overflow:visible; white-space:normal; }
  .platform-settings-nav a { line-height:1.45; }
 }
+
+.admin-decision-help{font-size:0.875rem;line-height:1.65;color:var(--muted);max-width:75ch;margin-top:18px}
