@@ -94,7 +94,7 @@
         ]
     },
     "scripts-descriptions": {
-        "build:prod-zip": "Build dist/folkscript-cpanel.zip with production dependencies and compiled assets for manual upload."
+        "build:prod-zip": "Run automated QA, validate the production package, then build dist/folkscript-cpanel.zip."
     },
     "extra": {
         "laravel": {

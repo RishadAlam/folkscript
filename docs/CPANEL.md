@@ -21,7 +21,7 @@ Redis, Meilisearch, Reverb, and social-image rendering are optional. The supplie
 
 ## 2. Build the ZIP locally
 
-Build from a Git checkout with PHP 8.3 or later compatible with the lockfile, PHP ZIP support and the application's required PHP extensions, Composer 2, Node.js 22.12 or later, npm, and Git. Dependency downloads require network access. Use the committed lockfiles; do not update dependencies as part of a release build.
+Build from a Git checkout with PHP 8.3 or later compatible with the lockfile, PHP ZIP support, `pdo_sqlite` for isolated QA, and the application's required PHP extensions, Composer 2, Node.js 22.12 or later, npm, and Git. Dependency downloads and security audits require network access. Use the committed lockfiles; do not update dependencies as part of a release build.
 
 From the project root:
 
@@ -31,7 +31,20 @@ composer build:prod-zip
 
 The builder uses an allowlist of Git-tracked application files and reads their current working-tree contents. Add newly created application files to Git before building; untracked files are not included. Existing uncommitted edits to tracked application files are included, so review the intended changes first.
 
-Dependencies and assets are built in a private temporary directory. The command leaves the development installation's `.env`, dependencies, database, uploads, and running services alone. Its output is:
+The command runs these automated QA gates in a private temporary directory before creating the ZIP:
+
+1. Check staged/unstaged Git changes for whitespace errors; validate Composer metadata and lockfile strictly.
+2. Install locked PHP dependencies including test tools, check platform requirements, and run `composer audit --locked` against all locked dependencies.
+3. Run `npm ci`, then `npm audit --audit-level=low` against the installed dependencies, including development tools.
+4. Syntax-check application, public entrypoint, configuration, migration, translation, route, build-script, and test PHP files.
+5. Run `npm run build`, all `tests/JavaScript/*.test.mjs` tests, and `composer test -- --compact --display-warnings --fail-on-warning --fail-on-risky` with isolated in-memory SQLite. The test environment uses a temporary empty `.env`, which is removed immediately afterward; your local `.env` is never copied or loaded.
+6. Remove development PHP dependencies, verify that installed packages exactly match the production lockfile, and validate every compiled asset referenced by the manifest.
+7. Compile production Blade views and routes. Boot the pruned package, run migrations and role-only seeding in memory, and check public pages, API documentation, compiled assets and quote-card fonts with production dependencies.
+8. Remove all QA state and compiled caches, create the ZIP, and check its integrity before replacing the output file.
+
+Every command must succeed. A failed test, reported dependency vulnerability, unavailable audit service, or invalid production package exits with an error and leaves any previous ZIP unchanged. There is no skip-QA option. A previous ZIP is not evidence that the latest build passed: check the command's exit status and final success message.
+
+The command leaves the development installation's `.env`, dependencies, database, uploads, and running services alone. Only production dependencies and assets remain in the final archive. Its output is:
 
 ```text
 dist/folkscript-cpanel.zip
@@ -41,7 +54,7 @@ The archive has no enclosing folder: after extraction, `artisan`, `app/`, `publi
 
 The packaged `.env.example` comes from `deployment/cpanel.env.example` and has production defaults without credentials. The archive excludes the local `.env`, uploaded files, databases, logs, sessions, generated caches, development PHP dependencies, Node modules, tests, Git metadata, and development tools. Frontend sources are omitted after compilation, except the font CSS that quote cards read at runtime. The API documentation source is also retained because the application reads it at runtime.
 
-Do not use this ZIP as a backup: it intentionally contains no existing site's data or secrets.
+Do not use this ZIP as a backup: it intentionally contains no existing site's data or secrets. These are automated checks for the PHP/Node versions running the command; the build does not launch a browser, run every CI version, or certify a hosting account. Complete the host and browser checks below before opening the site to users.
 
 ## 3. Upload and configure a new installation
 

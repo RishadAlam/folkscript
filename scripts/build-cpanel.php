@@ -38,6 +38,9 @@ function run(array $command, string $cwd, array $environment, bool $capture = fa
         fclose($pipes[1]);
     }
     if (proc_close($process) !== 0) {
+        if ($capture && $output !== '') {
+            fwrite(STDERR, $output);
+        }
         throw new RuntimeException('Build step failed: '.implode(' ', $command));
     }
 
@@ -58,8 +61,8 @@ function copySource(string $root, string $source, string $destination): void
 }
 
 try {
-    if (PHP_VERSION_ID < 80300 || ! class_exists(ZipArchive::class) || ! function_exists('proc_open')) {
-        throw new RuntimeException('Use PHP 8.3+ with the ZIP extension and proc_open enabled to build the archive.');
+    if (PHP_VERSION_ID < 80300 || ! class_exists(ZipArchive::class) || ! extension_loaded('pdo_sqlite') || ! function_exists('proc_open')) {
+        throw new RuntimeException('Use PHP 8.3+ with ZIP, pdo_sqlite (for isolated QA), and proc_open enabled to build the archive.');
     }
     if (count($argv) > 1) {
         throw new RuntimeException('Usage: composer build:prod-zip (output: dist/folkscript-cpanel.zip)');
@@ -74,7 +77,9 @@ try {
     }
     $environment += [
         'APP_ENV' => 'production', 'APP_DEBUG' => 'false',
-        'DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => ':memory:',
+        'APP_KEY' => 'base64:'.base64_encode(random_bytes(32)),
+        'APP_URL' => 'https://example.test', 'SEED_DEMO_CONTENT' => 'false',
+        'DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => ':memory:', 'DB_URL' => '',
         'CACHE_STORE' => 'array', 'SESSION_DRIVER' => 'array',
         'QUEUE_CONNECTION' => 'sync', 'MAIL_MAILER' => 'array',
         'COMPOSER_PROCESS_TIMEOUT' => '0', 'PUPPETEER_SKIP_DOWNLOAD' => 'true',
@@ -84,14 +89,16 @@ try {
     run([...$composer, '--version'], $root, $environment);
     run(['node', '--version'], $root, $environment);
     run(['npm', '--version'], $root, $environment);
+    run(['git', 'diff', '--check'], $root, $environment);
+    run(['git', 'diff', '--cached', '--check'], $root, $environment);
     $tracked = explode("\0", trim(run(['git', 'ls-files', '-z'], $root, $environment, true), "\0"));
 
     $temporary = sys_get_temp_dir().'/folkscript-cpanel-'.bin2hex(random_bytes(8));
     directory($temporary, 0700);
     $stage = $temporary.'/app';
     directory($stage);
-    $files = ['artisan', 'composer.json', 'composer.lock', 'package.json', 'package-lock.json', 'vite.config.js', 'LICENSE', 'bootstrap/app.php', 'bootstrap/providers.php', 'docs/API.md', 'docs/ASSETS.md'];
-    $directories = ['app/', 'config/', 'routes/', 'lang/', 'database/migrations/', 'database/seeders/', 'database/factories/', 'resources/views/', 'resources/css/', 'resources/js/', 'public/'];
+    $files = ['artisan', 'composer.json', 'composer.lock', 'package.json', 'package-lock.json', 'vite.config.js', 'phpunit.xml', 'LICENSE', 'bootstrap/app.php', 'bootstrap/providers.php', 'public/index.php', 'public/.htaccess', 'public/.well-known/security.txt', 'docs/API.md', 'docs/ASSETS.md', 'scripts/verify-production.php'];
+    $directories = ['app/', 'config/', 'routes/', 'lang/', 'database/migrations/', 'database/seeders/', 'database/factories/', 'resources/views/', 'resources/css/', 'resources/js/', 'public/', 'tests/', 'scripts/'];
 
     echo "\nPreparing tracked source files in an isolated build directory…\n";
     foreach ($tracked as $file) {
@@ -117,12 +124,62 @@ try {
         directory($stage.'/'.$path);
     }
 
-    echo "\nInstalling locked production PHP dependencies…\n";
+    echo "\nQA: validating dependencies and installing the locked test tools…\n";
+    run([...$composer, 'validate', '--strict', '--no-check-publish'], $stage, $environment);
+    run([...$composer, 'install', '--no-scripts', '--prefer-dist', '--no-interaction', '--no-progress', '--optimize-autoloader'], $stage, $environment);
+    run([...$composer, 'check-platform-reqs'], $stage, $environment);
+    run([...$composer, 'audit', '--locked'], $stage, $environment);
+    run(['npm', 'ci', '--include=dev', '--no-audit', '--no-fund'], $stage, $environment);
+    run(['npm', 'audit', '--audit-level=low'], $stage, $environment);
+
+    echo "\nQA: checking PHP syntax…\n";
+    $phpFiles = [$stage.'/artisan', $stage.'/public/index.php'];
+    foreach (['app', 'bootstrap', 'config', 'database', 'lang', 'routes', 'scripts', 'tests'] as $path) {
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($stage.'/'.$path, FilesystemIterator::SKIP_DOTS));
+        foreach ($iterator as $entry) {
+            if ($entry->isFile() && $entry->getExtension() === 'php') {
+                $phpFiles[] = $entry->getPathname();
+            }
+        }
+    }
+    foreach ($phpFiles as $file) {
+        run([PHP_BINARY, '-l', $file], $stage, $environment, true);
+    }
+    echo 'PHP syntax passed for '.count($phpFiles)." files.\n";
+
+    echo "\nQA: building frontend assets and running every JavaScript test…\n";
+    run(['npm', 'run', 'build'], $stage, $environment);
+    $javascriptTests = glob($stage.'/tests/JavaScript/*.test.mjs');
+    if (! $javascriptTests) {
+        throw new RuntimeException('No JavaScript tests were found; refusing to skip QA.');
+    }
+    run(['node', '--test', ...$javascriptTests], $stage, $environment);
+    echo "\nQA: running the complete PHP application suite with in-memory SQLite…\n";
+    $testEnvironment = array_replace($environment, ['APP_ENV' => 'testing']);
+    // Dotenv reports a suppressed file-read warning in every test without this empty file.
+    // All test settings come from the isolated process environment, never the local .env.
+    if (file_put_contents($stage.'/.env', '') === false) {
+        throw new RuntimeException('Could not prepare the empty test environment file.');
+    }
+    run([PHP_BINARY, 'artisan', 'package:discover', '--no-ansi'], $stage, $testEnvironment);
+    run([...$composer, 'test', '--', '--compact', '--display-warnings', '--fail-on-warning', '--fail-on-risky'], $stage, $testEnvironment);
+    removeTree($stage.'/.env');
+
+    echo "\nQA passed. Preparing and verifying production-only dependencies…\n";
     run([...$composer, 'install', '--no-dev', '--no-scripts', '--prefer-dist', '--no-interaction', '--no-progress', '--optimize-autoloader'], $stage, $environment);
     run([...$composer, 'check-platform-reqs', '--no-dev'], $stage, $environment);
-    echo "\nBuilding locked frontend assets…\n";
-    run(['npm', 'ci', '--include=dev', '--no-audit', '--no-fund'], $stage, $environment);
-    run(['npm', 'run', 'build'], $stage, $environment);
+    $installed = json_decode(file_get_contents($stage.'/vendor/composer/installed.json'), true, flags: JSON_THROW_ON_ERROR);
+    $locked = json_decode(file_get_contents($stage.'/composer.lock'), true, flags: JSON_THROW_ON_ERROR);
+    $installedNames = array_column($installed['packages'], 'name');
+    $productionNames = array_column($locked['packages'], 'name');
+    sort($installedNames);
+    sort($productionNames);
+    if ($installed['dev'] !== false || $installedNames !== $productionNames) {
+        throw new RuntimeException('The deployment dependencies do not exactly match the production lockfile.');
+    }
+    // Remove manifests that still reference QA-only service providers before booting production.
+    removeTree($stage.'/bootstrap/cache');
+    directory($stage.'/bootstrap/cache');
     run([PHP_BINARY, 'artisan', 'package:discover', '--no-ansi'], $stage, $environment);
 
     $manifestPath = $stage.'/public/build/manifest.json';
@@ -141,7 +198,11 @@ try {
     }
 
     // Only views and font CSS are used from resources/ at runtime (including quote cards).
-    foreach (['node_modules', 'resources/js', 'package.json', 'package-lock.json', 'vite.config.js'] as $path) {
+    // Keep the smoke checker outside the payload so it verifies the actual pruned package.
+    if (! copy($stage.'/scripts/verify-production.php', $temporary.'/verify-production.php')) {
+        throw new RuntimeException('Could not prepare the production smoke check.');
+    }
+    foreach (['node_modules', 'resources/js', 'package.json', 'package-lock.json', 'vite.config.js', 'tests', 'scripts', 'phpunit.xml', '.phpunit.result.cache', '.phpunit.cache'] as $path) {
         removeTree($stage.'/'.$path);
     }
     foreach (new FilesystemIterator($stage.'/resources/css') as $entry) {
@@ -155,6 +216,20 @@ try {
     foreach ($writable as $path) {
         directory($stage.'/'.$path);
     }
+
+    echo "\nQA: compiling production views/routes and checking a clean installation…\n";
+    run([PHP_BINARY, 'artisan', 'view:cache', '--no-ansi'], $stage, $environment);
+    run([PHP_BINARY, 'artisan', 'route:cache', '--no-ansi'], $stage, $environment);
+    run([PHP_BINARY, $temporary.'/verify-production.php', $stage], $stage, $environment);
+    // No QA state, temporary keys, compiled paths or test uploads may enter the ZIP.
+    foreach (['bootstrap/cache', 'storage'] as $path) {
+        removeTree($stage.'/'.$path);
+    }
+    foreach ($writable as $path) {
+        directory($stage.'/'.$path);
+    }
+
+    echo "\nAll automated QA and production checks passed. Creating the ZIP…\n";
 
     $outputDirectory = $root.'/dist';
     if (is_link($outputDirectory)) {
@@ -170,7 +245,10 @@ try {
     $count = 0;
     foreach ($iterator as $entry) {
         $name = str_replace(DIRECTORY_SEPARATOR, '/', substr($entry->getPathname(), strlen($stage) + 1));
-        if ($entry->isLink() || preg_match('~(^|/)(\.git|\.svn|\.hg|node_modules)(/|$)~', $name)) {
+        if ($entry->isLink() || preg_match('~(^|/)(\.git|\.svn|\.hg|node_modules)(/|$)~', $name)
+            || preg_match('~^(tests|scripts|public/storage|resources/js)(/|$)|^public/hot$|^\.phpunit|^phpunit\.xml$~', $name)
+            || (preg_match('~(^|/)\.env[^/]*$~', $name) && $name !== '.env.example')
+            || ($entry->isFile() && (str_starts_with($name, 'storage/') || str_starts_with($name, 'bootstrap/cache/')))) {
             throw new RuntimeException("Unexpected build artifact: {$name}");
         }
         $isDirectory = $entry->isDir();
