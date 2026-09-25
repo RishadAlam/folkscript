@@ -17,7 +17,7 @@ A free, open-source, nonprofit publishing platform. Every published story is fre
 Provide publishing, rich editing, accounts, community, search, administration, SEO and feeds. The September 25 decision to make the project entirely free supersedes monetization in the original build reference. There are no paid tiers, subscriptions, paywalls, earnings ledgers, or payment integrations. External production credentials and domain ownership are not supplied. Example editorial content and accounts must be documented as demo data. User explicitly requests autonomous decisions, fast execution, no questions and no unnecessary tests.
 
 ## Brand Commitments
-Preserve supplied Folkscript SVG assets. Ink navy #1E2A47, ink black #141B2E, warm paper #F6F3EC, slate #8B9BC0, restrained amber #D9A441. Source Serif 4 for editorial titles and reading; Source Sans 3 for controls, supporting copy, and administration. Keep the supplied SVG lettering unchanged. Use scalable rem text sizes, a 1rem interface body, and a .875rem metadata floor.
+Preserve supplied Folkscript SVG assets. Ink navy #1E2A47, ink black #141B2E, white light-mode paper #FFFFFF, neutral panels #F8F9FB, soft grouping #F1F3F6, dividers #DFE3E9, slate #8B9BC0, restrained amber #D9A441. Dark mode retains its warm foreground #F6F3EC. Source Serif 4 for editorial titles and reading; Source Sans 3 for controls, supporting copy, and administration. Keep the supplied SVG lettering unchanged. Use scalable rem text sizes, a 1rem interface body, and a .875rem metadata floor.
 
 ## Evidence on Hand
 Product specification and four SVG assets supplied in /Users/rishadalam/Downloads/files. No real posts or audience metrics supplied.

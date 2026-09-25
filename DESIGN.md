@@ -3,11 +3,11 @@ name: Folkscript
 description: An independent literary quarterly for the open web.
 colors:
   ink: "#1e2a47"
-  paper: "#f6f3ec"
-  surface: "#fcfaf6"
+  paper: "#ffffff"
+  surface: "#f8f9fb"
   muted: "#626771"
-  rule: "#d9d8d1"
-  soft: "#ebe8e0"
+  rule: "#dfe3e9"
+  soft: "#f1f3f6"
   amber: "#d9a441"
   amber-strong: "#a87b2c"
   accent-readable: "#77551c"
@@ -140,14 +140,14 @@ components:
 
 **Creative North Star: "The Independent Literary Quarterly"**
 
-Folkscript uses the quiet authority of a literary journal: expressive serif titles, warm paper, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with denser forms, and clearer task groupings.
+Folkscript uses the quiet authority of a literary journal: expressive serif titles, white pages, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with neutral panels, denser forms, and clearer task groupings.
 
 Preserve the supplied Folkscript SVG assets. Source Serif 4 gives editorial titles and prose their literary character; Source Sans 3 keeps controls, supporting text, and administration easy to scan. Supplied SVG wordmarks retain their original embedded type declarations. Photography remains rectangular and editorial, with restrained crops and no decorative paper texture.
 
 **Key Characteristics:**
 
 - Source Serif 4 for editorial reading and titles, paired with Source Sans 3 for interface tasks.
-- Warm paper and navy ink, reversed into coherent dark surfaces.
+- White pages, subtle neutral panels, and navy ink, paired with coherent dark surfaces.
 - Fine rules and tonal grouping, with shadows limited to floating UI.
 - Large story headlines, visible authorship, and a narrow article measure.
 - Small amber cues for engagement and reading progress.
@@ -156,7 +156,7 @@ This document records the CSS import order in `resources/css/app.css`: `fonts.cs
 
 ## Colors
 
-The light palette combines warm paper, cool ink, and occasional amber.
+The light palette combines a white page with subtle neutral surfaces, cool ink, and occasional amber. The September 25 light-theme refinement replaces the former cream backgrounds across publication, account, editor, and administration screens; the dark palette retains its existing values.
 
 ### Primary
 
@@ -165,9 +165,9 @@ The light palette combines warm paper, cool ink, and occasional amber.
 
 ### Neutral
 
-- **Paper** (`paper`, `#f6f3ec`) is the warm light-theme page background and reversed text on navy surfaces. **Editorial surface** (`surface`, `#fcfaf6`) distinguishes panels and dropdowns; **soft surface** (`soft`, `#ebe8e0`) groups featured stories, notes, tags, and empty states.
+- **Paper** (`paper`, `#ffffff`) is the white light-theme page background and reversed text on navy surfaces. **Editorial surface** (`surface`, `#f8f9fb`) distinguishes panels and dropdowns; **soft surface** (`soft`, `#f1f3f6`) groups featured stories, notes, tags, and empty states.
 - **Muted ink** (`muted`) carries supporting copy and metadata. **Rule** (`rule`) divides navigation, lists, sections, and fields.
-- **Ink black** (`ink-black`) becomes the dark page background. `dark-surface`, `dark-muted`, `dark-rule`, and `dark-soft` replace corresponding light variables.
+- **Ink black** (`ink-black`) becomes the dark page background. Dark-mode foreground ink remains the original warm `#f6f3ec`, independently of the light-theme white page; `dark-surface`, `dark-muted`, `dark-rule`, and `dark-soft` replace corresponding light variables.
 - **Slate** (`slate`) belongs to the supplied dark wordmark. It is not the current light-theme body or metadata color.
 - **Avatar paper** and **avatar ink** supply the neutral initial-avatar treatment; account initials may instead use ink and paper.
 
