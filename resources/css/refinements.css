@@ -88,6 +88,9 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .footer-fine nav { display: flex; align-items: center; gap: 24px; }
 .footer-fine>span:last-child { text-align: right; }
 
+.page-heading { flex-wrap: wrap; }
+.page-heading>div:first-child { flex: 1 1 28rem; min-width: 0; }
+.page-heading>.form-actions { max-width: 100%; flex-wrap: wrap; }
 .page-heading p { font-size:1.0625rem; line-height: 1.6; }
 .studio-heading-actions { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:12px; }
 .studio-heading-actions .btn { white-space:nowrap; }
@@ -268,3 +271,29 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .comment-report form { margin-top: 12px; max-width: 580px; gap: 12px; }
 .comment-report small { font-size:0.875rem; line-height: 1.5; color: var(--muted); }
 .comment-actions:has(.comment-report[open])>.comment-tools { flex-basis: 100%; }
+
+/* Keep reading available in very narrow embedded and wearable browser views. */
+@media (max-width: 319px) {
+ .page-shell { padding-inline: 12px; }
+ .masthead { height: auto; min-height: 74px; flex-wrap: wrap; justify-content: center; gap: 4px; padding-block: 8px; }
+ .masthead .brand { width: min(120px, 100%); }
+ .header-actions { margin-inline: auto; flex-wrap: wrap; justify-content: center; }
+ .account-dropdown { position: fixed; inset: 8px 8px auto; min-width: 0; max-height: calc(100svh - 16px); }
+ .mobile-menu { padding: 8px; }
+ .mobile-menu a, .mobile-menu button { overflow-wrap: anywhere; }
+ .home-intro h1, .page-heading h1, .article-top h1 { font-size: 1.75rem; overflow-wrap: anywhere; }
+ .home-story-list .story-card { display: flex; flex-direction: column; gap: 14px; }
+ .home-story-list .story-image { width: 100%; margin: 0; aspect-ratio: 1.5; }
+ .topic-strip { max-width: 100%; margin-right: 0; padding-right: 0; }
+ .lead-copy, .sidebar-note, .closing-invitation { padding: 16px 12px; }
+ .lead-author, .article-actions, .article-actions>div, .section-heading, .author-about, .profile-header { flex-wrap: wrap; }
+ .lead-author>div, .author-about>div { min-width: 0; }
+ .article-top, .article-body, .article-cover { padding-inline: 12px; }
+ .story-meta { flex-wrap: wrap; }
+ .search-form { flex-wrap: wrap; }
+ .search-form input { flex-basis: 70%; }
+ .search-form .btn { width: 100%; }
+ .footer-wordmark { font-size: 1.4rem; }
+ .footer-inner>nav { grid-template-columns: minmax(0, 1fr); }
+ .footer-fine nav { flex-wrap: wrap; gap: 4px 16px; }
+}

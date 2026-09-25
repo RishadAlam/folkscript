@@ -9,12 +9,14 @@ The implementation preserves Folkscript's supplied marks, Fraunces, navy ink, wa
 ## Structure and behavior
 
 - **Admin dashboard:** attention queues lead; recent activity and recently published stories provide context. Full administration forms live on their own destinations.
-- **Navigation:** `/admin?view=…` opens Admin dashboard, Reports, Comments, Stories, People, Categories & tags, or Activity log. Site settings shares the same shell. Navigation reflects the user's permissions and current destination.
-- **Focused lists:** reports have Open/Reviewed/Dismissed filters; comments have Flagged/Hidden/Visible; stories have publication-state filters and title/writer search; people have account-state filters and search.
+- **Navigation:** `/admin?view=…` opens Admin dashboard, Reports, Comments, Stories, Users & access, Categories & tags, or Activity log. Site settings shares the same shell. Navigation reflects the user's permissions and current destination.
+- **Focused lists:** reports have Open/Reviewed/Dismissed filters; comments have Flagged/Hidden/Visible; stories have publication-state filters and title/writer search; users have account-state and highest-role filters plus name, username, and email search.
 - **Workspace switching:** the Administration breadcrumb and Admin dashboard navigation return to the administration home. Writing studio appears in desktop and mobile administration navigation; authorized staff have a matching Admin dashboard action in the studio and account menu.
 - **Action recovery:** mutations return to the correct section with its validated filter context. Pagination returns to an available page after a queue shrinks. Already reviewed reports cannot be processed again.
 - **Progressive controls:** account access opens within one person’s row. Category/tag creation appears before each list. Validation keeps the workspace visible, reopens the affected form, preserves input, and focuses the first invalid field.
 - **Deliberate outcomes:** hiding and unpublishing explain their effect before confirmation. Hidden comments can be restored. Protected accounts and unavailable services explain their state.
+
+The **Users & access** page explains each role, shows why protected accounts cannot be changed, and separates role selection from suspension. The dashboard has a direct management shortcut. An explicit role choice survives later email verification. See [User roles and access](ACCESS_CONTROL.md) for the full capability matrix and safeguards.
 
 The desktop sidebar is 224px, reducing to 208px at 1180px. A native disclosure menu replaces it at 900px. Administration headings are 30px, reducing to 27px at 480px. People/story rows stack at 700px. These are surface-specific layout choices; `DESIGN.md` retains the shared system.
 
