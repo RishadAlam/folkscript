@@ -24,7 +24,7 @@ class AdminController extends Controller
         'reports' => ['report_status', 'reports_page'],
         'comments' => ['comment_status', 'comments_page'],
         'stories' => ['story_q', 'story_status', 'posts_page'],
-        'people' => ['q', 'user_status', 'users_page'],
+        'people' => ['q', 'user_status', 'user_role', 'users_page'],
         'topics' => [],
         'activity' => [],
     ];
@@ -34,6 +34,7 @@ class AdminController extends Controller
         'report_status' => ['open', 'resolved', 'dismissed'],
         'story_status' => ['published', 'draft', 'scheduled', 'archived'],
         'user_status' => ['all', 'active', 'unverified', 'suspended'],
+        'user_role' => ['all', 'reader', 'author', 'editor', 'admin', 'super-admin'],
     ];
 
     public function index(Request $request)
@@ -42,7 +43,7 @@ class AdminController extends Controller
         $this->validateQuery($request);
         $section = $request->query('view') ?? match (true) {
             $request->query->has('comment_status'), $request->query->has('comments_page') => 'comments',
-            $request->query->has('q'), $request->query->has('users_page'), $request->query->has('user_status') => 'people',
+            $request->query->has('q'), $request->query->has('users_page'), $request->query->has('user_status'), $request->query->has('user_role') => 'people',
             $request->query->has('reports_page'), $request->query->has('report_status') => 'reports',
             $request->query->has('posts_page'), $request->query->has('story_q'), $request->query->has('story_status') => 'stories',
             default => 'overview',
@@ -54,6 +55,7 @@ class AdminController extends Controller
         $reportStatus = $request->query('report_status', 'open');
         $storyStatus = $request->query('story_status', 'published');
         $userStatus = $request->query('user_status', 'all');
+        $userRole = $request->query('user_role', 'all');
         $userQuery = $request->query('q') ?? '';
         $storyQuery = $request->query('story_q') ?? '';
         $users = $reports = $moderationComments = $posts = $activities = $categories = $tags = collect();
@@ -68,6 +70,12 @@ class AdminController extends Controller
                 ->when(in_array($userStatus, ['active', 'unverified'], true), fn ($query) => $query->whereNull('suspended_at'))
                 ->when($userStatus === 'active', fn ($query) => $query->whereNotNull('email_verified_at'))
                 ->when($userStatus === 'unverified', fn ($query) => $query->whereNull('email_verified_at'))
+                ->when($userRole !== 'all', function ($query) use ($userRole) {
+                    // Accounts may also retain the baseline reader role. Filter by the highest role shown in the list.
+                    $higherRoles = array_slice(['super-admin', 'admin', 'editor', 'author', 'reader'], 0, array_search($userRole, ['super-admin', 'admin', 'editor', 'author', 'reader'], true));
+                    $query->whereHas('roles', fn ($roles) => $roles->where('name', $userRole))
+                        ->whereDoesntHave('roles', fn ($roles) => $roles->whereIn('name', $higherRoles));
+                })
                 ->latest()->orderByDesc('id')->paginate(15, ['*'], 'users_page');
         }
         if (in_array($section, ['overview', 'reports'], true)) {
@@ -103,7 +111,7 @@ class AdminController extends Controller
         }
         return view('admin', [
             'section' => $section, 'userQuery' => $userQuery, 'storyQuery' => $storyQuery,
-            'userStatus' => $userStatus, 'reportStatus' => $reportStatus, 'storyStatus' => $storyStatus,
+            'userStatus' => $userStatus, 'userRole' => $userRole, 'reportStatus' => $reportStatus, 'storyStatus' => $storyStatus,
             'canManageUsers' => $canManageUsers, 'users' => $users,
             'reports' => $reports,
             'commentStatus' => $commentStatus,
@@ -126,12 +134,19 @@ class AdminController extends Controller
             throw $exception->redirectTo($this->sectionUrl($request, 'people'));
         }
         abort_if($user->hasRole('super-admin'), 403, 'Transfer platform ownership through the administrative console.');
-        $before = $user->getRoleNames()->all();
-        $user->syncRoles(array_unique(['reader', $data['role']]));
-        $user->forceFill(['suspended_at' => $request->boolean('suspended') ? now() : null])->save();
-        if ($user->suspended_at) { $user->tokens()->delete(); }
-        activity()->causedBy($actor)->performedOn($user)->withProperties(['roles_before' => $before, 'roles_after' => $user->getRoleNames(), 'suspended' => (bool) $user->suspended_at])->log('Updated account access');
-        return redirect($this->sectionUrl($request, 'people'))->with('status', 'Account access updated.');
+        DB::transaction(function () use ($request, $actor, $user, $data) {
+            $user = User::lockForUpdate()->findOrFail($user->id);
+            abort_if($user->hasRole('super-admin') || (! $actor->hasRole('super-admin') && $user->hasRole('admin')), 403);
+            $before = $user->getRoleNames()->all();
+            $user->syncRoles(array_unique(['reader', $data['role']]));
+            $user->forceFill([
+                'access_role_assigned_at' => now(),
+                'suspended_at' => $request->boolean('suspended') ? ($user->suspended_at ?? now()) : null,
+            ])->save();
+            if ($user->suspended_at) { $user->tokens()->delete(); }
+            activity()->causedBy($actor)->performedOn($user)->withProperties(['roles_before' => $before, 'roles_after' => $user->getRoleNames(), 'suspended' => (bool) $user->suspended_at])->log('Updated account access');
+        });
+        return redirect($this->sectionUrl($request, 'people'))->with('status', __('Access updated for :name.', ['name' => $user->name]));
     }
 
     public function report(Request $request, Report $report)

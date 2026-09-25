@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -27,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'social_links' => 'array', 'newsletter_enabled' => 'boolean', 'two_factor_confirmed_at' => 'datetime', 'suspended_at' => 'datetime'];
+        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'social_links' => 'array', 'newsletter_enabled' => 'boolean', 'two_factor_confirmed_at' => 'datetime', 'suspended_at' => 'datetime', 'access_role_assigned_at' => 'datetime'];
     }
 
     public function pinnedPost(): BelongsTo { return $this->belongsTo(Post::class, 'pinned_post_id')->published(); }
@@ -45,9 +46,17 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
 
     public function markEmailAsVerified(): bool
     {
-        $result = $this->forceFill(['email_verified_at' => $this->freshTimestamp()])->save();
-        $this->assignRole('author');
-        return $result;
+        return DB::transaction(function () {
+            $account = static::lockForUpdate()->findOrFail($this->getKey());
+            $result = $account->forceFill(['email_verified_at' => $account->freshTimestamp()])->save();
+            // Verification completes normal onboarding but must not undo an administrator's explicit role choice.
+            if (! $account->access_role_assigned_at) {
+                $account->assignRole('author');
+            }
+            $this->refresh();
+
+            return $result;
+        });
     }
 
     public function initials(): string

@@ -5,7 +5,7 @@
         [['overview', 'Admin dashboard', 'book-open'], ['reports', 'Reports', 'shield'], ['comments', 'Comments', 'message-circle']],
         [['stories', 'Stories', 'file-text'], ['topics', 'Categories & tags', 'list']],
     ];
-    if ($manage) $groups[] = [['people', 'People', 'user-plus'], ['activity', 'Activity log', 'history'], ['settings', 'Site settings', 'settings']];
+    if ($manage) $groups[] = [['people', 'Users & access', 'user-plus'], ['activity', 'Activity log', 'history'], ['settings', 'Site settings', 'settings']];
 @endphp
 @foreach($groups as $group)
     <div class="admin-nav-group">

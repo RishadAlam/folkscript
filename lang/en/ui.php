@@ -15,9 +15,9 @@ return [
     ],
     'roles' => [
         'reader' => 'Reader',
-        'author' => 'Author',
+        'author' => 'Writer',
         'editor' => 'Editor',
-        'admin' => 'Admin',
-        'super-admin' => 'Super admin',
+        'admin' => 'Administrator',
+        'super-admin' => 'Platform owner',
     ],
 ];

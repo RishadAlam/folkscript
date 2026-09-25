@@ -25,7 +25,7 @@
                 @forelse($activities->take(5) as $activity)<div class="admin-activity-preview"><span class="admin-activity-dot"></span><div><p>{{ $activity->description }}</p><small>{{ $activity->causer?->name ?? __('System') }} · {{ $activity->created_at->diffForHumans() }}</small></div></div>@empty<p class="muted">{{ __('Changes made by your team will appear here.') }}</p>@endforelse
             @else<p class="muted">{{ __('Review reader concerns, manage stories, and keep conversations on track.') }}</p><a class="admin-shortcut" href="{{ route('admin', ['view' => 'stories']) }}">{{ __('Browse stories') }}<x-icon name="arrow-right" size="16" /></a>@endif
         </section>
-        @if($canManageUsers)<div class="admin-overview-shortcuts"><a class="admin-shortcut" href="{{ route('platform.settings') }}"><x-icon name="settings" size="18" /><span>{{ __('Publication settings') }}</span><x-icon name="chevron-right" size="16" /></a></div>@endif
+        @if($canManageUsers)<div class="admin-overview-shortcuts"><a class="admin-shortcut" href="{{ route('admin', ['view' => 'people']) }}"><x-icon name="user-plus" size="18" /><span>{{ __('Manage users & access') }}</span><x-icon name="chevron-right" size="16" /></a><a class="admin-shortcut" href="{{ route('platform.settings') }}"><x-icon name="settings" size="18" /><span>{{ __('Publication settings') }}</span><x-icon name="chevron-right" size="16" /></a></div>@endif
     </aside>
 </div>
 <section class="admin-recent-stories" aria-labelledby="recent-stories-title">
