@@ -88,6 +88,14 @@
                 <div>
                     <h3>{{ __('Connect your authenticator') }}</h3>
                     <p class="muted">{{ __('Scan the QR code with your app, then enter its six-digit code to finish setup.') }}</p>
+                    <details class="settings-disclosure">
+                        <summary>{{ __('Set up on this phone or without a camera') }}</summary>
+                        <p class="muted" id="two-factor-key-help">{{ __('In your authenticator, add a new account using a setup key. Choose time-based codes (TOTP), name the account Folkscript, and enter this key. Keep it private.') }}</p>
+                        <label class="field">
+                            {{ __('Setup key') }}
+                            <input class="form-input" type="text" value="{{ \Laravel\Fortify\Fortify::currentEncrypter()->decrypt($user->two_factor_secret) }}" readonly autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="two-factor-key-help">
+                        </label>
+                    </details>
                     <form method="post" action="{{ route('settings.two-factor.confirm') }}" class="stack" data-error-bag="confirmTwoFactorAuthentication">
                         @csrf
                         <label class="field">

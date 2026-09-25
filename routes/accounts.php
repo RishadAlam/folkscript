@@ -15,7 +15,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1,password-email')->name('password.email');
     Route::get('/reset-password/{token}', fn (Request $request, string $token) => view('auth.reset-password', ['token' => $token, 'email' => $request->query('email')]))->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1,password-reset')->name('password.update');
-    Route::view('/two-factor-challenge', 'auth.two-factor')->name('two-factor.login');
+    Route::get('/two-factor-challenge', [AuthController::class, 'twoFactorPage'])->name('two-factor.login');
     Route::post('/two-factor-challenge', [AuthController::class, 'twoFactor'])->middleware('throttle:6,1,two-factor-login');
     Route::get('/auth/{provider}/redirect', [AuthController::class, 'socialRedirect'])->name('social.redirect');
     Route::get('/auth/{provider}/callback', [AuthController::class, 'socialCallback'])->name('social.callback');
