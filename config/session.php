@@ -75,6 +75,9 @@ return [
 
     'connection' => env('SESSION_CONNECTION'),
 
+    // Redis session keys remain independent of the general cache prefix.
+    'prefix' => env('SESSION_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-'.Str::slug((string) env('APP_ENV', 'production')).'-session-'),
+
     /*
     |--------------------------------------------------------------------------
     | Session Database Table

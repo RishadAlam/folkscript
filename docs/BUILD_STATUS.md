@@ -19,11 +19,20 @@ This is a locally implemented publishing application, with demonstration editori
 - Private and authenticated responses use private/no-store cache policy. The service worker caches the offline shell and static assets, not article bodies, drafts or account responses.
 - Unpublished or suspended-author stories are excluded by server-side queries. Published stories are free to read, including their full body through the public story API. Feeds expose story summaries.
 - Content observers invalidate sitemaps after committed publishing/moderation changes. Author identity/visibility changes refresh search data. View-counter updates do not regenerate social cards or search documents.
-- Public home/discovery/search/trending queries cache paginated story IDs and counts for 60 seconds through the configured cache store (database locally, Redis in Docker). Query, topic and page keys are separate; committed publishing, taxonomy and author changes invalidate them. Cards recheck published/active-author visibility on every request. Following feeds and private responses are never shared in this cache, and article bodies are never stored in it.
+- Public home/discovery/search/trending queries cache paginated story IDs and counts for 60 seconds through the configured cache store (database by default, Redis when configured locally or in Docker). Query, topic and page keys are separate; committed publishing, taxonomy and author changes invalidate them. Cards recheck published/active-author visibility on every request. Following feeds and private responses are never shared in this cache, and article bodies are never stored in it.
 - New uploads are owned by their account, constrained by MIME type, size and decoded pixel count, and stored using randomized filenames. Conversion work requires the configured PHP image extension.
+- Redis connections separate jobs/Horizon, cache, sessions, and locks into distinct databases. Prefixes include the application name and environment; database-wide clearing still requires an app-specific instance or allocated databases.
 - Queue retry timeouts exceed the configured worker runtime. Horizon access requires an active, verified administrator even in the local environment.
 - Read-only support sessions expire after 30 minutes, recheck the original operator's authority on each request, and block private account pages and mutations, including signed email-verification GET requests.
 - External integrations remain off or return actionable unavailable states when their configuration is missing. There are no payment integrations or paid access tiers.
+
+## Local Redis verification
+
+On September 25, 2026, the local installation switched cache, sessions, and queues to a dedicated loopback Redis service on port 6381. MySQL remains the content database. Existing unexpired sessions and cache values were carried across; users, stories, and uploads were preserved. Redis uses AOF persistence and `noeviction`. Per-user macOS services named `local.folkscript.redis`, `local.folkscript.horizon`, and `local.folkscript.scheduler` supervise the local processes; their definitions and runtime data are outside the repository.
+
+Verification covered cache hits/invalidation, atomic rate limiting, session reads and expiry, exclusive locks, isolation when clearing cache/locks, and a sitemap job completed by Horizon with no failed jobs. The automated suite passed 166 PHP tests (1,695 assertions) and 12 JavaScript tests; the production asset build passed. Browser checks covered session continuity, bookmark persistence, settings, writing and administration dashboards, restricted Horizon access, and a 390px Chrome mobile reader view. Public/private API responses, RSS/sitemap XML, Markdown and font endpoints also passed smoke checks.
+
+A small sequential localhost comparison measured warm page medians around 20–22 ms after the switch, versus 23–25 ms before it. These timings are development-machine observations, not a concurrent production load test or an exhaustive device certification. See [Installation](../INSTALL.md#optional-local-redis) for reproducible configuration and [Deployment](DEPLOYMENT.md#redis-isolation-and-maintenance) for maintenance boundaries.
 
 ## Work beyond the current local delivery
 

@@ -5,7 +5,7 @@
 web
 
 ## Stack
-Laravel 13, Livewire 3, Alpine, Blade, Tailwind 4, TipTap. Local MySQL at `127.0.0.1:3306`, database `folkscript`, user `root`, blank password; SQLite remains an optional development fallback. Configurable production database, queues, search and object storage.
+Laravel 13, Livewire 3, Alpine, Blade, Tailwind 4, TipTap. Local MySQL at `127.0.0.1:3306`, database `folkscript`, user `root`, blank password; SQLite remains an optional development fallback. Optional dedicated Redis for cache, sessions, and Horizon queues, isolated by connection. Configurable production database, queues, search and object storage.
 
 ## Users
 Readers discover independent writing, save stories and follow writers. Verified writers publish and manage stories. Editors and administrators manage trust and content.
@@ -29,4 +29,4 @@ Writing and reading lead. Authors own their voice. Powerful tools stay understan
 Responsive web, keyboard access, WCAG AA contrast, reduced motion and dark mode.
 
 ## Assumptions
-Proceed code-first for the requested speed; an editorial discovery homepage is the primary entry. The local demo uses MySQL, database-backed queues/cache/sessions, and log mail without external services. Root with a blank password is a local-only development configuration. Switching database connections does not synchronize existing data. Source code is available under the MIT license. Authors retain ownership of their writing; the software license does not relicense stories or third-party assets. Nonprofit describes the project purpose and does not assert registered charitable status.
+Proceed code-first for the requested speed; an editorial discovery homepage is the primary entry. The basic installation uses MySQL, database-backed queues/cache/sessions, and log mail without external services. The optional Redis setup uses a dedicated loopback instance on port 6381, with separate databases for jobs, cache, sessions, and locks; MySQL remains the source of publishing data. Root with a blank password is a local-only development configuration. Switching database connections does not synchronize existing data. Source code is available under the MIT license. Authors retain ownership of their writing; the software license does not relicense stories or third-party assets. Nonprofit describes the project purpose and does not assert registered charitable status.

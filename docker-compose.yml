@@ -11,10 +11,32 @@ x-app-environment: &app-environment
   DB_DATABASE: folkscript
   DB_USERNAME: folkscript
   DB_PASSWORD: ${DOCKER_DB_PASSWORD:-local-development-change-me}
+  REDIS_CLIENT: phpredis
   REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_USERNAME: ""
+  REDIS_PASSWORD: ""
+  REDIS_URL: ""
+  REDIS_DEFAULT_URL: ""
+  REDIS_CACHE_URL: ""
+  REDIS_SESSION_URL: ""
+  REDIS_LOCK_URL: ""
+  REDIS_DB: 0
+  REDIS_CACHE_DB: 1
+  REDIS_SESSION_DB: 2
+  REDIS_LOCK_DB: 3
+  REDIS_PREFIX: folkscript-docker-production-database-
   CACHE_STORE: redis
+  REDIS_CACHE_CONNECTION: cache
+  REDIS_CACHE_LOCK_CONNECTION: locks
+  CACHE_PREFIX: folkscript-docker-production-cache-
   SESSION_DRIVER: redis
+  SESSION_CONNECTION: sessions
+  SESSION_STORE: redis
+  SESSION_PREFIX: folkscript-docker-production-session-
   QUEUE_CONNECTION: redis
+  REDIS_QUEUE_CONNECTION: default
+  HORIZON_PREFIX: "folkscript_docker_production_horizon:"
   SCOUT_DRIVER: meilisearch
   MEILISEARCH_HOST: http://meilisearch:7700
   MEILISEARCH_KEY: ${MEILISEARCH_KEY:-local-search-change-me}
@@ -76,7 +98,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory-policy noeviction
     volumes:
       - redis:/data
     healthcheck:

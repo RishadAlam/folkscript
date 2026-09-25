@@ -35,6 +35,8 @@ This adds the shared demo accounts documented in [INSTALL.md](../INSTALL.md#loca
 
 The HTTP listener is bound to `127.0.0.1:8080`; place an HTTPS reverse proxy in front of it for internet access. Set the canonical `APP_URL`, secure session settings, proxy trust, real mail configuration, and application secrets before accepting users. Do not expose PostgreSQL, Redis or Meilisearch ports publicly. A production deployment should pin image digests and audit/update dependencies.
 
+Compose overrides native local Redis settings with its internal `redis:6379` service, distinct database indexes, and Docker-specific prefixes. Connection URL overrides are disabled in this bundled stack so a local URL cannot redirect Docker workers to another instance. Redis uses append-only persistence and `noeviction`; queues and sessions must not be treated as disposable cache.
+
 The `storage`, `postgres`, `redis`, and `meilisearch` Docker volumes persist across container replacements. `docker compose down -v` deletes those volumes. Back up PostgreSQL and uploaded media separately and verify restores. Search is rebuildable from the database; the database and uploads are not.
 
 After code changes:
@@ -43,7 +45,7 @@ After code changes:
 docker compose up -d --build
 docker compose exec app php artisan migrate --force
 docker compose exec app php artisan optimize
-docker compose exec app php artisan queue:restart
+docker compose exec queue php artisan horizon:terminate
 ```
 
 Queue and scheduler processes must run continuously. Scheduled posts are processed every minute. Observe failed jobs with `php artisan queue:failed`; retry only after resolving the cause. Docker runs Horizon against Redis; its `/horizon` dashboard requires an active verified administrator. On a native Redis host, supervise `php artisan horizon` instead of `queue:work`. The default local database queue uses `queue:work`.
@@ -79,7 +81,7 @@ php artisan optimize
 
 Do not regenerate the key on later deployments. If your hosting platform provides the key as an environment secret, generate it once with `php artisan key:generate --show` and store that value there instead. The production seed initializes role permissions without demo accounts when the production environment and seed flag above are set. Finish [creating the first administrator](../INSTALL.md#create-the-first-administrator), then verify public reading, registration, mail and publishing on the real domain.
 
-Configure a supervised `php artisan queue:work --tries=3 --timeout=120` process and a cron entry running `php artisan schedule:run` every minute. On each deployment, restart workers. Enable HTTPS, configure trusted proxies appropriately for the provider, and set `SESSION_SECURE_COOKIE=true` on HTTPS production sites.
+Configure a supervised `php artisan queue:work --tries=3 --timeout=120` process and a cron entry running `php artisan schedule:run` every minute. On each deployment, restart database workers with `php artisan queue:restart`. When using Redis and Horizon, supervise `php artisan horizon` instead and restart it with `php artisan horizon:terminate`. Restart a long-running scheduler after configuration changes. Enable HTTPS, configure trusted proxies appropriately for the provider, and set `SESSION_SECURE_COOKIE=true` on HTTPS production sites.
 
 For example, replace the project path in this cron entry:
 
@@ -88,6 +90,42 @@ For example, replace the project path in this cron entry:
 ```
 
 The supplied queue retry interval is 180 seconds; keep a worker's timeout shorter than its queue connection's `retry_after`. Deploy database migrations with a backup and an application maintenance/rollback plan. Back up uploaded media, the database and the application key, and test recovery. On normal releases, use `migrate --force`, rebuild caches/assets, and restart workers; do not rerun the new-install key generation command.
+
+## Redis isolation and maintenance
+
+Redis is optional for the basic install. See [local Redis setup](../INSTALL.md#optional-local-redis) for the macOS example. A native production service must be private to the application network, authenticated where appropriate, supervised, and backed by persistent storage. Use append-only persistence and `maxmemory-policy noeviction` when storing queues or sessions; monitor memory, disk capacity, rejected writes, and persistence health. Choose a memory limit appropriate to the host. Back up Redis alongside the database when queued work must survive restoration.
+
+The supplied standalone configuration separates data by connection:
+
+| Connection | Database variable and default | Purpose |
+| --- | --- | --- |
+| `default` | `REDIS_DB=0` | Redis jobs and Horizon metadata |
+| `cache` | `REDIS_CACHE_DB=1` | Application cache, rate limits, and two-factor replay state |
+| `sessions` | `REDIS_SESSION_DB=2` | Sessions when `SESSION_DRIVER=redis` and `SESSION_CONNECTION=sessions` |
+| `locks` | `REDIS_LOCK_DB=3` | Cache locks, scheduled-task mutexes, and unique-job locks |
+
+`REDIS_CACHE_LOCK_CONNECTION` defaults to `locks`. Redis sessions must explicitly select `SESSION_CONNECTION=sessions`; leave that setting unset for database sessions. A Redis Cluster service cannot use this numbered-database layout; adapt its connection and isolation strategy separately rather than copying these settings unchanged.
+
+Connection URLs are independent: `REDIS_DEFAULT_URL`, `REDIS_CACHE_URL`, `REDIS_SESSION_URL`, and `REDIS_LOCK_URL`. A URL overrides the host, port, credentials, and database for its own connection. Legacy `REDIS_URL` is a fallback only for `default`; it never points all four connections at the same database. If migrating a deployment that previously relied on one URL, configure each connection explicitly before switching. Do not publish credential-bearing URLs.
+
+Default Redis, cache, session, and Horizon prefixes include `APP_NAME` and `APP_ENV`. Set `REDIS_PREFIX`, `CACHE_PREFIX`, `SESSION_PREFIX`, and `HORIZON_PREFIX` explicitly when multiple installations share those values. Horizon uses its own prefix, so changing `REDIS_PREFIX` alone does not isolate its metadata. Redis sessions use `SESSION_PREFIX` rather than the general cache prefix. Changing prefixes changes the namespace of existing data, including queued work and Redis sessions; plan that as a migration. Prefixes prevent key collisions but do not make database-wide clearing safe between applications.
+
+`php artisan cache:clear` flushes the entire configured cache database, including rate limits and two-factor replay state. `php artisan cache:clear --locks` flushes the entire locks database; use it only after checking for running jobs or scheduled tasks. These operations must never target the jobs or session databases. Avoid `FLUSHALL` and blanket Redis cleanup. Use `config:clear` to refresh configuration without clearing runtime cache; `optimize:clear` includes a cache flush unless invoked with `--except=cache`.
+
+Keep Horizon's 120-second worker timeout shorter than the Redis queue's 180-second `retry_after`. `REDIS_QUEUE` configures both the queue producer and Horizon's worker/wait-time settings. Restart Horizon after changing it. Keep the scheduler running for scheduled publication, opted-in digests, and five-minute Horizon metrics snapshots. Horizon and the application must use identical connection, prefix, and cache settings.
+
+## Switching an existing installation to Redis
+
+Changing environment variables does not migrate database jobs or sessions. Plan a short transition and preserve the existing application key, database, and uploaded media.
+
+1. Start the isolated Redis service and verify connection access without flushing its databases. Inspect pending database jobs, delayed jobs, and failed jobs without exposing their payloads.
+2. Pause the scheduler and other producers, then let the existing database worker finish intended jobs. Delayed jobs may remain; retain an explicitly targeted database worker until they run, or perform a controlled migration. Do not delete job rows or automatically retry failed jobs as part of this change.
+3. Stop old workers before changing their cache/prefix configuration. Switch `CACHE_STORE` and `QUEUE_CONNECTION` to `redis`; keep the current session driver until session handling is planned. Set all four Redis connection indexes, URL overrides, and prefixes consistently.
+4. Either migrate unexpired sessions during a paused write window, preserving IDs, payloads, and remaining TTL, or schedule a sign-out. A session-store migration must account for the application's session encryption/serialization and Redis cache encoding; copying raw SQL values into arbitrary Redis keys is insufficient. Simply setting `SESSION_DRIVER=redis` makes database sessions unavailable. Save in-progress forms first, and set `SESSION_CONNECTION=sessions` only when activating Redis sessions.
+5. Run `php artisan config:clear` (or rebuild production configuration), then restart application processes, the scheduler, and Horizon using the new configuration. Keep exactly one intended supervisor for the new Redis queue. Leave the database jobs, batches, and failed-job tables in place; batching and failure records still use SQL.
+6. Check public pages, authentication, session continuity if migrated, cache writes, an innocuous queued job, Horizon access, and scheduled processing. Keep the old queue/session data until the transition is confirmed. Switching back also needs a queue/session handoff; it is not an automatic rollback.
+
+Cache moves reset transient rate limits, two-factor replay markers, and digest de-duplication state unless those values are deliberately carried across. Do not run old and new schedulers together during the transition, and avoid resending an already-delivered digest. Preserve unique-job and scheduler locks or let active work finish before changing lock stores.
 
 ## Upgrading to the free publishing model
 

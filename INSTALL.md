@@ -153,6 +153,50 @@ The database queue handles background work. The scheduler publishes scheduled st
 
 For frontend development, also run `npm run dev`; Vite then serves updated assets. After stopping Vite, run `npm run build` to return to compiled assets. Keep Node and Vite private to the development environment.
 
+## Optional local Redis
+
+The basic install works without Redis. To use Redis for cache, sessions, and background jobs on macOS, install Redis with `brew install redis` and enable the `redis` PHP extension for the PHP version running both the application and workers. Verify the CLI extension with `php --ri redis`; if it is missing, install and enable the matching phpredis extension before changing drivers.
+
+Use a dedicated instance on `127.0.0.1:6381`, with its own data directory, rather than reusing another project's Redis database. For a foreground development instance:
+
+```sh
+mkdir -p "$HOME/Library/Application Support/Folkscript/redis"
+redis-server --bind 127.0.0.1 --port 6381 --protected-mode yes --appendonly yes --maxmemory-policy noeviction --dir "$HOME/Library/Application Support/Folkscript/redis"
+```
+
+Keep that terminal running, or configure a per-user macOS LaunchAgent to supervise the same instance with an absolute Redis executable and data path. A service definition and persistent data belong outside the repository. Do not start a second Redis process on the same port or data directory. Check the service from another terminal with `redis-cli -h 127.0.0.1 -p 6381 ping`.
+
+For a fresh installation, set the following values in your private `.env`. For an existing installation, follow [Switching an existing installation to Redis](docs/DEPLOYMENT.md#switching-an-existing-installation-to-redis) first so queued work and active sessions are handled deliberately.
+
+```dotenv
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+SESSION_DRIVER=redis
+SESSION_CONNECTION=sessions
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6381
+REDIS_DB=0
+REDIS_CACHE_DB=1
+REDIS_SESSION_DB=2
+REDIS_LOCK_DB=3
+REDIS_CACHE_LOCK_CONNECTION=locks
+REDIS_QUEUE=default
+```
+
+Redis database 0 holds queues and Horizon metadata, 1 holds cache values, 2 holds sessions, and 3 holds locks. Keep these distinct. Clear cached configuration with `php artisan config:clear`, then start each process in its own terminal:
+
+```sh
+php artisan serve --host=127.0.0.1 --port=8000
+php artisan horizon
+php artisan schedule:work
+npm run dev
+```
+
+Use Horizon instead of a second `queue:work` or `queue:listen` process for the Redis queue. `composer dev` uses Laravel's default queue listener, so use the explicit commands above for this setup. The scheduler also records Horizon metrics every five minutes. `/horizon` is available only to active, verified administrators and platform owners.
+
+After PHP/configuration changes, restart the application and scheduler, and gracefully restart supervised Horizon with `php artisan horizon:terminate`. If Horizon runs in a terminal, start it again after termination. Changing `REDIS_QUEUE` also updates Horizon's queue and wait-time configuration when its process restarts. See [Redis isolation and maintenance](docs/DEPLOYMENT.md#redis-isolation-and-maintenance) before clearing cache or locks.
+
 ## Create the first administrator
 
 An empty installation does not contain a default administrator or password. Use this procedure for an account you own:
@@ -174,7 +218,7 @@ On a private local installation using log mail, registration writes its initial 
 
 ## Defaults and optional services
 
-The default environment uses database sessions, cache and queues, local public media, database-backed search, log mail, and no external analytics. Redis, Horizon workers, Meilisearch, Reverb, Google/GitHub login, S3-compatible media, Plausible and Sentry are optional. Their environment settings and operational requirements are documented in [Deployment](docs/DEPLOYMENT.md). Installing the code does not provision service accounts or enable email delivery.
+The example environment uses database sessions, cache and queues, local public media, database-backed search, log mail, and no external analytics. The optional local Redis setup above replaces only cache, session, and queue storage; MySQL remains the publishing database. Redis, Horizon workers, Meilisearch, Reverb, Google/GitHub login, S3-compatible media, Plausible and Sentry are optional. Their environment settings and operational requirements are documented in [Deployment](docs/DEPLOYMENT.md). Installing the code does not provision service accounts or enable email delivery.
 
 ## Check the installation
 
@@ -193,6 +237,7 @@ The PHP tests use a separate in-memory SQLite database configured in `phpunit.xm
 | Symptom | Check |
 | --- | --- |
 | Composer reports missing extensions | Install them for the CLI PHP version shown by `php --version`; check `php --ini` and `composer check-platform-reqs`. |
+| Redis connection refused | Start the dedicated instance, verify the host/port and PHP redis extension, then clear configuration and restart the application, Horizon, and scheduler. |
 | Database connection refused or access denied | Start the server and correct `DB_*` values. Then run `php artisan config:clear` and restart long-running PHP processes. |
 | `RoleDoesNotExist` during registration | Initialize roles using one of the seed paths above. |
 | Missing Vite manifest or styles | Run `npm ci` and `npm run build`. A leftover `public/hot` file points Laravel at Vite; remove it only when the development server is stopped. |
