@@ -4,6 +4,7 @@
 !.env.example
 node_modules
 vendor
+build
 dist
 public/build
 public/hot

@@ -17,12 +17,16 @@ function directory(string $path, int $mode = 0755): void
 function removeTree(string $path): void
 {
     if (is_link($path) || is_file($path)) {
-        unlink($path);
+        if (! unlink($path)) {
+            throw new RuntimeException("Cannot remove file: {$path}");
+        }
     } elseif (is_dir($path)) {
         foreach (new FilesystemIterator($path) as $entry) {
             removeTree($entry->getPathname());
         }
-        rmdir($path);
+        if (! rmdir($path)) {
+            throw new RuntimeException("Cannot remove directory: {$path}");
+        }
     }
 }
 
@@ -65,7 +69,30 @@ try {
         throw new RuntimeException('Use PHP 8.3+ with ZIP, pdo_sqlite (for isolated QA), and proc_open enabled to build the archive.');
     }
     if (count($argv) > 1) {
-        throw new RuntimeException('Usage: composer build:prod-zip (output: dist/folkscript-cpanel.zip)');
+        throw new RuntimeException('Usage: composer build:prod-zip (output: build/folkscript-cpanel.zip)');
+    }
+
+    // This directory is disposable output; a failed QA run must not leave an old ZIP.
+    $outputDirectory = $root.'/build';
+    $legacyDirectory = $root.'/dist';
+    if (is_link($outputDirectory) || (file_exists($outputDirectory) && ! is_dir($outputDirectory))) {
+        throw new RuntimeException('build must be a directory, not a file or symbolic link.');
+    }
+    if (is_link($legacyDirectory)) {
+        throw new RuntimeException('Refusing to clean legacy ZIP output through a dist symbolic link.');
+    }
+    echo "\nCleaning previous production build files…\n";
+    removeTree($outputDirectory);
+    directory($outputDirectory);
+    if (is_dir($legacyDirectory)) {
+        // Remove only output from earlier versions, preserving unrelated dist files.
+        removeTree($legacyDirectory.'/folkscript-cpanel.zip');
+        foreach (glob($legacyDirectory.'/.folkscript-cpanel-*.tmp') ?: [] as $file) {
+            removeTree($file);
+        }
+        if (! (new FilesystemIterator($legacyDirectory))->valid()) {
+            removeTree($legacyDirectory);
+        }
     }
 
     // Keep OS/network tooling configuration, but never inherit app secrets or VITE_* values.
@@ -231,11 +258,6 @@ try {
 
     echo "\nAll automated QA and production checks passed. Creating the ZIP…\n";
 
-    $outputDirectory = $root.'/dist';
-    if (is_link($outputDirectory)) {
-        throw new RuntimeException('dist must be a directory, not a symbolic link.');
-    }
-    directory($outputDirectory);
     $partial = $outputDirectory.'/.folkscript-cpanel-'.bin2hex(random_bytes(8)).'.tmp';
     $zip = new ZipArchive;
     if ($zip->open($partial, ZipArchive::CREATE | ZipArchive::EXCL) !== true) {

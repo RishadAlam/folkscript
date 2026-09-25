@@ -1,6 +1,6 @@
 # Deploy Folkscript through cPanel
 
-Run `composer build:prod-zip` on your development machine to create `dist/folkscript-cpanel.zip`. Upload and extract that archive through cPanel File Manager, then configure and initialize the application through Terminal or SSH. The host does not need Composer, npm, or Node.js for the default installation. This is a deployment package, not a browser installer.
+Run `composer build:prod-zip` on your development machine to create `build/folkscript-cpanel.zip`. Upload and extract that archive through cPanel File Manager, then configure and initialize the application through Terminal or SSH. The host does not need Composer, npm, or Node.js for the default installation. This is a deployment package, not a browser installer.
 
 ## 1. Check the hosting account
 
@@ -31,7 +31,9 @@ composer build:prod-zip
 
 The builder uses an allowlist of Git-tracked application files and reads their current working-tree contents. Add newly created application files to Git before building; untracked files are not included. Existing uncommitted edits to tracked application files are included, so review the intended changes first.
 
-The command runs these automated QA gates in a private temporary directory before creating the ZIP:
+The command first deletes and recreates the project's `build/` directory. Treat this directory as disposable: keep backups and anything you want to retain elsewhere. It also removes the old `dist/folkscript-cpanel.zip` and unfinished `.folkscript-cpanel-*.tmp` archives from earlier versions, preserving unrelated files in `dist/`.
+
+It then installs dependencies and builds assets from scratch in a private temporary directory, running these automated QA gates before creating the ZIP:
 
 1. Check staged/unstaged Git changes for whitespace errors; validate Composer metadata and lockfile strictly.
 2. Install locked PHP dependencies including test tools, check platform requirements, and run `composer audit --locked` against all locked dependencies.
@@ -40,14 +42,14 @@ The command runs these automated QA gates in a private temporary directory befor
 5. Run `npm run build`, all `tests/JavaScript/*.test.mjs` tests, and `composer test -- --compact --display-warnings --fail-on-warning --fail-on-risky` with isolated in-memory SQLite. The test environment uses a temporary empty `.env`, which is removed immediately afterward; your local `.env` is never copied or loaded.
 6. Remove development PHP dependencies, verify that installed packages exactly match the production lockfile, and validate every compiled asset referenced by the manifest.
 7. Compile production Blade views and routes. Boot the pruned package, run migrations and role-only seeding in memory, and check public pages, API documentation, compiled assets and quote-card fonts with production dependencies.
-8. Remove all QA state and compiled caches, create the ZIP, and check its integrity before replacing the output file.
+8. Remove all QA state and compiled caches, create the ZIP, and check its integrity before publishing the completed output file.
 
-Every command must succeed. A failed test, reported dependency vulnerability, unavailable audit service, or invalid production package exits with an error and leaves any previous ZIP unchanged. There is no skip-QA option. A previous ZIP is not evidence that the latest build passed: check the command's exit status and final success message.
+Every command must succeed. After cleanup, a failed test, reported dependency vulnerability, unavailable audit service, or invalid production package exits with an error and leaves no deployment ZIP. The previous ZIP has already been deleted, and unfinished output is removed on failure. There is no skip-QA option; check the command's exit status and final success message.
 
 The command leaves the development installation's `.env`, dependencies, database, uploads, and running services alone. Only production dependencies and assets remain in the final archive. Its output is:
 
 ```text
-dist/folkscript-cpanel.zip
+build/folkscript-cpanel.zip
 ```
 
 The archive has no enclosing folder: after extraction, `artisan`, `app/`, `public/`, and `vendor/` are directly inside the destination directory. It contains production PHP dependencies, compiled browser assets, Blade views, translations, migrations and seeders, runtime documentation and fonts, licenses, and empty writable directories. This guide is included as `CPANEL.md`.
