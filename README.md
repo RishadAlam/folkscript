@@ -98,6 +98,7 @@ PHP tests use an isolated in-memory SQLite database. Coverage includes authoriza
 | [Installation](INSTALL.md) | Requirements, MySQL/SQLite setup, demo data, first administrator, troubleshooting |
 | [Deployment](docs/DEPLOYMENT.md) | Native and Docker hosting, HTTPS, workers, scheduler, storage, integrations |
 | [Reader tools](docs/READER_TOOLS.md) | Public Markdown, AI-reader links, and content discovery |
+| [API reference](docs/API.md) / [OpenAPI](public/openapi.json) | Every v1 endpoint, token scopes, response fields, errors, pagination, and automation examples; also available at `/developers/api` on your installation |
 | [Product](PRODUCT.md) / [Design](DESIGN.md) | Product scope, visual system, and accessibility conventions |
 | [Build status](docs/BUILD_STATUS.md) | Implemented features and deployment boundaries |
 | [Changelog](CHANGELOG.md) | Release history |

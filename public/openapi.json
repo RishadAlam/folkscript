@@ -1,0 +1,844 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Folkscript API",
+    "version": "1.0.0",
+    "description": "The existing Folkscript v1 API for public reading, personal account data, and scoped token revocation. Settings tokens have profile:read and posts:read and expire after 90 days. There is no story-write, user-management, token-issue, or webhook API. See /developers/api for setup and automation guidance. This specification describes the current implementation.",
+    "license": {
+      "name": "MIT (software only)",
+      "url": "https://github.com/RishadAlam/folkscript/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "This Folkscript installation; replace the origin when importing into another API tool."
+    }
+  ],
+  "externalDocs": {
+    "description": "Complete developer guide",
+    "url": "https://github.com/RishadAlam/folkscript/blob/main/docs/API.md"
+  },
+  "tags": [
+    {
+      "name": "Public stories",
+      "description": "No authentication; only currently published stories by active authors."
+    },
+    {
+      "name": "Personal account",
+      "description": "Bearer tokens access their own account only, regardless of role."
+    },
+    {
+      "name": "Token management",
+      "description": "Special tokens:manage ability, not issued by Settings."
+    }
+  ],
+  "paths": {
+    "/posts": {
+      "get": {
+        "operationId": "listPublishedStories",
+        "tags": [
+          "Public stories"
+        ],
+        "summary": "Search and paginate published stories",
+        "description": "Ordered by published_at descending. Excludes future-dated, draft, scheduled, archived stories and suspended authors. Public route uses a shared IP rate limit; a Bearer header does not broaden access. Search uses title and excerpt, with literal % and _ characters. Case sensitivity follows the host database collation.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 150
+            },
+            "description": "Optional title or excerpt search."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page; pages beyond the end return an empty array."
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            },
+            "description": "Results per page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum requests per one-minute bucket.",
+                "schema": {
+                  "type": "integer",
+                  "example": 60
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current bucket.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicStoryPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/posts/{post}": {
+      "get": {
+        "operationId": "getPublishedStory",
+        "tags": [
+          "Public stories"
+        ],
+        "summary": "Read a published story with HTML",
+        "description": "Returns 404 for missing or non-public content, including when the requester is its author. Editor JSON and private author data are excluded.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "post",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Numeric database ID, not a slug."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum requests per one-minute bucket.",
+                "schema": {
+                  "type": "integer",
+                  "example": 60
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current bucket.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/StoryDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "getMyProfile",
+        "tags": [
+          "Personal account"
+        ],
+        "summary": "Read your profile and private email",
+        "description": "Requires profile:read. No password hashes, two-factor secrets, recovery codes, or roles are returned.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-ability": "profile:read",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum requests per one-minute bucket.",
+                "schema": {
+                  "type": "integer",
+                  "example": 60
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current bucket.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Profile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/me/posts": {
+      "get": {
+        "operationId": "listMyStories",
+        "tags": [
+          "Personal account"
+        ],
+        "summary": "Read your own stories in every publication state",
+        "description": "Requires posts:read. Ordered by updated_at descending, fixed 20 results per page. Does not accept q or per_page. Invalid page values fall back to page 1. Uses meta for pagination; no links object. Includes only the token owner's stories, even for administrators.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-ability": "posts:read",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page. Increment until meta.current_page reaches meta.last_page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum requests per one-minute bucket.",
+                "schema": {
+                  "type": "integer",
+                  "example": 60
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current bucket.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalStoryPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/tokens/{token}": {
+      "delete": {
+        "operationId": "revokeMyToken",
+        "tags": [
+          "Token management"
+        ],
+        "summary": "Revoke one of your own tokens",
+        "description": "Requires tokens:manage, which normal Settings tokens do not have. Reserved for explicitly provisioned server-side integrations. No token-list or token-create API exists. Missing or foreign tokens return 404. Self-revocation is permitted and invalidates subsequent requests. Request has no body.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-required-ability": "tokens:manage",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Numeric database ID, not a slug."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum requests per one-minute bucket.",
+                "schema": {
+                  "type": "integer",
+                  "example": 60
+                }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Requests remaining in the current bucket.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Token revoked."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Complete Laravel Sanctum personal access token from Settings → Developer. Settings tokens expire after 90 days and include profile:read and posts:read. Token abilities are described per operation; this is not OAuth."
+      }
+    },
+    "schemas": {
+      "Author": {
+        "type": "object",
+        "required": [
+          "name",
+          "username",
+          "url"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Taxonomy": {
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "Story": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "excerpt",
+          "url",
+          "cover_image",
+          "reading_time",
+          "published_at",
+          "updated_at",
+          "author",
+          "tags",
+          "topics"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "cover_image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "reading_time": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Estimated reading time in minutes."
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Taxonomy"
+            }
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Taxonomy"
+            }
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "current_page",
+          "last_page",
+          "total"
+        ],
+        "properties": {
+          "current_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "last_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "StoryDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Story"
+          },
+          {
+            "type": "object",
+            "required": [
+              "body_html"
+            ],
+            "properties": {
+              "body_html": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "PersonalStory": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Story"
+          },
+          {
+            "type": "object",
+            "required": [
+              "status",
+              "body_html",
+              "body_json"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "scheduled",
+                  "published",
+                  "archived"
+                ]
+              },
+              "body_html": {
+                "type": "string",
+                "nullable": true
+              },
+              "body_json": {
+                "nullable": true,
+                "description": "Opaque TipTap editor document. May be object, array, or null.",
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "nullable": true,
+                    "additionalProperties": true
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PublicStoryPage": {
+        "type": "object",
+        "required": [
+          "data",
+          "links",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Story"
+            }
+          },
+          "links": {
+            "type": "object",
+            "required": [
+              "next",
+              "previous"
+            ],
+            "properties": {
+              "next": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              },
+              "previous": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              }
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "PersonalStoryPage": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonalStory"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "username",
+          "email",
+          "bio",
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Private account email; do not log publicly."
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": [
+          "message",
+          "errors"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "Unauthenticated": {
+        "description": "Missing, invalid, expired, or revoked token.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Suspended account or missing token ability.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Missing/non-public story, missing/foreign token, or unmatched path.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "HTTP method is not supported for this path.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Application failure. Proxy or host errors may have a non-JSON body.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Invalid public-list query. Message wording can vary; use HTTP status and field keys.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "example": {
+              "message": "The per page field must not be greater than 50.",
+              "errors": {
+                "per_page": [
+                  "The per page field must not be greater than 50."
+                ]
+              }
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "60 requests per minute. Private routes share a bucket per account; public routes share a bucket per domain/client IP. Wait before retrying. Host/proxy limits may also apply.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests per one-minute bucket.",
+            "schema": {
+              "type": "integer",
+              "example": 60
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining in the current bucket.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "Retry-After": {
+            "description": "Seconds until a request can be retried.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix reset timestamp in seconds.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Too Many Attempts."
+            }
+          }
+        }
+      }
+    }
+  }
+}

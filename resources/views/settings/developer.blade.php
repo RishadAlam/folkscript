@@ -3,6 +3,7 @@
         <h2 id="settings-api-heading">{{ __('API access') }}</h2>
         <p class="muted">{{ __('Connect a personal app or integration to your Folkscript account. You do not need an API token to read or write on the website.') }}</p>
         <p class="field-help">{{ __('Tokens can read your profile, including your private email address, and your own stories, including drafts. They cannot change your account or publish stories. Share tokens only with apps you trust.') }}</p>
+        <p><a href="{{ route('api.docs') }}" class="text-link">{{ __('Read the API documentation') }} <x-icon name="arrow-up-right" size="16" /></a> <span class="field-help">{{ __('Endpoints, examples, permissions, and OpenAPI.') }}</span></p>
 
         @if($hasRecentPasswordConfirmation && session('token'))
             <div class="notice settings-token-notice" role="status">
