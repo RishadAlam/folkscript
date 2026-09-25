@@ -1,43 +1,37 @@
-# Running Folkscript
+# Deploying Folkscript
 
 Folkscript runs locally without paid services. Production email, OAuth, media storage, indexing, analytics, and the public domain require operator-owned accounts and credentials. The repository does not provision those accounts or represent a deployed production service.
 
-## Local development
+## Start from a fresh clone
 
-Requirements: a running local MySQL server; PHP 8.3 or later with `pdo_mysql`, GD, mbstring, XML, cURL, intl and ZIP; Composer 2; Node 22.12 or later; npm. Use the PHP version allowed by `composer.json`.
+Follow [INSTALL.md](../INSTALL.md) for dependency requirements, MySQL or SQLite setup, optional demonstration data, local processes, and the [first administrator](../INSTALL.md#create-the-first-administrator). The committed lockfiles determine PHP and Node compatibility. PHP 8.3–8.5 and Node 22.12 or later fit the current dependencies. PCNTL and POSIX are required by the installed Horizon package; native Windows users need WSL2 or Docker.
 
-```sh
-cp .env.example .env
-mysql --host=127.0.0.1 --port=3306 --user=root --execute="CREATE DATABASE IF NOT EXISTS folkscript CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-composer install
-php artisan key:generate
-php artisan migrate --seed
-php artisan storage:link
-npm ci
-npm run build
-php artisan serve
-```
-
-In two additional terminals, run `php artisan queue:work` and `php artisan schedule:work`. For frontend development, run `npm run dev`. The seeded stories, writers, and any demonstration metrics are sample content. See the main README for the generated demonstration accounts. Do not expose a seeded demonstration installation as a production site.
-
-The default local MySQL connection uses database `folkscript`, host `127.0.0.1`, port `3306`, user `root`, and a blank password. The database queue/cache and log mail make the application usable without paid external services. SQLite remains available as an alternative; see [MySQL setup](MYSQL_SETUP.md) for configuration and existing-data migration notes. Mail written to the log is not delivered. Use an SMTP or transactional mail provider for verification, password resets and notifications on a public site.
+The example environment uses local MySQL, database queues/cache/sessions, and log mail. Its blank-password root account is for local development only. A public installation needs dedicated database credentials and real SMTP or transactional email for verification, resets, and enabled notifications. Mail written to a log is not delivered.
 
 ## Docker
 
 The Docker files have not been built or exercised in this environment. The supplied Docker setup includes FrankenPHP, PostgreSQL, Redis, Meilisearch, a Horizon queue supervisor, and a scheduler. PHP extensions and Chromium for optional social image generation are installed in the application image.
 
-1. Copy `.env.example` to `.env`. Set `APP_KEY` to the output of `php artisan key:generate --show` and `APP_URL=http://localhost:8080` for a local Docker deployment.
+1. Copy `.env.example` to `.env`. Generate a new key with `openssl rand -base64 32`, then set `APP_KEY=base64:GENERATED_VALUE` and `APP_URL=http://localhost:8080` for local evaluation. Keep `SEED_DEMO_CONTENT=false`. Preserve the existing application key when moving an existing site.
 2. Set long random `DOCKER_DB_PASSWORD` and `MEILISEARCH_KEY` values. The Compose fallback values are for local evaluation only.
 3. Build and start the stack, migrate, and index the stories:
 
 ```sh
 docker compose up -d --build
 docker compose exec app php artisan migrate --force
-docker compose exec app php artisan storage:link
+docker compose exec app php artisan db:seed --force
 docker compose exec app php artisan scout:import 'App\Models\Post'
 ```
 
-For a disposable demo, run `docker compose exec app php artisan db:seed`. For production, initialize the roles and the first administrator using your controlled account setup instead of the demo seed. Never run `migrate:fresh` against a real database.
+Compose forces `APP_ENV=production`, so the seed command above creates only roles and permissions while `SEED_DEMO_CONTENT=false`. Create your own verified owner account using [the first-administrator procedure](../INSTALL.md#create-the-first-administrator); run Tinker with `docker compose exec app php artisan tinker`. The image already creates `public/storage` as a link to the shared storage volume.
+
+For a private, disposable Docker demo, opt in explicitly:
+
+```sh
+docker compose exec -e SEED_DEMO_CONTENT=true app php artisan db:seed --force
+```
+
+This adds the shared demo accounts documented in [INSTALL.md](../INSTALL.md#local-demo). Keep a demo environment separate from a public installation. Never run `migrate:fresh` against a real database.
 
 The HTTP listener is bound to `127.0.0.1:8080`; place an HTTPS reverse proxy in front of it for internet access. Set the canonical `APP_URL`, secure session settings, proxy trust, real mail configuration, and application secrets before accepting users. Do not expose PostgreSQL, Redis or Meilisearch ports publicly. A production deployment should pin image digests and audit/update dependencies.
 
@@ -56,9 +50,44 @@ Queue and scheduler processes must run continuously. Scheduled posts are process
 
 ## Forge, Laravel Cloud, or another PHP host
 
-Point the document root to `public/`, use a supported PHP version, install Composer production dependencies, and run the frontend build. Set writable permissions only for `storage/` and `bootstrap/cache/`. Create the public storage link, run migrations, then `php artisan optimize`. Never serve the repository root or commit a production `.env`.
+Point the document root to `public/`, use a supported PHP version, and create an empty database with a dedicated account. Set writable permissions only for `storage/` and `bootstrap/cache/`. Never serve the repository root or commit a production `.env`.
+
+Before bootstrapping, configure at least:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-public-domain.example
+SESSION_SECURE_COOKIE=true
+SEED_DEMO_CONTENT=false
+```
+
+Set `DB_*` to the real database, configure `MAIL_*` for delivery, and supply a stable `APP_KEY`. On a **new** installation, the following commands install locked dependencies and initialize an empty publication:
+
+```sh
+composer install --no-dev --prefer-dist --optimize-autoloader
+composer check-platform-reqs --no-dev
+php artisan key:generate --force
+php artisan config:clear
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link
+npm ci
+npm run build
+php artisan optimize
+```
+
+Do not regenerate the key on later deployments. If your hosting platform provides the key as an environment secret, generate it once with `php artisan key:generate --show` and store that value there instead. The production seed initializes role permissions without demo accounts when the production environment and seed flag above are set. Finish [creating the first administrator](../INSTALL.md#create-the-first-administrator), then verify public reading, registration, mail and publishing on the real domain.
 
 Configure a supervised `php artisan queue:work --tries=3 --timeout=120` process and a cron entry running `php artisan schedule:run` every minute. On each deployment, restart workers. Enable HTTPS, configure trusted proxies appropriately for the provider, and set `SESSION_SECURE_COOKIE=true` on HTTPS production sites.
+
+For example, replace the project path in this cron entry:
+
+```cron
+* * * * * cd /srv/folkscript && php artisan schedule:run >> /dev/null 2>&1
+```
+
+The supplied queue retry interval is 180 seconds; keep a worker's timeout shorter than its queue connection's `retry_after`. Deploy database migrations with a backup and an application maintenance/rollback plan. Back up uploaded media, the database and the application key, and test recovery. On normal releases, use `migrate --force`, rebuild caches/assets, and restart workers; do not rerun the new-install key generation command.
 
 ## Upgrading to the free publishing model
 

@@ -1,41 +1,53 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/images/folkscript-web-dark.svg">
+  <img src="public/images/folkscript-web-primary.svg" alt="Folkscript" width="280">
+</picture>
+
 # Folkscript
 
 **Written by the people, read by everyone.**
 
-A free, open-source, nonprofit Laravel publishing platform with a custom editorial interface, the supplied Folkscript identity, self-hosted Source Serif 4 and Source Sans 3 typography, light and dark themes, and responsive reading and writing surfaces.
+A free, self-hosted publishing platform for independent writers and communities. Built with Laravel, Livewire, and an editorial interface designed for reading. Every published story is freely accessible—no subscriptions, paywalls, or payment integrations.
 
-Source code is licensed under [MIT](LICENSE). Story authors retain their rights, and [third-party assets](docs/ASSETS.md) keep their own licenses. Nonprofit describes the project purpose, not a claim of registered charitable status.
+[![Application checks](https://github.com/RishadAlam/folkscript/actions/workflows/ci.yml/badge.svg)](https://github.com/RishadAlam/folkscript/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PHP 8.3+](https://img.shields.io/badge/PHP-8.3%2B-777BB4.svg)](composer.json)
+[![Laravel 13](https://img.shields.io/badge/Laravel-13-FF2D20.svg)](composer.json)
 
-## Open the local app
+[Install](INSTALL.md) · [Deployment](docs/DEPLOYMENT.md) · [Contribute](CONTRIBUTING.md) · [Get help](SUPPORT.md) · [Releases](https://github.com/RishadAlam/folkscript/releases)
 
-The development instance is available at **http://127.0.0.1:8000** while its PHP server is running.
+## What you can do
 
-| Account | Email | Password |
-| --- | --- | --- |
-| Writer | `writer@folkscript.test` | `Folkscript2026!` |
-| Administrator | `admin@folkscript.test` | `Folkscript2026!` |
-| Platform owner | `owner@folkscript.test` | `Folkscript2026!` |
-| Editor | `editor@folkscript.test` | `Folkscript2026!` |
-| Reader | `reader@folkscript.test` | `Folkscript2026!` |
+- **Read and discover:** topic pages, search, trending stories, author profiles, collections, bookmarks, and a following feed.
+- **Write and publish:** TipTap rich editing, Markdown import/export, images, code blocks, supported video embeds, autosave, revisions, and scheduled publishing.
+- **Build a community:** follows, reactions, threaded responses, notifications, reports, moderation, and role-based administration.
+- **Own your platform:** email/password accounts, verification, password resets, authenticator 2FA, optional Google/GitHub sign-in, scoped API tokens, and administrative settings.
+- **Share your writing:** SEO metadata, JSON-LD, sitemaps, RSS feeds, public Markdown pages, an `llms.txt` content index, and AI-reader shortcuts.
+- **Read comfortably:** self-hosted Source Serif 4 and Source Sans 3, white and dark themes, system-theme defaults, responsive layouts, and complete cover images in story thumbnails.
 
-These are local demonstration accounts, with original sample stories and illustrative readership counts. `unverified@folkscript.test` and `suspended@folkscript.test` use the same password for restricted-account scenarios. Production seeding creates roles without demonstration users or stories unless explicitly enabled. Do not expose these shared demo credentials on a public installation.
+MySQL is the default local database. SQLite is available for development and testing. Optional integrations include S3-compatible storage, Meilisearch, Redis/Horizon, Reverb, Plausible, and Sentry. Core reading and publishing require no paid service.
 
-## What is included
+## Project status
 
-- Editorial home, topic and search pages, trending stories, author profiles with social links and a pinned story, author collections, bookmarks and a following feed.
-- TipTap rich editing with Markdown import/export, images, code blocks, supported YouTube embeds, draft autosave, revision restore, scheduling, and a live SEO checklist and social preview.
-- Registration, verification, resets, authenticator 2FA, OAuth handlers, profile management, scoped API tokens and permission-based access.
-- Threaded comments, reactions, follows, reports, notifications, moderation, user/role administration, site settings, audit history and read-only support sessions.
-- Full access to every published story without an account or payment. Accounts enable participation; verified authors can publish.
-- Canonical and social metadata, JSON-LD, sitemaps, RSS, IndexNow, optional dynamic social PNGs, downloadable quote cards, public REST API and an installable PWA shell.
-- WebP uploads through Media Library, optional S3 storage, Meilisearch, Reverb, email digests, Plausible analytics and Sentry error reporting.
+The initial public release is a **preview for self-hosting and contribution**. The repository contains the application, demo fixtures, deployment configuration, and automated checks. Publishing this repository does not deploy a live website. Review the [launch boundaries](docs/BUILD_STATUS.md) and [production checklist](docs/DEPLOYMENT.md) before opening an installation to the public.
 
-## Run from a fresh checkout
+Folkscript is an open-source, nonprofit project. This describes its purpose, not registered charitable status. The MIT software license permits commercial as well as noncommercial use; writing and third-party assets keep their own rights.
 
-Use a running local MySQL server; PHP 8.3+ with `pdo_mysql`, GD, mbstring, XML, cURL, intl, ZIP and the extensions required by Composer; Composer 2; Node 22.12+ and npm. The example environment connects to `127.0.0.1:3306`, database `folkscript`, user `root`, with an empty password.
+## Quick start
+
+You need PHP **8.3+**, Composer **2**, Node **22.12+**, npm, and MySQL **8+**. PHP needs `pdo_mysql`, `pdo_sqlite` for tests, GD, mbstring, XML, cURL, intl, ZIP, bcmath, pcntl, and posix. Use macOS, Linux, or WSL2; the Horizon dependency requires Unix process extensions. See [installation requirements](INSTALL.md) for alternatives and troubleshooting.
+
+For a new local checkout:
 
 ```sh
+git clone https://github.com/RishadAlam/folkscript.git
+cd folkscript
 cp .env.example .env
+```
+
+Set the `DB_*` values in `.env` for your local MySQL account and create the database. The example below uses the repository's **local-only** defaults, root with an empty password:
+
+```sh
 mysql --host=127.0.0.1 --port=3306 --user=root --execute="CREATE DATABASE IF NOT EXISTS folkscript CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 composer install
 php artisan key:generate
@@ -46,42 +58,59 @@ npm run build
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-Run `php artisan queue:work --timeout=120` and `php artisan schedule:work` in separate terminals for background jobs and scheduled publishing. Use `npm run dev` when editing frontend assets. The default environment uses local MySQL and a database queue/cache; it needs no paid service. Local verification and reset emails go to `storage/logs/laravel.log`.
-
-SQLite remains an option: install `pdo_sqlite`, set `DB_CONNECTION=sqlite` and `DB_DATABASE` to the absolute path of `database/database.sqlite` in `.env`, create that file with `touch database/database.sqlite`, then run the same migrations. Changing the connection alone does not move existing data. See [MySQL setup and migration notes](docs/MYSQL_SETUP.md) for the current local migration, demo fixtures, and connection checks.
-
-## Upgrading an existing installation
-
-Back up the database and uploads, install the locked dependencies, and run `php artisan migrate --force`. The free-publishing migration preserves users and stories, converts the former paid reader role to `reader`, and retires obsolete payment tables and columns. Historical migrations remain solely to support upgrades. Rebuild assets and restart queue workers after deploying. See [free-publishing scope](docs/FREE_PUBLISHING.md).
-
-## Production setup
-
-The project is implemented locally, not publicly deployed. Provide a public domain, HTTPS hosting, mail delivery and any chosen external-service credentials. Reading and publishing have no paid tier. The project contains no checkout, subscription, payout, or payment-provider integration.
-
-See [Deployment](docs/DEPLOYMENT.md) for Docker and native hosting, queue/scheduler supervision, OAuth, media storage, search, notifications, SEO and API configuration. Docker configuration is supplied but was not built in this environment. [Build status](docs/BUILD_STATUS.md) records launch boundaries and optional work precisely.
-
-## Project map
-
-| Path | Purpose |
-| --- | --- |
-| `app/Http/Controllers` | Publishing, community, identity, moderation, SEO and API handlers |
-| `app/Livewire/PostEditor.php` | Reactive publishing editor |
-| `app/Services` | Sanitization, media processing, SEO and platform services |
-| `app/Models`, `app/Policies` | Persisted domain and access rules |
-| `resources/views`, `resources/css`, `resources/js` | Blade interface, editorial system and editor behavior |
-| `database/migrations`, `database/seeders` | Schema, roles and local demo content |
-| `public/images`, `public/fonts` | Supplied identity, editorial assets and self-hosted fonts |
-| `docs` | Original brief, implementation notes, assets and operational documentation |
-
-## Checks
+Open **http://localhost:8000**, matching `APP_URL` in `.env`. In separate terminals, run background jobs and scheduled publishing:
 
 ```sh
-npm run build
-php artisan view:cache
-php artisan route:cache
-php artisan test --compact
+php artisan queue:work --timeout=120
+php artisan schedule:work
 ```
 
-The repeatable suite covers ownership, free public story access, sanitization, all five account roles, authentication, tokens, media conversion, support sessions and publishing workflows. It uses an isolated in-memory SQLite database; the new audit suites refuse to reset any other database. See the [action and permission audit](docs/ACTION_AUDIT.md) and [Chrome browser walkthrough](docs/CHROME_BROWSER_AUDIT.md) for historical cases, Safari/in-app coverage, fixes and remaining gaps. Their paid-product sections are superseded by the [free-publishing change](docs/FREE_PUBLISHING.md). These are functional checks, not a claim of audited accessibility, a production security assessment or real-user Core Web Vitals results.
+Use `npm run dev` instead of repeated asset builds while editing the frontend. Initial signup verification links appear in `storage/logs/laravel.log`; configure a delivery mailer for password resets and verification resends. For SQLite, production administration, and Docker, follow [INSTALL.md](INSTALL.md) and [Deployment](docs/DEPLOYMENT.md).
 
-[Product context](PRODUCT.md) · [Design system](DESIGN.md) · [Asset sources](docs/ASSETS.md) · [Source brief](docs/folkscript-build-plan.md)
+### Local demo accounts
+
+`php artisan migrate --seed` creates sample stories and accounts in a local environment. All accounts below use the demo password **`Folkscript2026!`**:
+
+| Role | Email |
+| --- | --- |
+| Reader | `reader@folkscript.test` |
+| Writer | `writer@folkscript.test` |
+| Editor | `editor@folkscript.test` |
+| Administrator | `admin@folkscript.test` |
+| Platform owner | `owner@folkscript.test` |
+
+Additional unverified and suspended accounts support local permission checks. Demo people, writing, and readership counts are illustrative. In production, seeding creates roles and permissions only unless `SEED_DEMO_CONTENT=true` is explicitly enabled. Never expose the shared demo accounts or a blank-password database account on a public installation.
+
+## Development checks
+
+```sh
+composer test
+node --test tests/JavaScript/*.test.mjs
+npm run build
+```
+
+PHP tests use an isolated in-memory SQLite database. Coverage includes authorization, account security, free story access, publishing, media, moderation, Markdown exports, and RSS; JavaScript tests cover reader-tool interactions and recovery states. GitHub Actions runs the checks for pushes and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for browser verification and focused tests when making changes.
+
+## Documentation
+
+| Guide | Contents |
+| --- | --- |
+| [Installation](INSTALL.md) | Requirements, MySQL/SQLite setup, demo data, first administrator, troubleshooting |
+| [Deployment](docs/DEPLOYMENT.md) | Native and Docker hosting, HTTPS, workers, scheduler, storage, integrations |
+| [Reader tools](docs/READER_TOOLS.md) | Public Markdown, AI-reader links, and content discovery |
+| [Product](PRODUCT.md) / [Design](DESIGN.md) | Product scope, visual system, and accessibility conventions |
+| [Build status](docs/BUILD_STATUS.md) | Implemented features and deployment boundaries |
+| [Changelog](CHANGELOG.md) | Release history |
+| [Asset sources](docs/ASSETS.md) | Fonts, photos, icons, and third-party notices |
+
+Historical implementation and review notes remain under `docs/`. The free-publishing scope in PRODUCT.md supersedes paid-product sections of the original build reference.
+
+## Contributing and support
+
+Bug reports, documentation improvements, accessibility work, and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), follow the [Code of Conduct](CODE_OF_CONDUCT.md), and use the [issue templates](https://github.com/RishadAlam/folkscript/issues/new/choose) for reproducible bugs or proposals.
+
+For setup questions, see [SUPPORT.md](SUPPORT.md). Report security vulnerabilities privately through the process in [SECURITY.md](SECURITY.md), not a public issue.
+
+## License
+
+Folkscript's source code is licensed under [MIT](LICENSE). Authors retain rights to their writing. Fonts, photography, and third-party service marks are covered by the licenses and notices in [Asset sources](docs/ASSETS.md).
