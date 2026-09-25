@@ -21,9 +21,10 @@
         <div class="editor-main">
             <div class="editor-cover">
                 <template x-if="$wire.coverImage"><img :src="$wire.coverImage" alt="{{ __('Story cover preview') }}"></template>
-                <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" x-ref="coverInput" @change="uploadCover($event)" class="sr-only" id="cover-upload" tabindex="-1">
-                <div class="editor-cover-actions"><button class="text-link" type="button" @click="$refs.coverInput.click()" :disabled="uploading || !ready"><x-icon name="image-plus" size="19" /><span x-text="uploading ? @js(__('Uploading image…')) : ($wire.coverImage ? @js(__('Change cover')) : @js(__('Add a cover image')))"></span></button><button type="button" class="text-link" x-show="$wire.coverImage" @click="removeCover()" :disabled="uploading">{{ __('Remove cover') }}</button></div>
-                <p class="editor-help">{{ __('Optional. JPG, PNG, WebP or AVIF, up to 5 MB. Your full image stays visible in the story and its thumbnails.') }}</p>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" x-ref="coverInput" @change="uploadCover($event)" class="sr-only" id="cover-upload" aria-describedby="cover-size-help cover-format-help" tabindex="-1">
+                <div class="editor-cover-actions"><button class="text-link" type="button" @click="$refs.coverInput.click()" aria-describedby="cover-size-help cover-format-help" :disabled="uploading || !ready"><x-icon name="image-plus" size="19" /><span x-text="uploading ? @js(__('Uploading image…')) : ($wire.coverImage ? @js(__('Change cover')) : @js(__('Add a cover image')))"></span></button><button type="button" class="text-link" x-show="$wire.coverImage" @click="removeCover()" :disabled="uploading">{{ __('Remove cover') }}</button></div>
+                <p id="cover-size-help" class="editor-help"><strong>{{ __('Recommended cover: 1600 × 900 px (16:9).') }}</strong> {{ __('Thumbnails use the same image, scaled to fit without cropping. No separate upload needed.') }}</p>
+                <p id="cover-format-help" class="editor-help">{{ __('Optional. JPG, PNG, WebP or AVIF, up to 5 MB. Other image sizes are welcome, up to 6000 × 6000 px.') }}</p>
                 @error('coverImage')<p class="field-error">{{ $message }}</p>@enderror
             </div>
             <p x-show="uploadError" x-text="uploadError" x-cloak class="field-error editor-upload-error" role="alert"></p>
