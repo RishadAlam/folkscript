@@ -6,4 +6,4 @@ Routes are declared in `routes/series.php`, loaded before `routes/publishing.php
 
 The manager supports create, rename, introduction edits, adding/removing stories, numeric reading order, and deletion. Submitted post IDs must belong to the collection owner. Reordering requires the current exact set of attached IDs, rejecting stale or tampered submissions. Deleting a collection preserves all posts and redirects its former public URL to the author profile. Username changes preserve collection URLs through redirects.
 
-Navigation integration: add a **Collections** link to `/series` in the writing dashboard and account menu. Public author profiles may link their published collections using `route('series.show', ['username' => $author->username, 'slug' => $series->slug])`. Management paths `series*` should use noindex metadata.
+The writing dashboard and account menu link to **Collections** at `/series`. Public author profiles may link their published collections using `route('series.show', ['username' => $author->username, 'slug' => $series->slug])`. Management paths `series*` should use noindex metadata.

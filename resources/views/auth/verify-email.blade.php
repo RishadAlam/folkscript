@@ -3,11 +3,11 @@
     <section class="page-shell auth-single">
         <div class="auth-mail-icon"><x-icon name="mail" /></div>
         <h1>{{ __('One last thing.') }}<br>{{ $emailDeliveryAvailable ? __('Check your inbox.') : __('Verify your email.') }}</h1>
-        <p class="muted">{{ __('Verify') }} <strong>{{ auth()->user()->email }}</strong> {{ __('to publish stories and become part of the conversation.') }}</p>
+        <p class="muted">{{ __('Verify') }} <strong>{{ auth()->user()->email }}</strong> {{ __('to confirm this address belongs to you and complete your account setup.') }}</p>
         @if($emailDeliveryAvailable)
             <p class="muted">{{ __('Open the verification email to continue. If you cannot find it, check your spam folder or request a new link.') }}</p>
         @else
-            <p class="notice" id="verification-unavailable">{{ __('Email delivery is unavailable in this preview, so a verification link will not reach your inbox. You can keep reading or sign in with an existing demo account.') }}</p>
+            <p class="notice" id="verification-unavailable">{{ __('Email delivery is unavailable on this installation, so a verification link will not reach your inbox. You can keep reading while the site operator sets up email delivery.') }} @if(app()->isLocal()){{ __('You can also sign in with an existing demo account in this preview.') }}@endif</p>
         @endif
         <form method="post" action="{{ route('verification.send') }}" class="stack">
             @csrf

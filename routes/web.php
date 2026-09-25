@@ -5,6 +5,8 @@ require __DIR__.'/seo.php';
 Route::view('/about', 'about')->name('about');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/terms', 'terms')->name('terms');
+Route::get('/developers/api', [\App\Http\Controllers\ApiDocumentationController::class, 'index'])->name('api.docs');
+Route::get('/developers/api.md', [\App\Http\Controllers\ApiDocumentationController::class, 'markdown'])->name('api.docs.markdown');
 require __DIR__.'/quotes.php';
 require __DIR__.'/series.php';
 require __DIR__.'/reader.php';

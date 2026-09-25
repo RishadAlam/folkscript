@@ -17,11 +17,9 @@ The selected SVG contents are copied unchanged; color-variant source names are s
 | --- | --- | ---: | --- |
 | `claude.svg` | [`claude-color.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/claude-color.svg) | 1,696 | Original brand colors |
 | `openai.svg` | [`openai.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/openai.svg) | 1,687 | Monochrome; invert on dark surfaces |
-| `gemini.svg` | [`gemini-color.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/gemini-color.svg) | 2,836 | Original brand colors |
 | `perplexity.svg` | [`perplexity-color.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/perplexity-color.svg) | 603 | Original brand colors |
 | `copilot.svg` | [`copilot-color.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/copilot-color.svg) | 3,569 | Original brand colors |
 | `grok.svg` | [`grok.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/grok.svg) | 756 | Monochrome; invert on dark surfaces |
-| `deepseek.svg` | [`deepseek-color.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/deepseek-color.svg) | 2,164 | Original brand colors |
 | `google.svg` | [`google-color.svg`](https://github.com/lobehub/lobe-icons/blob/49a2130df7bfa5eb1b088261bff20a37e2967789/packages/static-svg/icons/google-color.svg) | 920 | Original brand colors |
 
-All eight files were parsed as SVG and checked for scripts, event handlers, external references, embedded raster images, and foreign objects. None are present. Internal gradient references remain intact. There is no runtime icon package, third-party asset request, or additional JavaScript dependency.
+All six files were parsed as SVG and checked for scripts, event handlers, external references, embedded raster images, and foreign objects. None are present. Internal gradient references remain intact. There is no runtime icon package, third-party asset request, or additional JavaScript dependency.
