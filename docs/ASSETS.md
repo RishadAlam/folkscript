@@ -8,10 +8,9 @@ The Folkscript SVG identity was supplied for this project. The PNG device icons 
 
 ## Fonts
 
-- **Source Serif 4:** self-hosted WOFF2 files from `@fontsource-variable/source-serif-4`. [Bundled SIL Open Font License](../public/fonts/source-serif-4-LICENSE.txt).
-- **Source Sans 3:** self-hosted WOFF2 files from `@fontsource-variable/source-sans-3`. [Bundled SIL Open Font License](../public/fonts/source-sans-3-LICENSE.txt).
+- **Lexend Variable:** self-hosted WOFF2 files from `@fontsource-variable/lexend`, with normal-style Latin, Latin Extended, and Vietnamese subsets covering weights 100–900. [Bundled SIL Open Font License](../public/fonts/lexend-LICENSE.txt).
 
-The exact package versions are pinned in `package-lock.json`. Retired Fraunces files and their OFL notice remain in earlier Git history only.
+The exact package version is pinned in `package-lock.json`. Lexend supplies page text, headings, and controls; code uses the platform monospace stack. Lexend has no true italic face, so browsers may synthesize oblique emphasis. Synthetic weight is disabled. Supplied SVG wordmarks retain their original lettering. Retired font assets and their notices remain in earlier Git history.
 
 ## Icons and service marks
 

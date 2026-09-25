@@ -15,6 +15,6 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Lexend Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-serif: var(--font-sans);
 }

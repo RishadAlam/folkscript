@@ -26,40 +26,79 @@ colors:
   avatar-ink: "#30413b"
 typography:
   display:
-    fontFamily: "Source Serif 4 Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "clamp(3.25rem, 6.1vw, 5.375rem)"
     fontWeight: 500
-    lineHeight: 1.05
-    letterSpacing: "-0.025em"
+    lineHeight: 1.12
+    letterSpacing: "-0.015em"
   headline:
-    fontFamily: "Source Serif 4 Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "clamp(2.5rem, 4.4vw, 3.25rem)"
     fontWeight: 600
     lineHeight: 1.16
-    letterSpacing: "-0.02em"
+    letterSpacing: "-0.01em"
   title:
-    fontFamily: "Source Serif 4 Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "1.6875rem"
     fontWeight: 600
     lineHeight: 1.3
-    letterSpacing: "-0.02em"
+    letterSpacing: "-0.01em"
   body:
-    fontFamily: "Source Sans 3 Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.6
   reading:
-    fontFamily: "Source Serif 4 Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: "1.25rem"
     fontWeight: 400
     lineHeight: 1.75
     letterSpacing: "0"
+  reading-small:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 400
+    lineHeight: 1.75
+  prose-heading:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "2rem"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+  prose-heading-small:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+  prose-subheading:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 600
+    lineHeight: 1.35
+    letterSpacing: "-0.01em"
+  prose-subheading-small:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 600
+    lineHeight: 1.35
+    letterSpacing: "-0.01em"
+  quote:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 400
+    lineHeight: 1.6
+  quote-small:
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 400
+    lineHeight: 1.6
   label:
-    fontFamily: "Source Sans 3 Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: ".875rem"
     fontWeight: 600
   button:
-    fontFamily: "Source Sans 3 Variable, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontFamily: "Lexend Variable, system-ui, -apple-system, Segoe UI, sans-serif"
     fontSize: ".875rem"
     fontWeight: 600
     lineHeight: 1.4
@@ -140,13 +179,13 @@ components:
 
 **Creative North Star: "The Independent Literary Quarterly"**
 
-Folkscript uses the quiet authority of a literary journal: expressive serif titles, white pages, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with neutral panels, denser forms, and clearer task groupings.
+Folkscript uses the quiet authority of a literary journal: clear Lexend titles, white pages, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with neutral panels, denser forms, and clearer task groupings.
 
-Preserve the supplied Folkscript SVG assets. Source Serif 4 gives editorial titles and prose their literary character; Source Sans 3 keeps controls, supporting text, and administration easy to scan. Supplied SVG wordmarks retain their original embedded type declarations. Photography remains rectangular and editorial. Story covers stay fully visible, with no decorative paper texture.
+Preserve the supplied Folkscript SVG assets. Lexend Variable supplies headings, prose, controls, supporting text, and administration. Size, weight, measure, and spacing distinguish sustained reading from interface tasks. Supplied SVG wordmarks retain their original embedded type declarations. Photography remains rectangular and editorial. Story covers stay fully visible, with no decorative paper texture.
 
 **Key Characteristics:**
 
-- Source Serif 4 for editorial reading and titles, paired with Source Sans 3 for interface tasks.
+- One Lexend Variable family across editorial reading, headings, and interface tasks; monospace for code.
 - White pages, subtle neutral panels, and navy ink, paired with coherent dark surfaces.
 - Fine rules and tonal grouping, with shadows limited to floating UI.
 - Large story headlines, visible authorship, and a narrow article measure.
@@ -179,22 +218,22 @@ The light palette combines a white page with subtle neutral surfaces, cool ink, 
 
 ## Typography
 
-Source Serif 4 Variable supplies editorial headings, article and legal prose, and the writing editor’s title and content. Source Sans 3 Variable supplies interface copy, navigation, controls, metadata, comments, settings, and every administration heading. The two roles preserve the literary identity while giving tasks a clearer rhythm. The user’s September 25 readability correction supersedes the former one-serif convention.
+Lexend Variable supplies every text role: editorial headings, article and legal prose, the writing editor, navigation, controls, metadata, comments, settings, and administration. The shared family keeps reading and account tasks coherent; size, weight, spacing, and line length establish their different rhythms. Code keeps a monospace stack, and supplied SVG wordmarks retain their original lettering.
 
-Both families are self-hosted in roman and italic, with Latin and Latin Extended assets separated by `unicode-range`. Latin Extended files load only when the rendered characters need them. Faces use `font-display: swap`, support weights 200–900, and keep optical sizing automatic where the font supports it. The normal Latin Source Sans 3 file is preloaded everywhere; the normal Latin Source Serif 4 file is preloaded on publication pages. Administration does not preload the reading face. Georgia and Times New Roman back up the serif role; system fonts back up the sans-serif role. Code retains a monospace stack. Keep the font license files with the assets.
+The normal variable face is self-hosted from `@fontsource-variable/lexend`, with Latin, Latin Extended, and Vietnamese assets separated by `unicode-range`. Extended and Vietnamese subsets load when the rendered characters need them. Faces use `font-display: swap` and support weights 100–900. One normal Latin font file is preloaded in each application shell. System fonts back up Lexend. Lexend has no true italic face; browser-synthesized oblique is permitted for semantic emphasis and quotations, while weight synthesis is disabled. Keep `public/fonts/lexend-LICENSE.txt` with the font assets.
 
 Use `rem` for type sizes so user text preferences can scale the hierarchy. The pixel equivalents below assume a 16px browser default. Headings use balanced wrapping, paragraphs use pretty wrapping, and ordinary text can wrap without forcing arbitrary breaks inside words.
 
-- **Display:** Source Serif 4 at weight 500; the home invitation uses `clamp(3.25rem, 6.1vw, 5.375rem)`, 1.05 leading, and -.025em tracking. Mobile uses `clamp(2.875rem, 12.5vw, 3.875rem)`. Italic emphasis stays at weight 500.
-- **Headline:** article titles use `clamp(2.5rem, 4.4vw, 3.25rem)`, weight 600, 1.16 leading, and -.02em tracking; below 600px they use `clamp(2.125rem, 9.8vw, 2.5rem)`. The existing featured-story scale remains responsive, with the same reading face and reduced tracking.
-- **Title:** story cards use 1.6875rem (27px), weight 600, and 1.3 leading; homepage rows use 1.5rem (24px) on mobile. Editorial section titles remain distinct from smaller interface headings. Settings, editor controls, notifications, and administration use the sans-serif role for their task headings.
+- **Display:** Lexend Variable at weight 500; the home invitation uses `clamp(3.25rem, 6.1vw, 5.375rem)`, 1.12 leading, and -.015em tracking. Mobile uses `clamp(2.875rem, 12.5vw, 3.875rem)`. Oblique emphasis stays at weight 500.
+- **Headline:** article titles use `clamp(2.5rem, 4.4vw, 3.25rem)`, weight 600, 1.16 leading, and -.01em tracking; below 600px they use `clamp(2.125rem, 9.8vw, 2.5rem)`. The existing featured-story scale remains responsive, using Lexend with -.01em tracking.
+- **Title:** story cards use 1.6875rem (27px), weight 600, and 1.3 leading; homepage rows use 1.5rem (24px) on mobile. Editorial section titles remain distinct from smaller interface headings. Settings, editor controls, notifications, and administration use the same Lexend family and weight 600 for their task headings. Headings use -.01em tracking unless a component explicitly resets it.
 - **Body and controls:** the interface default is 1rem (16px) at 1.6 leading. Fields stay at least 1rem; shared labels, buttons, and supporting metadata have a .875rem (14px) floor. Navigation and administration primary controls use 1rem. Keep the smaller role for metadata or compact controls, not primary instructions.
-- **Reading:** article and editor prose use 1.25rem (20px) at 1.75 leading, reducing to 1.125rem (18px) below 600px. The measure is capped at 68ch within the available column; article text also stays within 700px. Paragraphs have 1.25em bottom spacing. Legal prose uses 1.125rem. Prose h2 is 2rem/1.25, h3 is 1.5rem/1.35, and italic quotations are 1.5rem/1.6, with smaller mobile variants.
+- **Reading:** article and editor prose use 1.25rem (20px) at 1.75 leading, reducing to 1.125rem (18px) below 600px. The measure is capped at 68ch within the available column; article text also stays within 700px. Paragraphs have 1.25em bottom spacing. Legal prose uses 1.125rem. Prose h2 is 2rem/1.25, h3 is 1.5rem/1.35, and oblique quotations are 1.5rem/1.6. Below 600px, h2 uses 1.75rem (28px); h3 and quotations use 1.375rem (22px), retaining their respective line heights.
 - **Dark reading:** prose leading increases to 1.8. Article and editor prose use weight 420 and .003em tracking to support light text on the dark reading surface.
 
-Administration retains its compact hierarchy in Source Sans 3: page headings are 1.875rem (30px), reducing to 1.6875rem (27px) at 480px; panel headings are 1.25rem (20px). Tables, breadcrumbs, status text, and supporting labels stay at least .875rem. Tabular numerals remain on counts and numerical data.
+Administration retains its compact hierarchy in Lexend: page headings are 1.875rem (30px), reducing to 1.6875rem (27px) at 480px; panel headings are 1.25rem (20px). Tables, breadcrumbs, status text, and supporting labels stay at least .875rem. Tabular numerals remain on counts and numerical data.
 
-**The Reading and Interface Rule.** Use Source Serif 4 for editorial titles and sustained reading, and Source Sans 3 for interface work. Do not apply decorative optical-axis settings from another font, introduce extra families, or restyle the supplied SVG lettering.
+**The Shared Typeface Rule.** Use Lexend for headings, sustained reading, and interface work. Establish roles through size, weight, measure, and spacing. Keep code monospace and supplied SVG lettering unchanged; do not introduce a separate editorial family.
 
 ## Layout
 
@@ -236,7 +275,7 @@ The global keyboard focus treatment is a 2px ink outline offset by 5px. Platform
 
 ### Topics and tabs
 
-Topic pills have a single-pixel rule border, a transparent default ground, and reversed ink/paper selection. Main topic-strip controls use .875rem (14px) Source Sans 3 text and a 44px minimum height. Hover uses the soft surface. Mobile topic navigation scrolls horizontally. Page tabs are unboxed text with a 2px underline for the active state; counts use small soft pills.
+Topic pills have a single-pixel rule border, a transparent default ground, and reversed ink/paper selection. Main topic-strip controls use .875rem (14px) Lexend text and a 44px minimum height. Hover uses the soft surface. Mobile topic navigation scrolls horizontally. Page tabs are unboxed text with a 2px underline for the active state; counts use small soft pills.
 
 ### Story cards and containers
 
@@ -256,7 +295,7 @@ The September 25 refinement keeps the opening compact: article titles top out at
 
 Public stories, author profiles, collections, topics, and discovery pages expose a shared Copy page split button. Its reading options provide Markdown export and a compact assistant picker. Claude, ChatGPT, Perplexity, Copilot, Grok, and Google AI Mode are native links carrying “Read from [absolute Markdown URL] so I can ask questions about it.” They open immediately without fetching the article, changing the clipboard, or displaying launch notifications. Manual-only AI providers and paste steps are removed. Copy page remains a separate Markdown action with selectable text if clipboard access fails. URL-based assistant reading requires a publicly reachable deployment; third-party services cannot fetch localhost. Google Search separately searches the page title and explains that AI Overviews vary by query. Keep the control near the page heading, preserve 44px targets, clamp menus inside the viewport with available space above or below, and announce copy success or actionable failure. Exports include public content and attribution; private workspace screens do not expose this control. `reader-tools.css` is the final CSS import. See docs/READER_TOOLS.md for behavior and verification.
 
-A fixed amber progress line is 3px high and updates through `transform: scaleX(...)`, anchored left. Article tools show saved and appreciated states with changed icons, pressed states, or engagement color. Save, follow, and appreciation forms update in place with live feedback while retaining native form submission as a fallback. Guest actions preserve a safe local return destination through sign-in. Responses and their notifications share the `#responses` anchor. Quotations use italic type between horizontal rules. Author context, tags, responses, and related stories follow the reading column.
+A fixed amber progress line is 3px high and updates through `transform: scaleX(...)`, anchored left. Article tools show saved and appreciated states with changed icons, pressed states, or engagement color. Save, follow, and appreciation forms update in place with live feedback while retaining native form submission as a fallback. Guest actions preserve a safe local return destination through sign-in. Responses and their notifications share the `#responses` anchor. Quotations use oblique emphasis between horizontal rules. Author context, tags, responses, and related stories follow the reading column.
 
 Reading menus anchor to the split button with an 8px gap, not to a wrapper containing feedback. Feedback belongs inside an open menu and in the shared bottom notification position when closed; it must never change the heading layout. Recalculate placement when the button changes size, contain internal scrolling, and close the menu when its button leaves the viewport. New action feedback replaces older feedback instead of stacking messages in the same position. Administration notifications appear below the top bar, clear of its bottom save controls. Toggle icons preserve their original dimensions, read/unread notification rows share their insets, and the mobile publication menu closes when the viewport returns to desktop width.
 
@@ -276,13 +315,13 @@ Report filters distinguish Open, Reviewed, and Dismissed; closed reports expose 
 
 Account access controls open inside the selected person's row, leaving names, roles, and status readable before editing. Protected accounts explain why controls are unavailable. Category and tag creation disclosures appear above their corresponding lists and reopen on validation errors. The validation summary sits inside the workspace beneath its heading; field errors preserve values, open the affected disclosure, and move focus to the first invalid field. Hiding content and unpublishing retain inline explanations and confirmation buttons.
 
-`admin.css` and the final typography rules use Source Sans 3, ink, paper, rules, and status colors, with tonal panels and no new decorative shadows. Navigation and primary actions have 44px minimum targets; mobile navigation summaries have 48px targets. Administration buttons suppress the publication's hover movement. Focus uses a 2px ink outline with a 3px offset. Platform settings retain clear unavailable-service explanations.
+`admin.css` and the final typography rules use Lexend, ink, paper, rules, and status colors, with tonal panels and no new decorative shadows. Navigation and primary actions have 44px minimum targets; mobile navigation summaries have 48px targets. Administration buttons suppress the publication's hover movement. Focus uses a 2px ink outline with a 3px offset. Platform settings retain clear unavailable-service explanations.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** preserve the supplied Folkscript marks and the distinct reading and interface type roles.
+- **Do** preserve the supplied Folkscript marks and distinguish reading and interface roles within Lexend.
 - **Do** use semantic CSS variables so light and dark themes remain coherent.
 - **Do** give stories and authors visual priority through type, photography, and spacing.
 - **Do** maintain the 68ch prose cap, 700px desktop article measure, and responsive reading gutters.
@@ -293,7 +332,7 @@ Account access controls open inside the selected person's row, leaving names, ro
 
 ### Don't:
 
-- **Don't** add typefaces beyond the reading and interface pair or introduce decorative paper textures.
+- **Don't** add text typefaces beyond Lexend and the code monospace stack or introduce decorative paper textures.
 - **Don't** turn amber into a general-purpose background or primary button color.
 - **Don't** add rounded, shadowed containers around ordinary story cards.
 - **Don't** stretch article prose across the broad discovery-page frame.

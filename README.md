@@ -23,7 +23,7 @@ A free, self-hosted publishing platform for independent writers and communities.
 - **Build a community:** follows, reactions, threaded responses, notifications, reports, moderation, and role-based administration.
 - **Own your platform:** email/password accounts, verification, password resets, authenticator 2FA, optional Google/GitHub sign-in, scoped API tokens, and administrative settings.
 - **Share your writing:** SEO metadata, JSON-LD, sitemaps, RSS feeds, public Markdown pages, an `llms.txt` content index, and AI-reader shortcuts.
-- **Read comfortably:** self-hosted Source Serif 4 and Source Sans 3, white and dark themes, system-theme defaults, responsive layouts, and complete cover images in story thumbnails.
+- **Read comfortably:** self-hosted Lexend Variable throughout reading and the interface, white and dark themes, system-theme defaults, responsive layouts, and complete cover images in story thumbnails.
 
 MySQL is the default local database. SQLite is available for development and testing. Optional integrations include S3-compatible storage, Meilisearch, Redis/Horizon, Reverb, Plausible, and Sentry. Core reading and publishing require no paid service.
 

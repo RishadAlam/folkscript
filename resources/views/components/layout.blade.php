@@ -50,8 +50,7 @@
             });
         })();
     </script>
-    <link rel="preload" href="/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-    @unless($admin)<link rel="preload" href="/fonts/source-serif-4-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>@endunless
+    <link rel="preload" href="/fonts/lexend-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <x-analytics />
     @if(auth()->check() && config('folkscript.broadcast_notifications') && config('broadcasting.connections.reverb.key'))
     <meta name="folkscript-realtime" content="{{ json_encode(['user'=>auth()->id(), 'key'=>config('broadcasting.connections.reverb.key'), 'host'=>config('broadcasting.connections.reverb.options.host'), 'port'=>config('broadcasting.connections.reverb.options.port',443), 'scheme'=>config('broadcasting.connections.reverb.options.scheme','https')]) }}">
