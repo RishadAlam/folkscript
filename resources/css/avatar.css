@@ -1,7 +1,29 @@
 /* A photo and its initials share one fixed footprint, including failed image loads. */
-.avatar { position:relative; line-height:1; vertical-align:middle; isolation:isolate; }
+.avatar {
+    --avatar-background: #d5dacc;
+    --avatar-foreground: #30413b;
+    position:relative;
+    line-height:1;
+    vertical-align:middle;
+    isolation:isolate;
+    background:var(--avatar-background);
+    color:var(--avatar-foreground);
+}
+/* Initial-based colors stay stable across every avatar size and location. */
+.avatar-colored {
+    --avatar-background: hsl(var(--avatar-hue) 45% 88%);
+    --avatar-foreground: hsl(var(--avatar-hue) 45% 25%);
+}
+html.dark .avatar {
+    --avatar-background: #303c4e;
+    --avatar-foreground: #dce4ef;
+}
+html.dark .avatar-colored {
+    --avatar-background: hsl(var(--avatar-hue) 32% 25%);
+    --avatar-foreground: hsl(var(--avatar-hue) 42% 88%);
+}
 .avatar > img { position:absolute; inset:0; width:100%; height:100%; border-radius:inherit; object-fit:cover; background:inherit; }
-.avatar.account-avatar { background:var(--ink); color:var(--paper); font-size:1.6875rem; }
+.avatar.account-avatar { font-size:1.6875rem; }
 .admin-person-identity { display:flex; align-items:flex-start; gap:12px; min-width:0; }
 .admin-person-identity > div { min-width:0; }
 .admin-person-identity > .avatar { margin-top:2px; }

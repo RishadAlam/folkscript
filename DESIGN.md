@@ -169,7 +169,7 @@ The light palette combines a white page with subtle neutral surfaces, cool ink, 
 - **Muted ink** (`muted`) carries supporting copy and metadata. **Rule** (`rule`) divides navigation, lists, sections, and fields.
 - **Ink black** (`ink-black`) becomes the dark page background. Dark-mode foreground ink remains the original warm `#f6f3ec`, independently of the light-theme white page; `dark-surface`, `dark-muted`, `dark-rule`, and `dark-soft` replace corresponding light variables.
 - **Slate** (`slate`) belongs to the supplied dark wordmark. It is not the current light-theme body or metadata color.
-- **Avatar paper** and **avatar ink** supply the neutral initial-avatar treatment; account initials may instead use ink and paper.
+- **Avatar paper** and **avatar ink** supply the fallback for unknown initials. Named avatars use a stable hue derived from the first uppercase initial (Unicode code point × 137, modulo 360). Light mode pairs a pale background (45% saturation, 88% lightness) with dark initials (45%, 25%); dark mode pairs a deeper background (32%, 25%) with pale initials (42%, 88%). The shared treatment applies to public, account, and admin avatars. Uploaded photos still cover the initials, which remain available if the image fails to load.
 
 ### Status
 
