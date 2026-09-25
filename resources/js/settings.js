@@ -52,6 +52,78 @@ if (settings) {
         updateLinks();
     }
 
+    const photo = settings.querySelector('[data-profile-photo]');
+    if (photo) {
+        const form = photo.closest('form');
+        const input = photo.querySelector('[data-avatar-file]');
+        const preview = photo.querySelector('[data-avatar-preview]');
+        const frame = photo.querySelector('[data-avatar-frame]');
+        const feedback = photo.querySelector('[data-avatar-feedback]');
+        const reset = form.querySelector('[data-avatar-reset]');
+        const remove = form.querySelector('[data-avatar-remove]');
+        const serverInvalid = input.getAttribute('aria-invalid');
+        let previewUrl;
+        const restorePhoto = () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+            preview.onload = null;
+            preview.onerror = null;
+            preview.hidden = true;
+            preview.removeAttribute('src');
+            frame.dataset.remove = String(!!remove?.checked);
+            reset.hidden = true;
+            feedback.hidden = true;
+            input.setCustomValidity('');
+            input.setAttribute('aria-invalid', serverInvalid);
+        };
+        input.addEventListener('change', () => {
+            restorePhoto();
+            const file = input.files[0];
+            if (!file) return;
+            reset.hidden = false;
+            const showError = message => {
+                input.setCustomValidity(message);
+                input.setAttribute('aria-invalid', 'true');
+                feedback.textContent = message;
+                feedback.dataset.state = 'error';
+                feedback.hidden = false;
+                preview.hidden = true;
+            };
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { showError('Choose a JPG, PNG, or WebP image.'); return; }
+            if (file.size > 4 * 1024 * 1024) { showError('This photo is too large. Choose one no larger than 4 MB.'); return; }
+            previewUrl = URL.createObjectURL(file);
+            preview.onload = () => {
+                if (preview.naturalWidth > 6000 || preview.naturalHeight > 6000) {
+                    showError('Resize this photo to no more than 6000 pixels on either side.');
+                    return;
+                }
+                if (remove) remove.checked = false;
+                frame.dataset.remove = 'false';
+                input.setAttribute('aria-invalid', 'false');
+                preview.hidden = false;
+                feedback.textContent = 'Preview only. Save profile to apply this photo.';
+                delete feedback.dataset.state;
+                feedback.hidden = false;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+            preview.onerror = () => showError('This photo could not be read. Choose a different image.');
+            preview.src = previewUrl;
+        });
+        reset.addEventListener('click', () => {
+            input.value = '';
+            restorePhoto();
+            input.focus();
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        remove?.addEventListener('change', () => {
+            input.value = '';
+            restorePhoto();
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        restorePhoto();
+        window.addEventListener('pagehide', event => { if (!event.persisted && previewUrl) URL.revokeObjectURL(previewUrl); });
+    }
+
     const cover = settings.querySelector('[data-profile-cover]');
     if (cover) {
         const input = cover.querySelector('[data-cover-file]');
@@ -61,6 +133,7 @@ if (settings) {
         const reset = cover.querySelector('[data-cover-reset]');
         const remove = cover.querySelector('[data-cover-remove]');
         const original = preview.getAttribute('src');
+        const serverInvalid = input.getAttribute('aria-invalid');
         let previewUrl;
         const restorePreview = () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -73,6 +146,7 @@ if (settings) {
             empty.hidden = !preview.hidden;
             reset.hidden = true;
             input.setCustomValidity('');
+            input.setAttribute('aria-invalid', serverInvalid);
             feedback.hidden = true;
         };
         input.addEventListener('change', () => {
@@ -82,9 +156,12 @@ if (settings) {
             reset.hidden = false;
             const showError = message => {
                 input.setCustomValidity(message);
+                input.setAttribute('aria-invalid', 'true');
                 feedback.textContent = message;
                 feedback.dataset.state = 'error';
                 feedback.hidden = false;
+                preview.hidden = true;
+                empty.hidden = false;
             };
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { showError('Choose a JPG, PNG, or WebP image.'); return; }
             if (file.size > 6 * 1024 * 1024) { showError('This image is too large. Choose one smaller than 6 MB.'); return; }
@@ -96,6 +173,7 @@ if (settings) {
                     return;
                 }
                 feedback.textContent = `${preview.naturalWidth} × ${preview.naturalHeight} px · Preview only. Save profile to apply.`;
+                input.setAttribute('aria-invalid', 'false');
                 delete feedback.dataset.state;
                 feedback.hidden = false;
             };
@@ -151,4 +229,27 @@ if (settings) {
             event.returnValue = '';
         }
     });
+}
+
+// A native checkbox works with touch, keyboards, and password managers alike.
+for (const form of document.querySelectorAll('.auth-shell form, .auth-single form, [data-settings-page] form')) {
+    const passwords = [...form.querySelectorAll('input[type="password"]')];
+    if (!passwords.length) continue;
+    const label = document.createElement('label');
+    label.className = 'check-label password-visibility';
+    const toggle = document.createElement('input');
+    toggle.type = 'checkbox';
+    label.append(toggle, document.createTextNode(passwords.length > 1 ? 'Show passwords' : 'Show password'));
+    const finalField = passwords.at(-1).closest('.form-grid') || passwords.at(-1).closest('.field');
+    finalField.after(label);
+    toggle.addEventListener('change', () => {
+        passwords.forEach(input => { input.type = toggle.checked ? 'text' : 'password'; });
+    });
+}
+
+const authInvalid = document.querySelector('.auth-shell [aria-invalid="true"], .auth-single [aria-invalid="true"]');
+if (authInvalid) {
+    const disclosure = authInvalid.closest('details');
+    if (disclosure) disclosure.open = true;
+    requestAnimationFrame(() => authInvalid.focus());
 }

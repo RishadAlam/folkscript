@@ -8,7 +8,7 @@
             <div><dt>{{ __('Email verification') }}</dt><dd>{{ $user->hasVerifiedEmail() ? __('Verified') : __('Not verified') }}</dd></div>
         </dl>
         @if(! $user->hasVerifiedEmail())
-            <p class="muted">{{ __('Verify your email to unlock publishing and keep your account reachable.') }}</p>
+            <p class="muted">{{ __('Verify your email to keep your account reachable and use all the features included with your account.') }}</p>
             <a href="{{ route('verification.notice') }}" class="btn btn-outline">{{ __('Verify your email') }}</a>
         @elseif(! $user->canWrite())
             <p class="field-help">{{ __('You can read, save stories, and join conversations. Contact the site operator if you need writing access.') }}</p>

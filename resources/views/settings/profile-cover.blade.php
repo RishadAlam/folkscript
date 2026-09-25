@@ -8,7 +8,7 @@
     </div>
     <label class="field">{{ __('Choose a cover image') }}
         <input aria-invalid="{{ $errors->has('cover_image') ? 'true' : 'false' }}" aria-describedby="settings9-help settings9-error cover-preview-feedback" class="form-input" type="file" name="cover_image" accept="image/jpeg,image/png,image/webp" data-cover-file>
-        <span class="field-help" id="settings9-help">{{ __('Recommended: 1400 × 400 px (3.5:1). JPG, PNG, or WebP, up to 6 MB. The full image stays visible in the preview.') }}</span>
+        <span class="field-help" id="settings9-help">{{ __('Recommended: 1400 × 400 px (3.5:1). JPG, PNG, or WebP, up to 6 MB and 8000 px per side. The full image stays visible in the preview.') }}</span>
         <x-field-error name="cover_image" id="settings9-error" />
     </label>
     <p id="cover-preview-feedback" class="field-help" data-cover-feedback hidden role="status"></p>

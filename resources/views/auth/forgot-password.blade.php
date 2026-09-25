@@ -6,7 +6,7 @@
         @if($emailDeliveryAvailable)
             <p class="muted">{{ __('Enter the email address for your account. We’ll send you a link to choose a new password.') }}</p>
         @else
-            <p class="notice" id="password-email-unavailable">{{ __('Password reset email is unavailable on this installation. Contact the site administrator for help signing in, or use an existing demo account in this preview.') }}</p>
+            <p class="notice" id="password-email-unavailable">{{ __('Password reset email is unavailable on this installation. Contact the site administrator for help signing in.') }} @if(app()->isLocal()){{ __('You can also use an existing demo account in this preview.') }}@endif</p>
         @endif
         <form method="post" action="{{ route('password.email') }}" class="stack">
             @csrf

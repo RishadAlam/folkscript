@@ -35,6 +35,14 @@
 .settings-pane .stack { gap: 24px; }
 .settings-pane .profile-photo-editor { margin: 0; gap: 20px; align-items: center; }
 .settings-pane .profile-photo-editor .field { min-width: 0; }
+.settings-photo-preview { position: relative; flex: 0 0 auto; }
+.settings-photo-preview .account-avatar { display: grid; }
+.settings-photo-selection { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.settings-photo-selection[hidden], .settings-photo-reset[hidden], [data-avatar-feedback][hidden] { display: none !important; }
+.settings-photo-preview[data-remove="true"] .avatar img { display: none !important; }
+.settings-pane .settings-photo-reset { align-self: flex-start; }
+[data-avatar-feedback][data-state="error"] { color: var(--error); }
+.password-visibility { width: fit-content; cursor: pointer; }
 .settings-pane .settings-section { margin-bottom: 28px; padding-bottom: 28px; }
 .settings-pane .settings-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
 .settings-pane .settings-section>.muted { margin-bottom: 20px; }

@@ -8,7 +8,7 @@
             <span class="account-status" data-state="{{ $user->hasVerifiedEmail() ? 'positive' : 'neutral' }}">{{ $user->hasVerifiedEmail() ? __('Verified') : __('Not verified') }}</span>
         </div>
         @if(! $user->hasVerifiedEmail())
-            <p class="muted">{{ __('Verify your email to publish stories and create API tokens.') }}</p>
+            <p class="muted">{{ __('Verify your email to confirm this address belongs to you and use all the features included with your account.') }}</p>
             <a href="{{ route('verification.notice') }}" class="btn btn-outline">{{ __('Verify your email') }}</a>
         @else
             <p class="muted">{{ __('Your email is private. It is used for signing in and account messages.') }}</p>

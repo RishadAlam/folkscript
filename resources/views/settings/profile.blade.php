@@ -5,15 +5,21 @@
     </div>
     <form method="post" action="{{ route('settings.update') }}" enctype="multipart/form-data" class="stack" data-settings-form>
         @csrf @method('PATCH')
-        <div class="profile-photo-editor">
-            <x-avatar :user="$user" class="account-avatar" />
+        <div class="profile-photo-editor" data-profile-photo>
+            <div class="settings-photo-preview" data-avatar-frame>
+                <x-avatar :user="$user" class="account-avatar" />
+                <!-- impeccable-disable-next-line broken-image: A selected local image supplies this hidden preview's source. -->
+                <img class="settings-photo-selection" alt="{{ __('Selected profile photo preview') }}" data-avatar-preview hidden>
+            </div>
             <label class="field">{{ __('Profile photo') }}
-                <input aria-invalid="{{ $errors->has('avatar') ? 'true' : 'false' }}" aria-describedby="settings1-help settings1-error" class="form-input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp">
-                <span class="field-help" id="settings1-help">{{ __('A square photo works best. JPG, PNG, or WebP, up to 4 MB.') }}</span>
+                <input aria-invalid="{{ $errors->has('avatar') ? 'true' : 'false' }}" aria-describedby="settings1-help settings1-error avatar-preview-feedback" class="form-input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-avatar-file>
+                <span class="field-help" id="settings1-help">{{ __('A square photo works best. It appears in a circle. JPG, PNG, or WebP, up to 4 MB and 6000 px per side.') }}</span>
                 <x-field-error name="avatar" id="settings1-error" />
+                <span id="avatar-preview-feedback" class="field-help" data-avatar-feedback hidden role="status"></span>
             </label>
         </div>
-        @if($user->avatar)<label class="check-label"><input type="checkbox" name="remove_avatar" value="1" @checked(old('remove_avatar'))>{{ __('Remove current photo and use my initials') }}</label>@endif
+        <button type="button" class="btn btn-outline settings-photo-reset" data-avatar-reset hidden>{{ __('Cancel photo selection') }}</button>
+        @if($user->avatar)<label class="check-label"><input type="checkbox" name="remove_avatar" value="1" @checked(old('remove_avatar')) data-avatar-remove>{{ __('Remove current photo and use my initials') }}</label>@endif
         <div class="form-grid">
             <label class="field">{{ __('Display name') }}
                 <input aria-invalid="{{ $errors->has('name') ? 'true' : 'false' }}" aria-describedby="settings2-error" class="form-input" autocomplete="name" name="name" value="{{ old('name', $user->name) }}" maxlength="80" required>
