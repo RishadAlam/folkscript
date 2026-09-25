@@ -54,6 +54,10 @@
         }
     },
     "scripts": {
+        "build:cpanel": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php scripts/build-cpanel.php"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
@@ -88,6 +92,9 @@
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
+    },
+    "scripts-descriptions": {
+        "build:cpanel": "Build dist/folkscript-cpanel.zip with production dependencies and compiled assets for manual upload."
     },
     "extra": {
         "laravel": {

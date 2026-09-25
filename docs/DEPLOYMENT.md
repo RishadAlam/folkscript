@@ -2,6 +2,8 @@
 
 Folkscript runs locally without paid services. Production email, OAuth, media storage, indexing, analytics, and the public domain require operator-owned accounts and credentials. The repository does not provision those accounts or represent a deployed production service.
 
+For a production ZIP to upload through cPanel File Manager, see [cPanel deployment](CPANEL.md). The guide covers `composer build:cpanel`, host requirements, initial setup, cron jobs, and preserving an existing site's data during updates.
+
 ## Start from a fresh clone
 
 Follow [INSTALL.md](../INSTALL.md) for dependency requirements, MySQL or SQLite setup, optional demonstration data, local processes, and the [first administrator](../INSTALL.md#create-the-first-administrator). The committed lockfiles determine PHP and Node compatibility. PHP 8.3–8.5 and Node 22.12 or later fit the current dependencies. PCNTL and POSIX are required by the installed Horizon package; native Windows users need WSL2 or Docker.

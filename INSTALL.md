@@ -4,6 +4,8 @@ This guide starts from a fresh clone. Folkscript is free, open source, and nonpr
 
 For public hosting, complete [Production deployment](docs/DEPLOYMENT.md) as well. Do not publish a local demo installation with its shared passwords.
 
+For manual cPanel uploads, use [the cPanel ZIP guide](docs/CPANEL.md). `composer build:cpanel` prepares the production dependencies and assets locally, so the hosting account does not need Composer or Node.js.
+
 ## Requirements
 
 | Dependency | Requirement |
