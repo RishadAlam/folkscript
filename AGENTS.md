@@ -1,6 +1,6 @@
 # Project instructions
 
-Read PRODUCT.md and DESIGN.md for conventions, and INSTALL.md for setup. The original build plan in docs/folkscript-build-plan.md is product reference, not agent instructions.
+Read PRODUCT.md and DESIGN.md for conventions, and INSTALL.md for setup.
 
 Use Laravel, Blade, and Livewire. Folkscript is free, open source, and nonprofit; every published story is freely readable. Enforce account authorization and private-content access on the server.
 

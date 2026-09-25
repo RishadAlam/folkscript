@@ -97,14 +97,16 @@ PHP tests use an isolated in-memory SQLite database. Coverage includes authoriza
 | --- | --- |
 | [Installation](INSTALL.md) | Requirements, MySQL/SQLite setup, demo data, first administrator, troubleshooting |
 | [Deployment](docs/DEPLOYMENT.md) | Native and Docker hosting, HTTPS, workers, scheduler, storage, integrations |
+| [Roles and access](docs/ACCESS_CONTROL.md) | Reader, writer, editor, administrator, and owner capabilities |
+| [Authentication](docs/AUTHENTICATION.md) | Two-factor setup, recovery codes, password confirmation, and sign-in behavior |
 | [Reader tools](docs/READER_TOOLS.md) | Public Markdown, AI-reader links, and content discovery |
+| [Collections](docs/series.md) | Managing story collections, public visibility, and ordering |
+| [Localization](docs/localization.md) | Translation catalogs and adding an interface language |
 | [API reference](docs/API.md) / [OpenAPI](public/openapi.json) | Every v1 endpoint, token scopes, response fields, errors, pagination, and automation examples; also available at `/developers/api` on your installation |
 | [Product](PRODUCT.md) / [Design](DESIGN.md) | Product scope, visual system, and accessibility conventions |
 | [Build status](docs/BUILD_STATUS.md) | Implemented features and deployment boundaries |
 | [Changelog](CHANGELOG.md) | Release history |
 | [Asset sources](docs/ASSETS.md) | Fonts, photos, icons, and third-party notices |
-
-Historical implementation and review notes remain under `docs/`. The free-publishing scope in PRODUCT.md supersedes paid-product sections of the original build reference.
 
 ## Contributing and support
 

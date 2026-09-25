@@ -6,12 +6,12 @@ Folkscript is a free, open-source, nonprofit publishing project. Contributions t
 
 Search existing [issues](https://github.com/RishadAlam/folkscript/issues) and pull requests. For a large feature or a change to publishing behavior, describe the problem in an issue before investing in implementation. Small fixes and documentation improvements can go straight to a pull request.
 
-Read [PRODUCT.md](PRODUCT.md) for scope and [DESIGN.md](DESIGN.md) for interface conventions. Every published story is freely readable; contributions must preserve server-side authorization for account actions and private content. The original build plan is historical product reference and does not override the current free-publishing model.
+Read [PRODUCT.md](PRODUCT.md) for scope and [DESIGN.md](DESIGN.md) for interface conventions. Every published story is freely readable; contributions must preserve server-side authorization for account actions and private content.
 
 ## Local development
 
 1. Fork the repository, clone your fork, and create a branch for your change.
-2. Follow the [README setup instructions](README.md) to install the locked Composer and npm dependencies, configure a local database, and run migrations.
+2. Follow the [installation guide](INSTALL.md) to install the locked Composer and npm dependencies, configure a local database, and run migrations.
 3. Run `php artisan serve` and `npm run dev` in separate terminals. Use `php artisan queue:work --timeout=120` and `php artisan schedule:work` when working on background jobs or scheduled publishing.
 
 Use a dedicated development database. Demo accounts and sample stories belong only in local development. Do not commit `.env`, credentials, database copies, uploads, private logs, or personal information. Use `.env.example` to document configuration without real values.

@@ -1,6 +1,6 @@
 # Build status and launch boundaries
 
-This is a locally implemented publishing application, with demonstration editorial content. It is not a deployed production service. The current scope is free, open-source, nonprofit publishing; PRODUCT.md supersedes monetization in the original `docs/folkscript-build-plan.md` reference. The table below distinguishes implemented application paths from integrations that need an operator-owned service.
+This is a locally implemented publishing application, with demonstration editorial content. It is not a deployed production service. The current scope is free, open-source, nonprofit publishing, as described in [PRODUCT.md](../PRODUCT.md). The table below distinguishes implemented application paths from integrations that need an operator-owned service.
 
 | Area | Application support | Required outside the local installation |
 | --- | --- | --- |
@@ -27,11 +27,11 @@ This is a locally implemented publishing application, with demonstration editori
 
 ## Work beyond the current local delivery
 
-The reference brief includes wider launch goals that need separate verification or further implementation. Do not treat installed packages or configuration files as evidence that an external service is live.
+A public launch requires installation-specific verification and operational setup. Do not treat installed packages or configuration files as evidence that an external service is live.
 
 - Video/embed support is restricted to the supported providers rather than arbitrary third-party HTML.
 - The interface starts in English. Additional locale translations and an independently audited WCAG-AA result remain operator/product work.
 - Production CDN configuration/cache invalidation and real-user Core Web Vitals measurement require a deployed site. Uploaded images use a bounded WebP derivative; responsive `srcset` variants and AVIF output remain optional further optimization.
 - No production deployment, DNS change, mail delivery, search-console submission, or external analytics capture has been performed.
 
-See `docs/DEPLOYMENT.md` for concrete setup commands and environment keys. The repository's README identifies the local demonstration accounts and startup steps.
+See [Deployment](DEPLOYMENT.md) for setup commands and environment keys, and [Installation](../INSTALL.md) for local demonstration accounts and startup steps.

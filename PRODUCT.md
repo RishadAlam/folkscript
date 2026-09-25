@@ -14,13 +14,13 @@ Readers discover independent writing, save stories and follow writers. Verified 
 A free, open-source, nonprofit publishing platform. Every published story is free to read without an account. Written by the people, read by everyone.
 
 ## Capabilities and Constraints
-Provide publishing, rich editing, accounts, community, search, administration, SEO and feeds. The September 25 decision to make the project entirely free supersedes monetization in the original build reference. There are no paid tiers, subscriptions, paywalls, earnings ledgers, or payment integrations. External production credentials and domain ownership are not supplied. Example editorial content and accounts must be documented as demo data.
+Provide publishing, rich editing, accounts, community, search, administration, SEO and feeds. There are no paid tiers, subscriptions, paywalls, earnings ledgers, or payment integrations. External production credentials and domain ownership are not supplied. Example editorial content and accounts must be documented as demo data.
 
 ## Brand Commitments
 Preserve supplied Folkscript SVG assets. Ink navy #1E2A47, ink black #141B2E, white light-mode paper #FFFFFF, neutral panels #F8F9FB, soft grouping #F1F3F6, dividers #DFE3E9, slate #8B9BC0, restrained amber #D9A441. Dark mode retains its warm foreground #F6F3EC. Lexend Variable throughout headings, reading, controls, supporting copy, and administration; monospace for code. Keep the supplied SVG lettering unchanged. Use scalable rem text sizes, a 1rem interface body, and a .875rem metadata floor.
 
 ## Evidence on Hand
-The original product specification is preserved in docs/folkscript-build-plan.md; supplied brand assets are in public/images. Seeded stories and audience metrics are demonstration data.
+Supplied brand assets are in public/images, with provenance recorded in docs/ASSETS.md. Seeded stories and audience metrics are demonstration data.
 
 ## Product Principles
 Writing and reading lead. Authors own their voice. Powerful tools stay understandable. Authentication and permissions are enforced server-side. Unconfigured external services have honest, actionable states.
