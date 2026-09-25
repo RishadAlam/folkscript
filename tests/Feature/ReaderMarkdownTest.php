@@ -7,7 +7,6 @@ use App\Models\Post;
 use App\Models\Series;
 use App\Models\Tag;
 use App\Models\User;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 
@@ -30,13 +29,26 @@ class ReaderMarkdownTest extends SecurityTestCase
         ]);
     }
 
-    public function test_ai_reader_links_include_the_exact_absolute_markdown_url_prompt_without_manual_tools(): void
+    public function test_ai_reader_links_use_public_html_pages_while_markdown_actions_keep_the_export(): void
     {
+        config(['app.url' => 'http://127.0.0.1:8000']);
+        $origin = 'https://publication.example';
+        $author = $this->account('author');
+        $post = $this->story($author);
+        $category = Category::create(['name' => 'Nature', 'slug' => 'nature']);
+        $post->categories()->attach($category);
+        $collection = Series::create(['author_id' => $author->id, 'title' => 'Public collection', 'slug' => 'public-collection']);
+        $collection->posts()->attach($post, ['order' => 1]);
         $query = '?q=caf%C3%A9%20%26%20%E0%A6%AC%E0%A6%A8%20%2B%20%23&topic=nature&page=2';
-        $html = Blade::render('<x-reader-tools :url="$exportUrl" />', [
-            'exportUrl' => '/read/explore.md'.$query,
-        ]);
-        $prompt = 'Read from '.url('/read/explore.md').$query.' so I can ask questions about it.';
+        $pages = [
+            [$post->url, route('reader.story', $post, false)],
+            ['/@'.$author->username.'?page=2', route('reader.author', ['user' => $author, 'page' => 2], false)],
+            [route('series.show', ['username' => $author->username, 'slug' => $collection->slug, 'page' => 2], false), route('reader.collection', ['series' => $collection, 'page' => 2], false)],
+            ['/topic/nature?page=2', route('reader.topic', ['slug' => 'nature', 'page' => 2], false)],
+            ['/explore'.$query, '/read/explore.md'.$query],
+            ['/explore?type=people&page=2', '/read/explore.md?type=people&page=2'],
+            ['/trending?page=2', '/read/explore.md?sort=trending&page=2'],
+        ];
         $providers = [
             'Claude' => 'https://claude.ai/new?q=',
             'ChatGPT' => 'https://chatgpt.com/?q=',
@@ -45,20 +57,31 @@ class ReaderMarkdownTest extends SecurityTestCase
             'Grok' => 'https://grok.com/?q=',
             'Google AI Mode' => 'https://www.google.com/search?udm=50&q=',
         ];
-        $document = new \DOMDocument;
-        @$document->loadHTML($html);
-        $links = (new \DOMXPath($document))->query('//a[contains(concat(" ", normalize-space(@class), " "), " reader-provider ")]');
-        $this->assertCount(count($providers), $links);
-        $destinations = [];
-        foreach ($links as $link) {
-            $destinations[] = $link->getAttribute('href');
-            parse_str(parse_url($link->getAttribute('href'), PHP_URL_QUERY), $parameters);
-            $this->assertSame($prompt, $parameters['q']);
-            $this->assertSame('_blank', $link->getAttribute('target'));
-        }
-        $this->assertEqualsCanonicalizing(array_map(fn ($prefix) => $prefix.rawurlencode($prompt), array_values($providers)), $destinations);
-        foreach (['Gemini', 'DeepSeek', 'Copy &amp; paste instead', 'Prompt copied', 'Full-page prompt copied'] as $removed) {
-            $this->assertStringNotContainsString($removed, $html);
+        foreach ($pages as [$page, $export]) {
+            $tracking = (str_contains($page, '?') ? '&' : '?').'utm_source=newsletter&token=do-not-share';
+            $html = $this->get($origin.$page.$tracking)->assertOk()->getContent();
+            $prompt = 'Read from '.$origin.$page.' so I can ask questions about it.';
+            $document = new \DOMDocument;
+            @$document->loadHTML($html);
+            $xpath = new \DOMXPath($document);
+            $links = $xpath->query('//a[contains(concat(" ", normalize-space(@class), " "), " reader-provider ")]');
+            $this->assertCount(count($providers), $links);
+            $destinations = [];
+            foreach ($links as $link) {
+                $destinations[] = $link->getAttribute('href');
+                parse_str(parse_url($link->getAttribute('href'), PHP_URL_QUERY), $parameters);
+                $this->assertSame($prompt, $parameters['q']);
+                $this->assertSame('_blank', $link->getAttribute('target'));
+            }
+            $this->assertEqualsCanonicalizing(array_map(fn ($prefix) => $prefix.rawurlencode($prompt), array_values($providers)), $destinations);
+            $markdownLink = $xpath->query('//a[contains(@class, "reader-option")][contains(., "View as Markdown")]')->item(0);
+            parse_str(parse_url($markdownLink->getAttribute('href'), PHP_URL_QUERY) ?? '', $exportParameters);
+            parse_str(parse_url($export, PHP_URL_QUERY) ?? '', $expectedParameters);
+            $this->assertSame(parse_url($export, PHP_URL_PATH), parse_url($markdownLink->getAttribute('href'), PHP_URL_PATH));
+            $this->assertEquals([...$expectedParameters, 'view' => 'plain'], $exportParameters);
+            foreach (['Copy &amp; paste instead', 'Prompt copied', 'Full-page prompt copied'] as $removed) {
+                $this->assertStringNotContainsString($removed, $html);
+            }
         }
     }
 

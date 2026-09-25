@@ -8,8 +8,12 @@
         'Grok' => ['icon' => 'grok', 'prefill' => 'https://grok.com/?q='],
         'Google AI Mode' => ['icon' => 'google', 'prefill' => 'https://www.google.com/search?udm=50&q='],
     ];
-    $prompt = 'Read from '.url($url).' so I can ask questions about it.';
-    $googleUrl = 'https://www.google.com/search?'.http_build_query(['q' => 'Explain this page: '.url($url)], '', '&', PHP_QUERY_RFC3986);
+    // Assistant web readers may reject text/markdown. Share the public HTML page,
+    // retaining reading filters but excluding unrelated or private query values.
+    $pageParameters = array_filter(request()->only(['q', 'topic', 'type', 'page']), fn ($value) => is_string($value) && $value !== '');
+    $pageUrl = request()->url().($pageParameters ? '?'.http_build_query($pageParameters, '', '&', PHP_QUERY_RFC3986) : '');
+    $prompt = 'Read from '.$pageUrl.' so I can ask questions about it.';
+    $googleUrl = 'https://www.google.com/search?'.http_build_query(['q' => 'Explain this page: '.$pageUrl], '', '&', PHP_QUERY_RFC3986);
     $viewUrl = $url.(str_contains($url, '?') ? '&' : '?').'view=plain';
 @endphp
 @push('reader-meta')<link rel="alternate" type="text/markdown" href="{{ url($url) }}" title="{{ __('This page as Markdown') }}">@endpush

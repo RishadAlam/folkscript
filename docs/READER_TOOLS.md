@@ -4,11 +4,11 @@
 
 - **Copy page** copies public Markdown with author credit, publication date, source links, and article structure. Clipboard errors retain selectable Markdown and a plain-text link; request failures provide retry guidance.
 - **View as Markdown** opens a plain-text browser response. The `.md` endpoint serves `text/markdown` to clients by default.
-- **Claude, ChatGPT, Perplexity, Copilot, Grok, and Google AI Mode** open native new-tab links with the same prompt: `Read from <absolute Markdown export URL> so I can ask questions about it.` The URL identifies the current story, author, collection, topic, or filtered listing. Listing query parameters remain intact.
+- **Claude, ChatGPT, Perplexity, Copilot, Grok, and Google AI Mode** open native new-tab links with the same prompt: `Read from <absolute public page URL> so I can ask questions about it.` Stories use their normal `/@username/story-slug` HTML URL. Profiles, collections, topics, and listings use their public HTML pages too. Reading filters (`q`, `topic`, `type`) and pagination (`page`) remain intact; unrelated query parameters are excluded.
 - AI links are ready in server-rendered HTML. Opening the menu or selecting an AI provider does not fetch article contents, change the clipboard, or show a copied-prompt notification.
 - **Google Search** remains separate and searches the current page title. AI Overviews are controlled by Google and cannot be forced by this link.
 
-The deployed Markdown URL must be publicly reachable for an external assistant to read it. Localhost, private network addresses, authentication requirements, provider sign-in, and the provider's browsing support can prevent retrieval. The current flow deliberately sends only the URL prompt; it does not embed the article. No AI API key is required.
+The public page must be reachable for an external assistant to read it. Some assistant web readers reject the `text/markdown` content type even when the export returns HTTP 200, so AI buttons use the HTML page. Markdown remains available through Copy page, View as Markdown, and the content index. Localhost, private network addresses, authentication requirements, provider sign-in, and the provider's browsing support can prevent retrieval. The current flow deliberately sends only the URL prompt; it does not embed the article. No AI API key is required.
 
 ## Markdown reading format
 
@@ -16,7 +16,7 @@ Each export begins with a short quoted **Content index** block linking to the li
 
 The full authored text follows, preserving headings, quotations, lists, code languages, tables, image descriptions, captions, and video links. A duplicate opening title is removed, and authored top-level sections nest beneath the export's title without changing code examples. Topic and further-reading links lead directly to other public Markdown exports. No generated synopsis or provider-specific instructions are added.
 
-Discovery exports use `## Stories` or `## Writers` with `###` entries. Story summaries are explicitly identified as summaries, with links to the full text. The export's own URL and pagination preserve search, topic, sort, and page parameters while omitting the browser-only `view=plain` parameter. Copy page, View as Markdown, and AI URL prompts all use this same export.
+Discovery exports use `## Stories` or `## Writers` with `###` entries. Story summaries are explicitly identified as summaries, with links to the full text. The export's own URL and pagination preserve search, topic, sort, and page parameters while omitting the browser-only `view=plain` parameter. Copy page and View as Markdown use this export; AI prompts use the corresponding HTML page, with `/trending` identifying the trending sort.
 
 ## Layout and access
 
