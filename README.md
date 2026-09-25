@@ -2,7 +2,9 @@
 
 **Written by the people, read by everyone.**
 
-A working Laravel publishing platform with a custom editorial interface, the supplied Folkscript identity, self-hosted Fraunces typography, light and dark themes, and responsive reading and writing surfaces.
+A free, open-source, nonprofit Laravel publishing platform with a custom editorial interface, the supplied Folkscript identity, self-hosted Source Serif 4 and Source Sans 3 typography, light and dark themes, and responsive reading and writing surfaces.
+
+Source code is licensed under [MIT](LICENSE). Story authors retain their rights, and [third-party assets](docs/ASSETS.md) keep their own licenses. Nonprofit describes the project purpose, not a claim of registered charitable status.
 
 ## Open the local app
 
@@ -15,7 +17,6 @@ The development instance is available at **http://127.0.0.1:8000** while its PHP
 | Platform owner | `owner@folkscript.test` | `Folkscript2026!` |
 | Editor | `editor@folkscript.test` | `Folkscript2026!` |
 | Reader | `reader@folkscript.test` | `Folkscript2026!` |
-| Premium member | `premium@folkscript.test` | `Folkscript2026!` |
 
 These are local demonstration accounts, with original sample stories and illustrative readership counts. `unverified@folkscript.test` and `suspended@folkscript.test` use the same password for restricted-account scenarios. Production seeding creates roles without demonstration users or stories unless explicitly enabled. Do not expose these shared demo credentials on a public installation.
 
@@ -25,7 +26,7 @@ These are local demonstration accounts, with original sample stories and illustr
 - TipTap rich editing with Markdown import/export, images, code blocks, supported YouTube embeds, draft autosave, revision restore, scheduling, and a live SEO checklist and social preview.
 - Registration, verification, resets, authenticator 2FA, OAuth handlers, profile management, scoped API tokens and permission-based access.
 - Threaded comments, reactions, follows, reports, notifications, moderation, user/role administration, site settings, audit history and read-only support sessions.
-- Server-enforced premium content, Stripe membership checkout/portal, Connect onboarding and approved creator earnings with controlled transfer and reconciliation actions.
+- Full access to every published story without an account or payment. Accounts enable participation; verified authors can publish.
 - Canonical and social metadata, JSON-LD, sitemaps, RSS, IndexNow, optional dynamic social PNGs, downloadable quote cards, public REST API and an installable PWA shell.
 - WebP uploads through Media Library, optional S3 storage, Meilisearch, Reverb, email digests, Plausible analytics and Sentry error reporting.
 
@@ -49,19 +50,23 @@ Run `php artisan queue:work --timeout=120` and `php artisan schedule:work` in se
 
 SQLite remains an option: install `pdo_sqlite`, set `DB_CONNECTION=sqlite` and `DB_DATABASE` to the absolute path of `database/database.sqlite` in `.env`, create that file with `touch database/database.sqlite`, then run the same migrations. Changing the connection alone does not move existing data. See [MySQL setup and migration notes](docs/MYSQL_SETUP.md) for the current local migration, demo fixtures, and connection checks.
 
+## Upgrading an existing installation
+
+Back up the database and uploads, install the locked dependencies, and run `php artisan migrate --force`. The free-publishing migration preserves users and stories, converts the former paid reader role to `reader`, and retires obsolete payment tables and columns. Historical migrations remain solely to support upgrades. Rebuild assets and restart queue workers after deploying. See [free-publishing scope](docs/FREE_PUBLISHING.md).
+
 ## Production setup
 
-The project is implemented locally, not publicly deployed. Provide a public domain, HTTPS hosting, mail delivery and any chosen external-service credentials. Stripe checkout and transfers remain unavailable until configured; this build has not made payments or sent external messages. The earnings ledger uses explicitly approved allocations, with no invented engagement-to-revenue formula.
+The project is implemented locally, not publicly deployed. Provide a public domain, HTTPS hosting, mail delivery and any chosen external-service credentials. Reading and publishing have no paid tier. The project contains no checkout, subscription, payout, or payment-provider integration.
 
-See [Deployment](docs/DEPLOYMENT.md) for Docker and native hosting, queue/scheduler supervision, OAuth, Stripe, media storage, search, notifications, SEO and API configuration. Docker configuration is supplied but was not built in this environment. [Build status](docs/BUILD_STATUS.md) records launch boundaries and optional work precisely.
+See [Deployment](docs/DEPLOYMENT.md) for Docker and native hosting, queue/scheduler supervision, OAuth, media storage, search, notifications, SEO and API configuration. Docker configuration is supplied but was not built in this environment. [Build status](docs/BUILD_STATUS.md) records launch boundaries and optional work precisely.
 
 ## Project map
 
 | Path | Purpose |
 | --- | --- |
-| `app/Http/Controllers` | Publishing, community, identity, billing, moderation, SEO and API handlers |
+| `app/Http/Controllers` | Publishing, community, identity, moderation, SEO and API handlers |
 | `app/Livewire/PostEditor.php` | Reactive publishing editor |
-| `app/Services` | Sanitization, media processing, SEO, membership and payout services |
+| `app/Services` | Sanitization, media processing, SEO and platform services |
 | `app/Models`, `app/Policies` | Persisted domain and access rules |
 | `resources/views`, `resources/css`, `resources/js` | Blade interface, editorial system and editor behavior |
 | `database/migrations`, `database/seeders` | Schema, roles and local demo content |
@@ -77,6 +82,6 @@ php artisan route:cache
 php artisan test --compact
 ```
 
-The implementation was also checked with targeted isolated probes for ownership, premium gates, sanitization, roles, tokens, payouts, media conversions, support sessions and assembled routes. These are functional checks, not a claim of audited accessibility, a production security assessment or real-user Core Web Vitals results.
+The repeatable suite covers ownership, free public story access, sanitization, all five account roles, authentication, tokens, media conversion, support sessions and publishing workflows. It uses an isolated in-memory SQLite database; the new audit suites refuse to reset any other database. See the [action and permission audit](docs/ACTION_AUDIT.md) and [Chrome browser walkthrough](docs/CHROME_BROWSER_AUDIT.md) for historical cases, Safari/in-app coverage, fixes and remaining gaps. Their paid-product sections are superseded by the [free-publishing change](docs/FREE_PUBLISHING.md). These are functional checks, not a claim of audited accessibility, a production security assessment or real-user Core Web Vitals results.
 
 [Product context](PRODUCT.md) · [Design system](DESIGN.md) · [Asset sources](docs/ASSETS.md) · [Source brief](docs/folkscript-build-plan.md)

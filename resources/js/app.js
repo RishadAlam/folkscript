@@ -1,12 +1,15 @@
 import './community';
+import readerTools from './reader-tools';
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
-import { createIcons, Search, Moon, Sun, Bell, PenLine, ArrowUpRight, ArrowDown, ArrowRight, ArrowLeft, Menu, Plus, X, CheckCircle, Check, CheckCheck, Bookmark, BookmarkCheck, BookOpen, Feather, Sparkles, Heart, MessageCircle, Share2, Rss, ChevronRight, Archive, Bold, Italic, Strikethrough, Heading2, Heading3, Quote, List, ListOrdered, Code, Link, Image as ImageIcon, ImagePlus, Minus, Undo2, Redo2, Calendar, History, Circle, UserPlus, Shield, Lock, Mail, Settings, LogOut, Eye, Download, ExternalLink, FileText, Video } from 'lucide';
+import { createIcons, Search, Moon, Sun, Bell, PenLine, ArrowUpRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Menu, Plus, X, CheckCircle, Check, CheckCheck, Bookmark, BookmarkCheck, BookOpen, Feather, Sparkles, Heart, MessageCircle, Share2, Rss, ChevronRight, Archive, Bold, Italic, Strikethrough, Heading2, Heading3, Quote, List, ListOrdered, Code, Link, Image as ImageIcon, ImagePlus, Minus, Undo2, Redo2, Calendar, History, Circle, UserPlus, Shield, Lock, Mail, Settings, LogOut, Eye, Download, ExternalLink, FileText, Video, Copy, ChevronDown } from 'lucide';
 
-const iconSet = { Search, Moon, Sun, Bell, PenLine, ArrowUpRight, ArrowDown, ArrowRight, ArrowLeft, Menu, Plus, X, CheckCircle, Check, CheckCheck, Bookmark, BookmarkCheck, BookOpen, Feather, Sparkles, Heart, MessageCircle, Share2, Rss, ChevronRight, Archive, Bold, Italic, Strikethrough, Heading2, Heading3, Quote, List, ListOrdered, Code, Link, Image: ImageIcon, ImagePlus, Minus, Undo2, Redo2, Calendar, History, Circle, UserPlus, Shield, Lock, Mail, Settings, LogOut, Eye, Download, ExternalLink, FileText, Video };
+const iconSet = { Search, Moon, Sun, Bell, PenLine, ArrowUpRight, ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Menu, Plus, X, CheckCircle, Check, CheckCheck, Bookmark, BookmarkCheck, BookOpen, Feather, Sparkles, Heart, MessageCircle, Share2, Rss, ChevronRight, Archive, Bold, Italic, Strikethrough, Heading2, Heading3, Quote, List, ListOrdered, Code, Link, Image: ImageIcon, ImagePlus, Minus, Undo2, Redo2, Calendar, History, Circle, UserPlus, Shield, Lock, Mail, Settings, LogOut, Eye, Download, ExternalLink, FileText, Video, Copy, ChevronDown };
 let iconFrame;
 function refreshIcons() { cancelAnimationFrame(iconFrame); iconFrame = requestAnimationFrame(() => createIcons({ icons: iconSet, attrs: { 'stroke-width': 1.65 } })); }
 
 document.addEventListener('folkscript:icons', refreshIcons);
+
+Alpine.data('readerTools', readerTools);
 
 Alpine.data('storyEditor', wire => {
     let editor, saveTimer, changeVersion = 0, savedVersion = 0, trigger, confirmationTrigger;
@@ -257,7 +260,7 @@ if (article && toc) {
     if (headings.length > 1) {
         toc.hidden = false;
         headings.forEach((heading, index) => {
-            heading.id = `story-section-${index + 1}`;
+            if (!heading.id) heading.id = `story-section-${index + 1}`;
             const link = document.createElement('a'); link.href = `#${heading.id}`; link.textContent = heading.textContent; toc.querySelector('nav').append(link);
         });
     }
@@ -268,7 +271,7 @@ if (article && quoteInput) {
         const selection = window.getSelection();
         if (selection && article.contains(selection.anchorNode) && article.contains(selection.focusNode)) {
             const quote = selection.toString().trim();
-            if (quote.length >= 10 && quote.length <= 240) quoteInput.value = quote;
+            if (quote.length >= 12 && quote.length <= 240) quoteInput.value = quote;
         }
     });
 }

@@ -1,4 +1,8 @@
 @props(['user', 'size' => 'normal'])
-<span {{ $attributes->merge(['class' => 'avatar avatar-'.$size]) }} aria-hidden="true">
-@if($user->avatar)<img src="{{ str_starts_with($user->avatar, 'http') || str_starts_with($user->avatar, '/') ? $user->avatar : '/storage/'.$user->avatar }}" alt="" width="44" height="44">@else{{ mb_substr($user->name, 0, 1) }}{{ mb_substr(explode(' ', $user->name)[1] ?? '', 0, 1) }}@endif
+@php($avatarUrl = $user?->avatar_url)
+<span {{ $attributes->merge(['class' => 'avatar avatar-'.$size]) }} aria-hidden="true" @if($avatarUrl) x-data="{ imageLoaded: false }" @endif>
+    {{ $user?->initials() ?? '?' }}
+    @if($avatarUrl)
+        <img src="{{ $avatarUrl }}" alt="" width="100" height="100" decoding="async" x-init="imageLoaded = $el.complete && $el.naturalWidth > 0" x-on:load="imageLoaded = true" x-on:error="imageLoaded = false" x-show="imageLoaded" x-cloak>
+    @endif
 </span>

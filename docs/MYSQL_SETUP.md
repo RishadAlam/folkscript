@@ -58,24 +58,23 @@ This was a workspace-specific data transfer, not an automatic cross-database mig
 
 Run `php artisan db:seed` to add missing fixtures. Existing record contents and account access changes are preserved; seed reruns do not reset edited story states, report decisions, or collection membership. Deleted fixtures may be recreated. Demo content is skipped in production unless `SEED_DEMO_CONTENT=true` is explicitly set.
 
-A fresh demo seed creates 17 users and 16 stories: 12 published, two drafts, one scheduled, and one archived. It also creates seven responses, three moderation reports, two revisions, two collections, four notifications, and one pending demonstration allocation. Existing installations may have additional records from development or browser testing.
+The demo seed creates reader, writer, editor, administrator, owner, unverified, and suspended account scenarios, plus published, draft, scheduled, and archived stories. It also creates seven responses, three moderation reports, two revisions, two collections, and four notifications. Existing installations may have additional records from development or browser testing.
 
 Every account below uses the local demo password `Folkscript2026!`.
 
 | Email | Scenario |
 | --- | --- |
-| `admin@folkscript.test` | User access, moderation, settings, and earnings administration |
+| `admin@folkscript.test` | User access, moderation, and settings administration |
 | `owner@folkscript.test` | Super-admin access, including administrator role management |
 | `editor@folkscript.test` | Editorial moderation without account administration |
-| `writer@folkscript.test` | Published, draft, scheduled, and archived stories; collection, revisions, notifications, and earnings |
-| `reader@folkscript.test` | Following feed, saved stories, discussion replies, and premium access restriction |
-| `premium@folkscript.test` | Premium reading through a local role, without a Stripe subscription |
+| `writer@folkscript.test` | Published, draft, scheduled, and archived stories; collection, revisions and notifications |
+| `reader@folkscript.test` | Following feed, saved stories, discussion replies and free reading |
 | `unverified@folkscript.test` | Email-verification requirement |
 | `suspended@folkscript.test` | Suspended-account restrictions and administrator restoration |
 
 Moderation fixtures include open story and response reports, a flagged response awaiting review, and an already resolved report on a hidden response. The writer's scheduled story is initially set seven days ahead of its first seed run; the scheduler will publish it when that date arrives.
 
-The ledger reference `DEMO-NOT-REAL-ALLOCATION-001` is a fictional pending USD 125.00 allocation for the writer account. It has no payment destination, transfer identifier, or paid date. No payment or subscription is created by the seeder. OAuth, external delivery, Stripe, and other integrations remain dependent on their own configuration; fixtures do not verify those services.
+OAuth, external delivery, and optional integrations depend on their own configuration; fixtures do not verify those services. Existing accounts and stories are preserved by the free-publishing migration. The former paid reader role becomes `reader`; obsolete empty billing tables and untouched pending demo allocations are removed. The migration refuses subscriptions, connected billing accounts, and non-demo financial records so they can be archived first. See [the free-publishing migration record](FREE_PUBLISHING.md) for backup and verification details.
 
 ## SQLite alternative
 

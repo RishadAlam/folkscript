@@ -1,7 +1,7 @@
 @php
     $script = config('analytics.plausible_script_url');
     $endpoint = config('analytics.plausible_endpoint');
-    $publicPage = request()->is('/', 'explore', 'search', 'trending', 'topic/*', '@*', 'about', 'membership');
+    $publicPage = request()->is('/', 'explore', 'search', 'trending', 'topic/*', '@*', 'about');
     $enabled = config('analytics.enabled') && $publicPage && request()->header('DNT') !== '1';
     $validScript = is_string($script) && filter_var($script, FILTER_VALIDATE_URL) && parse_url($script, PHP_URL_SCHEME) === 'https';
     $validEndpoint = is_string($endpoint) && filter_var($endpoint, FILTER_VALIDATE_URL) && parse_url($endpoint, PHP_URL_SCHEME) === 'https';

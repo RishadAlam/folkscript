@@ -3,7 +3,6 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\MembershipController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +21,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/{provider}/callback', [AuthController::class, 'socialCallback'])->name('social.callback');
 });
 
-Route::get('/membership', [MembershipController::class, 'index'])->name('membership');
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -44,9 +42,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/tokens', [AccountController::class, 'createToken'])->middleware('verified')->name('settings.tokens.create');
     });
     Route::delete('/settings/tokens/{token}', [AccountController::class, 'revokeToken'])->name('settings.tokens.revoke');
-    Route::post('/membership/checkout', [MembershipController::class, 'checkout'])->middleware(['verified', 'throttle:6,1,membership-checkout'])->name('membership.checkout');
-    Route::post('/membership/portal', [MembershipController::class, 'portal'])->name('membership.portal');
-    Route::post('/membership/connect', [MembershipController::class, 'connect'])->middleware(['verified', 'throttle:6,1,membership-connect'])->name('membership.connect');
     Route::get('/admin', [AdminController::class, 'index'])->name('admin');
     Route::patch('/admin/users/{user}', [AdminController::class, 'user'])->name('admin.users.update');
     Route::patch('/admin/reports/{report}', [AdminController::class, 'report'])->name('admin.reports.update');

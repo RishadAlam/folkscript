@@ -1,0 +1,11 @@
+/* A photo and its initials share one fixed footprint, including failed image loads. */
+.avatar { position:relative; line-height:1; vertical-align:middle; isolation:isolate; }
+.avatar > img { position:absolute; inset:0; width:100%; height:100%; border-radius:inherit; object-fit:cover; background:inherit; }
+.avatar.account-avatar { background:var(--ink); color:var(--paper); font-size:1.6875rem; }
+.admin-person-identity { display:flex; align-items:flex-start; gap:12px; min-width:0; }
+.admin-person-identity > div { min-width:0; }
+.admin-person-identity > .avatar { margin-top:2px; }
+.admin-person-identity strong { font-weight:550; }
+.admin-writer-identity { display:inline-flex; align-items:center; gap:8px; }
+.admin-writer-identity:hover { text-decoration:underline; }
+@media(max-width:640px) { .avatar.account-avatar { font-size:1.4375rem; } }

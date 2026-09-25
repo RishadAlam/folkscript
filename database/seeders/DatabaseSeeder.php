@@ -23,11 +23,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $permissions = ['posts.create', 'posts.publish', 'posts.edit-own', 'posts.edit-any', 'comments.create', 'comments.moderate', 'categories.manage', 'users.manage', 'payouts.process', 'settings.manage', 'analytics.view'];
+        $permissions = ['posts.create', 'posts.publish', 'posts.edit-own', 'posts.edit-any', 'comments.create', 'comments.moderate', 'categories.manage', 'users.manage', 'settings.manage', 'analytics.view'];
         foreach ($permissions as $permission) { Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']); }
         $roles = [
             'reader' => ['comments.create'],
-            'premium-reader' => ['comments.create'],
             'author' => ['comments.create', 'posts.create', 'posts.publish', 'posts.edit-own', 'analytics.view'],
             'editor' => ['comments.create', 'posts.create', 'posts.publish', 'posts.edit-own', 'posts.edit-any', 'comments.moderate', 'categories.manage', 'analytics.view'],
             'admin' => $permissions,
@@ -65,22 +64,22 @@ class DatabaseSeeder extends Seeder
         }
 
         $stories = [
-            ['elena', 'The quiet art of paying attention', 'In a world that never stops asking for more, there is something quietly radical about noticing what is already here.', 'Life', 'attention', 'Mindful living, Creativity', 2, false],
-            ['james', 'The cities we build, the lives we shape', 'A walk through the spaces between buildings reveals what our cities really value—and what we might do differently.', 'Design', 'city', 'Architecture, Urban life', 4, false],
-            ['amara', 'Making room for a slower kind of creativity', 'The most meaningful work rarely arrives in a hurry. What happens when we give our ideas the space they need?', 'Culture', 'studio', 'Creativity, Work', 6, false],
-            ['oliver', 'A little further from the beaten path', 'Beyond the itinerary and the postcard views, the best journeys leave room for the unexpected.', 'Travel', 'nature', 'Travel, Nature', 8, false],
-            ['elena', 'The objects we choose to keep', 'On well-worn ceramics, handwritten notes, and the everyday things that quietly become a part of who we are.', 'Design', 'design', 'Design, Intentional living', 10, false],
-            ['james', 'A more human future for technology', 'Progress is not only a question of what we can build. It is also a question of what deserves our attention.', 'Technology', 'book', 'Technology, Human connection', 14, false],
-            ['amara', 'Why we still need independent voices', 'In a world of familiar opinions, a personal point of view can open a window we did not know was there.', 'Culture', 'book', 'Writing, Culture', 24, false],
-            ['oliver', 'What the forest knows about beginning again', 'A season spent walking the same trail taught me that growth is often happening long before we can see it.', 'Life', 'nature', 'Nature, Personal growth', 32, true],
-            ['alex', 'Finding a little wonder in the everyday', 'You do not need a plane ticket or a perfect morning to see things differently. Sometimes all it takes is a second look.', 'Life', 'attention', 'Life, Mindful living', 40, false],
-            ['james', 'Good design leaves room for real life', 'The things we love to use are rarely the loudest in the room. They simply make a little more space for us.', 'Design', 'design', 'Design, Everyday life', 48, true],
+            ['elena', 'The quiet art of paying attention', 'In a world that never stops asking for more, there is something quietly radical about noticing what is already here.', 'Life', 'attention', 'Mindful living, Creativity', 2],
+            ['james', 'The cities we build, the lives we shape', 'A walk through the spaces between buildings reveals what our cities really value—and what we might do differently.', 'Design', 'city', 'Architecture, Urban life', 4],
+            ['amara', 'Making room for a slower kind of creativity', 'The most meaningful work rarely arrives in a hurry. What happens when we give our ideas the space they need?', 'Culture', 'studio', 'Creativity, Work', 6],
+            ['oliver', 'A little further from the beaten path', 'Beyond the itinerary and the postcard views, the best journeys leave room for the unexpected.', 'Travel', 'nature', 'Travel, Nature', 8],
+            ['elena', 'The objects we choose to keep', 'On well-worn ceramics, handwritten notes, and the everyday things that quietly become a part of who we are.', 'Design', 'design', 'Design, Intentional living', 10],
+            ['james', 'A more human future for technology', 'Progress is not only a question of what we can build. It is also a question of what deserves our attention.', 'Technology', 'book', 'Technology, Human connection', 14],
+            ['amara', 'Why we still need independent voices', 'In a world of familiar opinions, a personal point of view can open a window we did not know was there.', 'Culture', 'book', 'Writing, Culture', 24],
+            ['oliver', 'What the forest knows about beginning again', 'A season spent walking the same trail taught me that growth is often happening long before we can see it.', 'Life', 'nature', 'Nature, Personal growth', 32],
+            ['alex', 'Finding a little wonder in the everyday', 'You do not need a plane ticket or a perfect morning to see things differently. Sometimes all it takes is a second look.', 'Life', 'attention', 'Life, Mindful living', 40],
+            ['james', 'Good design leaves room for real life', 'The things we love to use are rarely the loudest in the room. They simply make a little more space for us.', 'Design', 'design', 'Design, Everyday life', 48],
         ];
         $seeded = [];
-        foreach ($stories as $index => [$authorKey, $title, $excerpt, $category, $image, $tagNames, $hours, $premium]) {
+        foreach ($stories as $index => [$authorKey, $title, $excerpt, $category, $image, $tagNames, $hours]) {
             $author = $authors[$authorKey];
             $body = $this->storyBody($excerpt, $category, $image);
-            $post = Post::firstOrCreate(['author_id' => $author->id, 'slug' => Str::slug($title)], ['title' => $title, 'excerpt' => $excerpt, 'body_html' => $body, 'body_json' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $excerpt]]]]], 'cover_image' => '/images/story-'.$image.'.jpg', 'status' => 'published', 'is_premium' => $premium, 'published_at' => now()->subHours($hours), 'reading_time' => 5 + $index % 4, 'meta_title' => Str::limit($title.' — Stories and ideas on Folkscript', 60, ''), 'meta_description' => Str::limit($excerpt.' Discover independent perspectives on Folkscript, written by the people and read by everyone.', 160, ''), 'views' => 1250 - $index * 87]);
+            $post = Post::firstOrCreate(['author_id' => $author->id, 'slug' => Str::slug($title)], ['title' => $title, 'excerpt' => $excerpt, 'body_html' => $body, 'body_json' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $excerpt]]]]], 'cover_image' => '/images/story-'.$image.'.jpg', 'status' => 'published', 'published_at' => now()->subHours($hours), 'reading_time' => 5 + $index % 4, 'meta_title' => Str::limit($title.' — Stories and ideas on Folkscript', 60, ''), 'meta_description' => Str::limit($excerpt.' Discover independent perspectives on Folkscript, written by the people and read by everyone.', 160, ''), 'views' => 1250 - $index * 87]);
             if ($post->wasRecentlyCreated) {
                 $post->categories()->attach($categories[$category]->id);
                 foreach (explode(', ', $tagNames) as $tagName) {

@@ -1,4 +1,7 @@
 # Folkscript — Universal Blogging Platform
+
+> **Historical reference:** This document records an earlier product scope. The September 25, 2026 decision makes Folkscript free, open-source, and nonprofit. All premium, membership, subscription, payment, and earnings references below are superseded and describe removed features, not current requirements or deployment steps. See [the current scope](FREE_PUBLISHING.md) and [PRODUCT.md](../PRODUCT.md).
+
 ### Build Plan & Project Brief for Codex 6 Astra
 
 > **Purpose of this document:** Feed this file to Codex CLI running GPT-6 Astra (save it as `AGENTS.md` in your project root — that's the file Codex reads automatically at session start, the same way `CLAUDE.md` works for Claude Code) as the source of truth for the build. It defines the product, the stack, the data model, the full SEO/GEO layer, and a phased task list so work can proceed milestone by milestone instead of as one giant prompt.

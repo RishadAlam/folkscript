@@ -1,9 +1,15 @@
 // Public interactions progressively enhance ordinary, CSRF-protected forms.
 let feedbackTimer;
+window.addEventListener('folkscript:feedback', () => {
+    clearTimeout(feedbackTimer);
+    const region = document.getElementById('action-feedback');
+    if (region) region.hidden = true;
+});
 function feedback(message, failed = false) {
     const region = document.getElementById('action-feedback');
     if (!region) return;
     clearTimeout(feedbackTimer);
+    window.dispatchEvent(new CustomEvent('folkscript:feedback'));
     region.textContent = message;
     region.classList.toggle('is-error', failed);
     region.hidden = false;
@@ -19,6 +25,7 @@ document.addEventListener('submit', async event => {
     const kind = form.dataset.toggleAction;
     const stateKey = { bookmark: 'bookmarked', follow: 'following', react: 'reacted' }[kind];
     if (!stateKey) return;
+    const hadFocus = form.contains(document.activeElement);
     button.disabled = true;
     form.setAttribute('aria-busy', 'true');
     try {
@@ -51,6 +58,10 @@ document.addEventListener('submit', async event => {
                     icon.dataset.lucide = icons[kind][Number(enabled)];
                     icon.className = 'icon';
                     icon.setAttribute('aria-hidden', 'true');
+                    for (const attribute of ['style', 'width', 'height']) {
+                        const value = old.getAttribute(attribute);
+                        if (value !== null) icon.setAttribute(attribute, value);
+                    }
                     old.replaceWith(icon);
                 }
             }
@@ -58,16 +69,46 @@ document.addEventListener('submit', async event => {
             if (count && Number.isFinite(data.count)) count.textContent = data.count.toLocaleString();
         });
         document.dispatchEvent(new CustomEvent('folkscript:icons'));
+        if (kind === 'follow' && Number.isFinite(data.count)) {
+            document.querySelectorAll('[data-follower-count]').forEach(counter => {
+                if (counter.dataset.followUrl !== form.action) return;
+                counter.textContent = `${data.count.toLocaleString()} ${data.count === 1 ? counter.dataset.singular : counter.dataset.plural}`;
+            });
+        }
         const messages = { bookmark: ['Removed from saved stories.', 'Story saved. Find it in Saved stories.'], follow: ['Removed from your following feed.', 'Following. New stories will appear in your feed.'], react: ['Appreciation removed.', 'Appreciation added.'] };
         feedback(messages[kind][Number(enabled)]);
         if (!enabled && form.hasAttribute('data-remove-on-off')) {
-            form.closest('.story-card')?.remove();
+            const card = form.closest('.story-card');
+            const restoreFocus = hadFocus && (document.activeElement === document.body || card?.contains(document.activeElement));
+            const neighbour = card?.nextElementSibling || card?.previousElementSibling;
+            card?.remove();
             const count = document.querySelector('[data-saved-count]');
             if (count) count.textContent = String(Math.max(0, Number(count.textContent) - 1));
+            const removalHint = document.querySelector('[data-saved-removal-hint]');
+            if (removalHint && Number(count?.textContent) === 0) removalHint.hidden = true;
+            let nextFocus = neighbour?.querySelector('[data-toggle-action="bookmark"] button');
+            const pagination = document.querySelector('[data-saved-pagination]');
+            if (pagination) {
+                // A removed item changes the page's range; keep navigation but omit its stale summary.
+                const summary = pagination.querySelector('nav p');
+                if (summary) summary.hidden = true;
+            }
             if (!document.querySelector('.saved-list-items .story-card')) {
                 const empty = document.querySelector('[data-saved-empty]');
-                if (empty) empty.hidden = false;
+                if (empty) {
+                    empty.hidden = false;
+                    if (Number(count?.textContent) === 0) {
+                        const title = empty.querySelector('[data-saved-empty-title]');
+                        const description = empty.querySelector('[data-saved-empty-description]');
+                        if (title) title.textContent = title.dataset.emptyTitle;
+                        if (description) description.textContent = description.dataset.emptyDescription;
+                        empty.querySelector('[data-saved-remaining]')?.setAttribute('hidden', '');
+                    }
+                    nextFocus = empty.querySelector('a:not([hidden])');
+                }
+                if (pagination) pagination.hidden = true;
             }
+            if (restoreFocus) nextFocus?.focus();
         }
     } catch (error) {
         feedback(error instanceof TypeError ? 'You seem to be offline. Reconnect and try again.' : error.message, true);

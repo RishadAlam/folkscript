@@ -11,10 +11,19 @@
         </aside>
         <div class="admin-main">
             <header class="admin-topbar">
-                <div class="admin-breadcrumb"><span>{{ __('Administration') }}</span><x-icon name="chevron-right" size="14" /><strong>{{ $title }}</strong></div>
+                <nav class="admin-breadcrumb" aria-label="{{ __('Breadcrumb') }}"><a href="{{ route('admin') }}" aria-label="{{ __('Back to admin dashboard') }}">{{ __('Administration') }}</a><x-icon name="chevron-right" size="14" /><strong aria-current="page">{{ $title }}</strong></nav>
                 <div class="admin-topbar-actions"><a href="/" class="admin-view-site">{{ __('View site') }}<x-icon name="arrow-up-right" size="16" /></a><button class="icon-button" :aria-pressed="dark" @click="toggleTheme()" aria-label="{{ __('Toggle color theme') }}" title="{{ __('Switch between light and dark theme') }}"><span x-show="!dark"><x-icon name="moon" size="18" /></span><span x-show="dark" x-cloak><x-icon name="sun" size="18" /></span></button></div>
             </header>
-            <details class="admin-mobile-navigation"><summary><x-icon name="menu" size="20" /><span>{{ $title }}</span><span class="muted">{{ __('Menu') }}</span></summary><nav aria-label="{{ __('Administration on mobile') }}"><x-admin-navigation :section="$section" :counts="$counts" /><a href="/settings" class="admin-nav-link"><x-icon name="settings" size="18" />{{ __('Your account') }}</a></nav></details>
+            <details class="admin-mobile-navigation" @keydown.escape.prevent.stop="$el.open = false; $el.querySelector('summary').focus()">
+                <summary><x-icon name="menu" size="20" /><span>{{ $title }}</span><span class="admin-menu-label muted"><span class="admin-menu-open">{{ __('Menu') }}</span><span class="admin-menu-close">{{ __('Close') }}</span><x-icon name="chevron-right" size="16" /></span></summary>
+                <nav aria-label="{{ __('Administration on mobile') }}">
+                    <x-admin-navigation :section="$section" :counts="$counts" />
+                    <div class="admin-mobile-account">
+                        <a href="{{ route('settings') }}" class="admin-account-link"><x-avatar :user="auth()->user()" size="small" /><span><strong>{{ auth()->user()->name }}</strong><small>{{ __('Your account') }}</small></span></a>
+                        <form method="post" action="/logout">@csrf<button class="admin-row-action" type="submit"><x-icon name="log-out" size="17" />{{ __('Sign out') }}</button></form>
+                    </div>
+                </nav>
+            </details>
             <div class="admin-content" id="admin-content" tabindex="-1" x-init="$nextTick(() => { const invalid = $el.querySelector('[aria-invalid=true]'); if (invalid) invalid.focus(); })">
                 <header class="admin-page-heading"><div><h1>{{ $title }}</h1>@if($description)<p>{{ $description }}</p>@endif</div>@isset($actions)<div class="admin-heading-actions">{{ $actions }}</div>@endisset</header>
                 @if(session('error'))<div class="notice notice-error" role="alert">{{ session('error') }}</div>@endif

@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Cashier\Billable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -21,14 +20,14 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class User extends Authenticatable implements MustVerifyEmail, HasMedia
 {
-    use Billable, HasApiTokens, HasFactory, HasRoles, InteractsWithMedia, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, InteractsWithMedia, Notifiable, TwoFactorAuthenticatable;
 
     protected $fillable = ['name', 'username', 'email', 'password', 'bio', 'avatar', 'cover_image', 'location', 'social_links', 'newsletter_enabled'];
-    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'stripe_id', 'stripe_connect_id'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'social_links' => 'array', 'newsletter_enabled' => 'boolean', 'two_factor_confirmed_at' => 'datetime', 'suspended_at' => 'datetime', 'trial_ends_at' => 'datetime'];
+        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'social_links' => 'array', 'newsletter_enabled' => 'boolean', 'two_factor_confirmed_at' => 'datetime', 'suspended_at' => 'datetime'];
     }
 
     public function pinnedPost(): BelongsTo { return $this->belongsTo(Post::class, 'pinned_post_id')->published(); }
@@ -44,11 +43,6 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
         return ! $this->suspended_at && $this->hasVerifiedEmail() && $this->hasAnyRole(['author', 'editor', 'admin', 'super-admin']);
     }
 
-    public function hasPremiumAccess(): bool
-    {
-        return ! $this->suspended_at && ($this->hasAnyRole(['premium-reader', 'admin', 'super-admin']) || $this->subscribed('default'));
-    }
-
     public function markEmailAsVerified(): bool
     {
         $result = $this->forceFill(['email_verified_at' => $this->freshTimestamp()])->save();
@@ -58,7 +52,28 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
 
     public function initials(): string
     {
-        return collect(explode(' ', trim($this->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('');
+        $parts = preg_split('/\s+/u', trim($this->name ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+
+        return collect($parts)->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: '?';
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $avatar = trim($this->avatar ?? '');
+        if ($avatar === '' || preg_match('/[\x00-\x20\\\\]/', $avatar)) {
+            return null;
+        }
+
+        if (filter_var($avatar, FILTER_VALIDATE_URL) && in_array(strtolower((string) parse_url($avatar, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+            return $avatar;
+        }
+
+        // Support existing public-disk paths without accepting schemes or protocol-relative URLs.
+        if (str_starts_with($avatar, '//') || str_contains($avatar, ':') || preg_match('#(^|/)\.\.?(/|$)#', $avatar)) {
+            return null;
+        }
+
+        return str_starts_with($avatar, '/') ? $avatar : '/storage/'.preg_replace('#^storage/#', '', $avatar);
     }
 
     public function registerMediaCollections(): void

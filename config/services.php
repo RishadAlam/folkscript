@@ -38,5 +38,4 @@ return [
     'google' => ['client_id' => env('GOOGLE_CLIENT_ID'), 'client_secret' => env('GOOGLE_CLIENT_SECRET'), 'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL').'/auth/google/callback'), 'site_verification' => env('GOOGLE_SITE_VERIFICATION')],
     'github' => ['client_id' => env('GITHUB_CLIENT_ID'), 'client_secret' => env('GITHUB_CLIENT_SECRET'), 'redirect' => env('GITHUB_REDIRECT_URI', env('APP_URL').'/auth/github/callback')],
     'bing' => ['site_verification' => env('BING_SITE_VERIFICATION')],
-    'stripe' => ['payouts_enabled' => env('STRIPE_PAYOUTS_ENABLED', false), 'monthly_price' => env('STRIPE_MONTHLY_PRICE_ID'), 'yearly_price' => env('STRIPE_YEARLY_PRICE_ID'), 'membership_monthly' => env('MEMBERSHIP_MONTHLY_PRICE', 8), 'membership_yearly' => env('MEMBERSHIP_YEARLY_PRICE', 80)],
 ];

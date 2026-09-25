@@ -119,7 +119,7 @@ class AdminController extends Controller
         abort_unless(! $actor->suspended_at && $actor->hasVerifiedEmail() && $actor->hasAnyRole(['admin', 'super-admin']), 403);
         abort_if($actor->id === $user->id, 422, 'You cannot change your own access here.');
         if (! $actor->hasRole('super-admin')) { abort_if($user->hasAnyRole(['admin', 'super-admin']), 403); }
-        $allowed = $actor->hasRole('super-admin') ? ['reader', 'premium-reader', 'author', 'editor', 'admin'] : ['reader', 'premium-reader', 'author', 'editor'];
+        $allowed = $actor->hasRole('super-admin') ? ['reader', 'author', 'editor', 'admin'] : ['reader', 'author', 'editor'];
         try {
             $data = $request->validateWithBag('access-'.$user->id, ['role' => ['required', Rule::in($allowed)], 'suspended' => ['nullable', 'boolean']]);
         } catch (ValidationException $exception) {

@@ -1,5 +1,8 @@
 # MySQL and administration review
 
+> **Historical reference:** This document records an earlier product scope. The September 25, 2026 decision makes Folkscript free, open-source, and nonprofit. All premium, membership, subscription, payment, and earnings references below are superseded and describe removed features, not current requirements or deployment steps. See [the current scope](FREE_PUBLISHING.md) and [PRODUCT.md](../PRODUCT.md).
+
+
 This review follows the earlier [interface refinement](UX_REVIEW.md). The application now uses the local MySQL `folkscript` database; the original SQLite file was retained. [Setup and migration notes](MYSQL_SETUP.md) document the connection, data transfer, and demonstration accounts.
 
 ## Technical verification

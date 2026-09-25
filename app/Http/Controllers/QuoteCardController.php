@@ -15,7 +15,6 @@ class QuoteCardController extends Controller
         $story = Post::query()->published()->with('author')->findOrFail($post);
         $user = $request->user();
         abort_if($user?->suspended_at, 403, 'This account is suspended.');
-        abort_if($story->is_premium && (! $user || ($story->author_id !== $user->id && ! $user->hasPremiumAccess())), 403, 'A membership is required to share text from this story.');
 
         $data = $request->validate(['quote' => ['required', 'string', 'min:12', 'max:240']]);
         $quote = $this->normalize($data['quote']);

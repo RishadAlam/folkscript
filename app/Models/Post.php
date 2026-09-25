@@ -14,11 +14,11 @@ class Post extends Model
 {
     use HasFactory, Searchable;
 
-    protected $fillable = ['author_id', 'title', 'slug', 'excerpt', 'body_html', 'body_json', 'cover_image', 'status', 'is_premium', 'published_at', 'reading_time', 'meta_title', 'meta_description', 'canonical_url', 'og_image_path', 'views'];
+    protected $fillable = ['author_id', 'title', 'slug', 'excerpt', 'body_html', 'body_json', 'cover_image', 'status', 'published_at', 'reading_time', 'meta_title', 'meta_description', 'canonical_url', 'og_image_path', 'views'];
 
     protected function casts(): array
     {
-        return ['body_json' => 'array', 'is_premium' => 'boolean', 'published_at' => 'datetime', 'views' => 'integer'];
+        return ['body_json' => 'array', 'published_at' => 'datetime', 'views' => 'integer'];
     }
 
     public function author(): BelongsTo { return $this->belongsTo(User::class, 'author_id'); }
@@ -50,11 +50,11 @@ class Post extends Model
     public function shouldBeSearchable(): bool { return $this->status === 'published' && $this->published_at?->isPast() && $this->author && ! $this->author->suspended_at; }
     public function searchIndexShouldBeUpdated(): bool
     {
-        return $this->wasRecentlyCreated || $this->wasChanged(['author_id', 'title', 'excerpt', 'body_html', 'is_premium', 'status', 'published_at']);
+        return $this->wasRecentlyCreated || $this->wasChanged(['author_id', 'title', 'excerpt', 'body_html', 'status', 'published_at']);
     }
 
     public function toSearchableArray(): array
     {
-        return ['id' => $this->id, 'title' => $this->title, 'excerpt' => $this->excerpt, 'body' => $this->is_premium ? '' : strip_tags($this->body_html ?? ''), 'author' => $this->author->name, 'tags' => $this->tags->pluck('name')->all()];
+        return ['id' => $this->id, 'title' => $this->title, 'excerpt' => $this->excerpt, 'body' => strip_tags($this->body_html ?? ''), 'author' => $this->author->name, 'tags' => $this->tags->pluck('name')->all()];
     }
 }

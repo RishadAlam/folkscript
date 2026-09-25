@@ -1,0 +1,98 @@
+/* Reading and task typography share a restrained editorial identity. */
+:root {
+    --font-ui: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-reading: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+    --text-body: 1rem;
+    --text-small: .875rem;
+    --text-reading: 1.25rem;
+    --reading-leading: 1.75;
+}
+
+body {
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: 1.6;
+    font-optical-sizing: auto;
+}
+h1, h2, h3, h4, .editor-title, .footer-wordmark {
+    font-family: var(--font-reading);
+    font-weight: 600;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+}
+.home-intro h1 { letter-spacing: -.025em; font-weight: 500; }
+.home-intro h1 em { font-weight: 500; }
+.lead-copy h2, .article-top h1, .editor-title { letter-spacing: -.02em; }
+.article-top h1 { font-weight: 600; line-height: 1.16; }
+.story-title, .story-card h2, .story-card h3 { font-weight: 600; line-height: 1.3; }
+.desktop-nav, .mobile-menu, .account-dropdown, .btn, .text-link,
+.tab-nav, .topic-strip, input, select, textarea, button {
+    font-family: var(--font-ui);
+}
+.desktop-nav, .mobile-menu, .tab-nav, .account-dropdown { font-size: 1rem; }
+.btn, .text-link, .field>label, .field-label, .lead-author strong,
+.story-author, .comment-head>a { font-weight: 600; }
+.form-input, .editor-sidebar .form-input { font-size: 1rem; line-height: 1.5; }
+.story-excerpt, .lead-copy p, .profile-header p, .author-about p,
+.notification-item p, .writer-discovery p, .collection-link p { font-size: 1rem; line-height: 1.65; }
+.article-deck { font-size: 1.25rem; line-height: 1.6; max-width: 65ch; }
+.article-body { font-size: 1rem; line-height: 1.6; max-width: 760px; }
+.article-body>.prose, .legal-page .prose, .tiptap {
+    font-family: var(--font-reading);
+    font-size: var(--text-reading);
+    line-height: var(--reading-leading);
+    font-weight: 400;
+    letter-spacing: 0;
+    max-width: 68ch;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+.editor-body .tiptap { max-width: 68ch; margin-inline: auto; overflow-wrap: break-word; }
+.editor-excerpt { font-family: var(--font-ui); font-size: 1.125rem; }
+.prose p, .tiptap p { margin-bottom: 1.25em; }
+.prose h2 { font-size: 2rem; line-height: 1.25; margin-block: 1.5em .6em; }
+.prose h3 { font-size: 1.5rem; line-height: 1.35; margin-block: 1.4em .6em; }
+.prose blockquote { font-size: 1.5rem; line-height: 1.6; }
+.prose blockquote p { margin-bottom: 0; }
+.prose pre, .prose code { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; }
+.prose pre { font-size: .875rem; line-height: 1.65; }
+.prose a { text-underline-offset: .15em; text-decoration-thickness: 1px; }
+.legal-page .prose { font-size: 1.125rem; }
+.article-toc, .quote-maker, .article-actions, .article-tags, .author-about,
+.comments-section { font-family: var(--font-ui); }
+.comment { font-size: 1rem; line-height: 1.65; }
+.comment-head { line-height: 1.5; }
+.comment-head>span:not(.avatar) { font-size: .875rem; }
+.author-about h3 { font-family: var(--font-ui); font-size: 1.25rem; letter-spacing: 0; }
+
+/* Dense account and moderation tasks use a predictable sans-serif hierarchy. */
+.admin-body { font-size: 1rem; }
+.admin-body :is(h1,h2,h3,h4), .account-page :is(h1,h2,h3),
+.platform-page :is(h1,h2,h3), .editor-sidebar :is(h2,h3),
+.editor-topbar h1, .notification-item h2 {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+.admin-page-heading p, .admin-queue-row p, .admin-case-content p,
+.admin-report-reason p, .admin-activity-preview p, .admin-empty p,
+.admin-taxonomy-help, .admin-confirm p { font-size: 1rem; line-height: 1.6; }
+.admin-nav-link, .admin-body .btn, .admin-mobile-navigation>summary { font-size: 1rem; }
+.admin-page .admin-table td, .admin-page .admin-table th,
+.admin-breadcrumb, .admin-status, .admin-row-action { font-size: .875rem; }
+.admin-page .admin-table .admin-story-title { font-size: 1rem; font-weight: 600; }
+.dark { --reading-leading: 1.8; }
+.dark .article-body>.prose, .dark .tiptap { font-weight: 420; letter-spacing: .003em; }
+
+@media (max-width: 600px) {
+    :root { --text-reading: 1.125rem; }
+    .article-body { padding-inline: 22px; }
+    .article-deck { font-size: 1.125rem; }
+    .prose h2 { font-size: 1.75rem; }
+    .prose h3, .prose blockquote { font-size: 1.375rem; }
+    .article-byline .lead-author { min-width: 0; }
+    .article-byline .lead-author>div { min-width: 0; }
+    .article-byline .lead-author>div>span { line-height: 1.5; }
+    .article-byline .btn { flex-shrink: 0; }
+}

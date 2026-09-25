@@ -26,7 +26,6 @@ class PostService
             'body_json' => ['nullable', 'array'],
             'cover_image' => ['nullable', 'string', 'max:2048', 'regex:~^(https://[^\s]+|/(?:storage|images)/[^\s]+)$~'],
             'status' => ['required', Rule::in(['draft', 'published', 'scheduled', 'archived'])],
-            'is_premium' => ['boolean'],
             'published_at' => ['nullable', 'date'],
             'meta_title' => ['nullable', 'string', 'max:60'],
             'meta_description' => ['nullable', 'string', 'max:160'],

@@ -21,7 +21,6 @@ class PostEditor extends Component
     public string $coverImage = '';
     #[Locked]
     public string $status = 'draft';
-    public bool $isPremium = false;
     public string $publishedAt = '';
     public string $metaTitle = '';
     public string $metaDescription = '';
@@ -42,7 +41,6 @@ class PostEditor extends Component
             $this->slug = $post->slug;
             $this->coverImage = $post->cover_image ?? '';
             $this->status = $post->status;
-            $this->isPremium = $post->is_premium;
             $this->publishedAt = $post->published_at?->format('Y-m-d\TH:i') ?? '';
             $this->metaTitle = $post->meta_title ?? '';
             $this->metaDescription = $post->meta_description ?? '';
@@ -84,7 +82,7 @@ class PostEditor extends Component
     {
         $this->resetErrorBag();
         try {
-            $this->post = app(PostService::class)->save(auth()->user(), ['title' => $this->title, 'excerpt' => $this->excerpt, 'body_html' => $this->bodyHtml, 'body_json' => $this->bodyJson, 'slug' => $this->slug ?: null, 'cover_image' => $this->coverImage ?: null, 'status' => $status, 'is_premium' => $this->isPremium, 'published_at' => $this->publishedAt ?: null, 'meta_title' => $this->metaTitle ?: null, 'meta_description' => $this->metaDescription ?: null, 'canonical_url' => $this->canonicalUrl ?: null, 'category_ids' => $this->categoryIds, 'tag_names' => $this->tagNames], $this->post);
+            $this->post = app(PostService::class)->save(auth()->user(), ['title' => $this->title, 'excerpt' => $this->excerpt, 'body_html' => $this->bodyHtml, 'body_json' => $this->bodyJson, 'slug' => $this->slug ?: null, 'cover_image' => $this->coverImage ?: null, 'status' => $status, 'published_at' => $this->publishedAt ?: null, 'meta_title' => $this->metaTitle ?: null, 'meta_description' => $this->metaDescription ?: null, 'canonical_url' => $this->canonicalUrl ?: null, 'category_ids' => $this->categoryIds, 'tag_names' => $this->tagNames], $this->post);
         } catch (\Illuminate\Validation\ValidationException $exception) {
             $fields = ['body_html' => 'bodyHtml', 'cover_image' => 'coverImage', 'published_at' => 'publishedAt', 'meta_title' => 'metaTitle', 'meta_description' => 'metaDescription', 'canonical_url' => 'canonicalUrl', 'category_ids' => 'categoryIds', 'tag_names' => 'tagNames'];
             throw \Illuminate\Validation\ValidationException::withMessages(collect($exception->errors())->mapWithKeys(fn ($messages, $key) => [$fields[$key] ?? (str_starts_with($key, 'category_ids.') ? 'categoryIds' : $key) => $messages])->all());

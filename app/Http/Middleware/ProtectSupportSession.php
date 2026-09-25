@@ -19,7 +19,7 @@ class ProtectSupportSession
                 abort(403, 'This support session has expired. Sign in again to continue.');
             }
             if (! $request->is('support/stop')) {
-                abort_if(!$request->isMethodSafe() || $request->is('settings*', 'membership*', 'earnings*', 'admin*', 'payouts*', 'api*', 'horizon*', 'email/*'), 403, 'Support sessions are read-only. Return to your administrator account to make changes.');
+                abort_if(!$request->isMethodSafe() || $request->is('settings*', 'admin*', 'api*', 'horizon*', 'email/*'), 403, 'Support sessions are read-only. Return to your administrator account to make changes.');
             }
         }
         return $next($request);

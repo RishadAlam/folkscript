@@ -1,6 +1,6 @@
 # Running Folkscript
 
-Folkscript runs locally without paid services. Production email, OAuth, billing, media storage, indexing, analytics, and the public domain require operator-owned accounts and credentials. The repository does not provision those accounts or represent a deployed production service.
+Folkscript runs locally without paid services. Production email, OAuth, media storage, indexing, analytics, and the public domain require operator-owned accounts and credentials. The repository does not provision those accounts or represent a deployed production service.
 
 ## Local development
 
@@ -60,14 +60,16 @@ Point the document root to `public/`, use a supported PHP version, install Compo
 
 Configure a supervised `php artisan queue:work --tries=3 --timeout=120` process and a cron entry running `php artisan schedule:run` every minute. On each deployment, restart workers. Enable HTTPS, configure trusted proxies appropriately for the provider, and set `SESSION_SECURE_COOKIE=true` on HTTPS production sites.
 
+## Upgrading to the free publishing model
+
+Back up the database and uploads before deploying. Run the forward migrations with `php artisan migrate --force`; never reset the database. The migration preserves users and stories, converts the obsolete paid reader role to `reader`, and removes payment tables and columns. Dependency installation removes the payment packages. Remove any old payment-provider secrets from the deployment environment; no payment service is used by this project. The migration refuses existing subscriptions, connected billing accounts, and non-demo financial records; retire and archive those records before retrying. Rebuild assets, clear/rebuild configuration and view caches, and restart queue workers. When using a persistent Scout engine such as Meilisearch, run `php artisan scout:import 'App\Models\Post'` to index the full text of formerly restricted stories. The local collection driver has no persistent index. See [free-publishing scope](FREE_PUBLISHING.md) for migration behavior and verified results.
+
 ## External services
 
 | Service | Configuration and required work |
 | --- | --- |
 | Mail | Configure the application's `MAIL_*` values; verify sending domains and test verification/password-reset delivery. |
 | Google / GitHub login | Register OAuth apps, configure their client IDs/secrets, and whitelist the exact callback URLs from `php artisan route:list --path=auth`. |
-| Stripe membership | Set Stripe keys, the configured recurring price ID, and the webhook signing secret. Configure the Cashier webhook route and required events in Stripe. Verify checkout and cancellation in test mode before live mode. |
-| Creator payouts | Enable Stripe Connect and complete platform onboarding. Record only reconciled, explicitly approved earnings allocations in `/payouts`. Set `STRIPE_PAYOUTS_ENABLED=true` after test-mode verification. A transfer moves platform funds to a connected Stripe account; bank settlement is handled separately by Stripe. Ambiguous transfer results remain locked for reconciliation. |
 | Object storage | Set `MEDIA_DISK=s3` plus `AWS_*` credentials, endpoint and public media URL. Story/profile uploads are tracked by Media Library and immediately converted to WebP (1800px stories/covers, 320px avatars). Local uploads use `MEDIA_DISK=public` with `storage:link`. Use a CDN and backups policy suitable for uploads. |
 | Meilisearch | Set `SCOUT_DRIVER=meilisearch`, host and private key; run `scout:import` and keep queue workers running. Local database search remains useful without a dedicated search service. |
 | Reverb | Set `BROADCAST_CONNECTION=reverb`, the `REVERB_*` keys/host/origin values and public `VITE_REVERB_*` values. Rebuild frontend assets, supervise `php artisan reverb:start`, and proxy WebSockets over HTTPS. Set `BROADCAST_NOTIFICATIONS=true` for live notification delivery. |
@@ -81,7 +83,7 @@ The Plausible integration uses the site's current personalized script and its in
 ## SEO and feeds
 
 - `/sitemap.xml` is an index of paginated story, author and topic sitemaps. Only published stories with active authors are included. Publish changes invalidate the cached sitemap immediately; the queue warms it in the background.
-- `/feed.xml`, `/@username/feed.xml`, and `/topic/topic-slug/feed.xml` expose story summaries. Premium bodies never appear in feeds, public API payloads or structured data.
+- `/feed.xml`, `/@username/feed.xml`, and `/topic/topic-slug/feed.xml` expose story summaries. Feeds expose summaries; public API story responses include the full published body. Every published story is free to read.
 - Each public page has canonical, Open Graph, Twitter and JSON-LD metadata. Article schemas include approved visible comments. Author profiles and collections have their own schema types.
 - Renamed published story paths use the `redirects` table and the `ResolveRedirect` middleware. Keep redirect destinations as local absolute paths.
 - `/robots.txt` is generated by the application, not a static file, so its sitemap URL and configured crawler policy stay current. Ensure the web server forwards this route to Laravel.
@@ -97,7 +99,7 @@ Set `INDEXNOW_KEY` to an 8–128 character alphanumeric/dash key when the public
 
 The default `SEO_BLOCK_TRAINING_BOTS=false` adds no extra exclusions for model training crawlers. Search and citation crawlers can access published public pages. The site owner must choose and communicate a policy to authors before a public launch; no per-author training opt-out is implied.
 
-Set `SEO_BLOCK_TRAINING_BOTS=true` to add disallow rules for GPTBot, ClaudeBot, Google-Extended and CCBot. This does not block search/citation crawlers. `robots.txt` is a voluntary protocol, not access control. Member-only content remains protected by the application's authorization rules.
+Set `SEO_BLOCK_TRAINING_BOTS=true` to add disallow rules for GPTBot, ClaudeBot, Google-Extended and CCBot. This does not block search/citation crawlers. `robots.txt` is a voluntary protocol, not access control. Unpublished stories and private account data remain protected by application authorization.
 
 ### Social images
 
@@ -112,7 +114,7 @@ All routes are under `/api/v1`, with rate limiting and JSON errors:
 | Method | Path | Access |
 | --- | --- | --- |
 | GET | `/posts` | Published metadata, with `q`, `page`, and `per_page` (maximum 50). |
-| GET | `/posts/{id}` | Public story metadata and free article body. Member-only body is excluded. |
+| GET | `/posts/{id}` | Public story metadata and the full published article body; no account is required. |
 | GET | `/me` | Sanctum token with `profile:read`. |
 | GET | `/me/posts` | Sanctum token with `posts:read`; only the token owner's stories, including drafts. |
 | DELETE | `/tokens/{id}` | Sanctum token with `tokens:manage`; only the owner's token can be revoked. |
@@ -121,12 +123,12 @@ Pass `Authorization: Bearer YOUR_TOKEN` and `Accept: application/json`. Issue pe
 
 ## Quote cards
 
-`POST /posts/{id}/quote-card` accepts a `quote` containing 12–240 characters selected from a published story. This is a CSRF-protected web route with a limit of 15 requests per minute, not a token API route. It returns a downloadable 1200×630 SVG containing the selected words, author, title and Folkscript branding. It requires no external rendering service. The server checks that the quote actually occurs in the story, rejects private drafts, and requires the author or an eligible member for premium stories. Generated responses use `private, no-store` caching.
+`POST /posts/{id}/quote-card` accepts a `quote` containing 12–240 characters selected from a published story. This is a CSRF-protected web route with a limit of 15 requests per minute, not a token API route. It returns a downloadable 1200×630 SVG containing the selected words, author, title and Folkscript branding. It requires no external rendering service. The server checks that the quote actually occurs in the story, rejects private drafts, and makes quotation downloads available for every published story without an account. Generated responses use `private, no-store` caching.
 
 ## PWA, privacy and launch verification
 
-The service worker supports an installable app and an offline screen. It caches only the offline shell and public compiled assets. It never caches story HTML, API responses, drafts, account pages or premium content. Offline story reading is not advertised.
+The service worker supports an installable app and an offline screen. It caches only the offline shell and public compiled assets. It never caches story HTML, API responses, drafts or account pages. Offline story reading is not advertised.
 
-Before public launch, verify real delivery and billing credentials, select the crawler policy, remove demo accounts/content, and replace/confirm `security@folkscript.com` in `.well-known/security.txt` with a monitored mailbox. Renew the security file before its stated expiry. Validate representative article/profile/topic JSON-LD with search engine tools, check redirects and premium access, and use actual production traffic to evaluate Core Web Vitals. No Lighthouse or real-user performance result is implied by the implementation.
+Before public launch, verify real mail delivery and the credentials for any enabled services, select the crawler policy, remove demo accounts/content, and replace/confirm `security@folkscript.com` in `.well-known/security.txt` with a monitored mailbox. Renew the security file before its stated expiry. Validate representative article/profile/topic JSON-LD with search engine tools, check redirects, free public reading, and private draft access, and use actual production traffic to evaluate Core Web Vitals. No Lighthouse or real-user performance result is implied by the implementation.
 
-The GitHub Actions workflow installs locked dependencies, builds assets, runs migrations, compiles routes/views, checks PHP syntax, and runs the existing application test command. It does not publish or deploy the site. DNS registration, TLS issuance, search-console verification and live payments remain account-owner setup steps.
+The GitHub Actions workflow installs locked dependencies, builds assets, runs migrations, compiles routes/views, checks PHP syntax, and runs the existing application test command. It does not publish or deploy the site. DNS registration, TLS issuance, search-console verification remain account-owner setup steps.

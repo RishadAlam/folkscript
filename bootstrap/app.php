@@ -16,7 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [\App\Http\Middleware\ResolveRedirect::class, \App\Http\Middleware\EnsureActiveAccount::class, \Illuminate\Session\Middleware\AuthenticateSession::class, \App\Http\Middleware\ProtectSupportSession::class]);
         $middleware->api(append: [\App\Http\Middleware\EnsureActiveAccount::class]);
-        $middleware->validateCsrfTokens(except: ['stripe/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         \Sentry\Laravel\Integration::handles($exceptions);

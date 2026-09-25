@@ -13,15 +13,8 @@ return [
         'scheduled' => 'Scheduled',
         'archived' => 'Archived',
     ],
-    'payout_status' => [
-        'pending' => 'Pending',
-        'processing' => 'Processing',
-        'paid' => 'Transferred',
-        'failed' => 'Failed',
-    ],
     'roles' => [
         'reader' => 'Reader',
-        'premium-reader' => 'Premium reader',
         'author' => 'Author',
         'editor' => 'Editor',
         'admin' => 'Admin',

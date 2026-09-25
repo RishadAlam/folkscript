@@ -69,7 +69,6 @@ class EngagementController extends Controller
     public function comment(Request $request, Post $post)
     {
         $this->ensurePublished($post);
-        abort_unless(! $post->is_premium || $request->user()->hasPremiumAccess() || $post->author_id === $request->user()->id, 403);
         $data = $request->validate(['body' => ['required', 'string', 'min:3', 'max:5000'], 'parent_id' => ['nullable', 'integer'], 'website' => ['nullable', 'max:0']]);
         $data['body'] = trim(strip_tags($data['body']));
         if (mb_strlen($data['body']) < 3) {
@@ -111,7 +110,6 @@ class EngagementController extends Controller
         $post = $comment->post;
         $this->ensurePublished($post);
         abort_unless($comment->status === 'visible' && (! $comment->parent_id || $comment->parent?->status === 'visible'), 404);
-        abort_unless(! $post->is_premium || $request->user()->hasPremiumAccess() || $post->author_id === $request->user()->id, 403);
 
         $request->merge(['comment_id' => (string) $comment->id]);
         $data = $request->validateWithBag('commentReport', ['reason' => ['required', 'string', 'min:10', 'max:2000']]);

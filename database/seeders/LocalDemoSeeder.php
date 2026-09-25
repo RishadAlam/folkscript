@@ -6,7 +6,6 @@ use App\Models\Bookmark;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Follow;
-use App\Models\Payout;
 use App\Models\Post;
 use App\Models\Report;
 use App\Models\Revision;
@@ -27,7 +26,7 @@ class LocalDemoSeeder extends Seeder
 
         $accounts = [
             ['reader', 'Maya Patel', 'reader', true, false, 'A reader with an interest in cities, books, and everyday design.'],
-            ['premium', 'Theo Brooks', 'premium-reader', true, false, 'A demo member exploring long-form writing and independent perspectives.'],
+            ['theo', 'Theo Brooks', 'reader', true, false, 'A reader exploring long-form writing and independent perspectives.'],
             ['editor', 'Nora Williams', 'editor', true, false, 'Working with writers on clear, useful stories and considerate conversations.'],
             ['owner', 'Morgan Ellis', 'super-admin', true, false, 'Local demonstration account for platform administration.'],
             ['unverified', 'Leo Santos', 'reader', false, false, 'Local demo account awaiting email verification.'],
@@ -40,7 +39,10 @@ class LocalDemoSeeder extends Seeder
         ];
         $users = [];
         foreach ($accounts as [$key, $name, $role, $verified, $suspended, $bio]) {
-            $user = User::firstOrCreate(['email' => $key.'@folkscript.test'], [
+            // Preserve this known legacy demo identity on upgrades; never rename real accounts.
+            $user = $key === 'theo' ? User::where('email', 'premium@folkscript.test')
+                ->where('username', 'premium')->where('name', 'Theo Brooks')->first() : null;
+            $user ??= User::firstOrCreate(['email' => $key.'@folkscript.test'], [
                 'username' => $key, 'name' => $name, 'bio' => $bio,
                 'password' => Hash::make('Folkscript2026!'),
                 'email_verified_at' => $verified ? now() : null,
@@ -108,35 +110,29 @@ class LocalDemoSeeder extends Seeder
         $reportedComment = Comment::firstOrCreate(['post_id' => $firstStory->id, 'user_id' => $users['iris']->id, 'body' => 'Could the author add a source for the quotation in this section? I would like to read the original.'], ['status' => 'visible']);
         $hidden = Comment::firstOrCreate(['post_id' => $published->id, 'user_id' => $users['suspended']->id, 'body' => 'Demo moderation example: a response hidden after editorial review.'], ['status' => 'hidden']);
         $this->report($users['reader'], $published, 'Demo report: please check the attribution and fictional details in this sample story.');
-        $this->report($users['premium'], $reportedComment, 'Demo report: review whether this response needs an attribution note.');
+        $this->report($users['theo'], $reportedComment, 'Demo report: review whether this response needs an attribution note.');
         $this->report($users['reader'], $hidden, 'Demo report: this sample response has already been reviewed.', 'resolved', $admin);
 
         foreach ([$published, $second, $firstStory] as $post) {
             Bookmark::firstOrCreate(['user_id' => $users['reader']->id, 'post_id' => $post->id]);
         }
-        foreach ([$users['reader'], $users['premium']] as $reader) {
+        foreach ([$users['reader'], $users['theo']] as $reader) {
             Follow::firstOrCreate(['follower_id' => $reader->id, 'followable_type' => User::class, 'followable_id' => $writer->id]);
             Follow::firstOrCreate(['follower_id' => $reader->id, 'followable_type' => Category::class, 'followable_id' => $life->id]);
         }
 
         $this->notification($writer, 'demo-reader-follow', 'Maya Patel started following your writing.', '/@reader', 'follow');
         $this->notification($writer, 'demo-story-response', 'Maya Patel responded to “A neighbourhood library built on trust”.', $published->url.'#responses', 'comment');
-        $this->notification($writer, 'demo-read-notification', 'Theo Brooks started following your writing.', '/@premium', 'follow', true);
+        $this->notification($writer, 'demo-read-notification', 'Theo Brooks started following your writing.', '/@'.$users['theo']->username, 'follow', true);
         $this->notification($users['reader'], 'demo-writer-response', 'Alex Morgan replied to your response.', $published->url.'#responses', 'reply');
 
-        // Demonstration ledger entries never contain a destination, transfer, or paid date.
-        Payout::firstOrCreate(['reference' => 'DEMO-NOT-REAL-ALLOCATION-001'], [
-            'author_id' => $writer->id, 'author_name' => $writer->name, 'approved_by' => $admin->id,
-            'amount_cents' => 12500, 'currency' => 'usd', 'status' => 'pending',
-            'idempotency_key' => '61eac1c7-3db1-471a-9fbd-422491904aae',
-        ]);
         Activity::firstOrCreate(['log_name' => 'demo', 'description' => 'Loaded local demonstration content'], [
             'causer_type' => User::class, 'causer_id' => $admin->id,
-            'properties' => ['demo' => true, 'note' => 'Fictional accounts and content for local feature review; no payments were made.'],
+            'properties' => ['demo' => true, 'note' => 'Fictional accounts and content for local feature review.'],
         ]);
 
-        $this->command?->info('Local demo fixtures ready: reader, premium, editor, owner, unverified, and suspended accounts at @folkscript.test.');
-        $this->command?->info('Includes moderation reports, a flagged response, writer story states, collections, revisions, notifications, and one explicitly labelled pending demo allocation. No funds transferred.');
+        $this->command?->info('Local demo fixtures ready: reader, theo, editor, owner, unverified, and suspended accounts at @folkscript.test.');
+        $this->command?->info('Includes moderation reports, a flagged response, writer story states, collections, revisions, and notifications.');
     }
 
     private function story(User $author, string $slug, string $title, string $status, array $paragraphs, Category $category, array $extra = []): Post

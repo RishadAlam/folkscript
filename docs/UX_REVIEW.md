@@ -1,5 +1,8 @@
 # UI and UX refinement review
 
+> **Historical reference:** This document records an earlier product scope. The September 25, 2026 decision makes Folkscript free, open-source, and nonprofit. All premium, membership, subscription, payment, and earnings references below are superseded and describe removed features, not current requirements or deployment steps. See [the current scope](FREE_PUBLISHING.md) and [PRODUCT.md](../PRODUCT.md).
+
+
 This document records the earlier interface pass. See [MySQL and administration review](MYSQL_REVIEW.md) for subsequent database and administrator work.
 
 Reviewed locally in September 2026 following the initial application build. The goal was to make reading, discovery, writing, and account tasks clearer while preserving the supplied Folkscript marks, Fraunces typography, and navy/paper/amber palette. This is a bounded implementation review, not a claim that every possible state or accessibility requirement has been independently certified.

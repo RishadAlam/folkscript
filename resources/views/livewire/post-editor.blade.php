@@ -1,11 +1,12 @@
 <div class="editor-shell" wire:key="story-editor" x-data="storyEditor($wire)" @keydown.ctrl.s.window.prevent="saveShortcut()" @keydown.meta.s.window.prevent="saveShortcut()">
-    <header class="editor-topbar">
+    <header class="editor-topbar" id="editor-top">
         <div class="editor-heading"><a href="{{ route('dashboard') }}" class="icon-button" aria-label="{{ __('Back to studio') }}"><x-icon name="arrow-left" /></a><h1>{{ __('Story editor') }}</h1></div>
         <div class="editor-save-actions">
             <button type="button" class="btn btn-outline" @click="askForDraft()" :disabled="busy || uploading || !ready">{{ $status === 'draft' ? __('Save draft') : __('Move to drafts') }}</button>
             <button type="button" class="btn btn-primary" @click="submit('publish')" :disabled="busy || uploading || !ready"><span x-text="pendingAction === 'publish' ? @js(__('Publishing…')) : ($wire.status === 'published' ? @js(__('Update story')) : @js(__('Publish now')))"></span><x-icon name="arrow-up-right" size="16" /></button>
         </div>
         <p class="editor-save-status" :class="{ 'has-error': saveError }" role="status" aria-live="polite" x-text="statusText"></p>
+        <a class="text-link editor-settings-jump" href="#editor-publish-settings">{{ __('Publish settings') }} <x-icon name="arrow-down" size="16" /></a>
     </header>
 
     <div class="editor-feedback notice notice-error" x-show="saveError" x-cloak role="alert"><p x-text="saveError"></p><button type="button" class="text-link" x-show="ready && $wire.status === 'draft'" @click="submit('saveDraft')" :disabled="busy || !online">{{ __('Try saving again') }}</button><button type="button" class="text-link" x-show="ready" @click="exportMarkdown()">{{ __('Download a Markdown copy') }}</button></div>
@@ -22,7 +23,7 @@
                 <template x-if="$wire.coverImage"><img :src="$wire.coverImage" alt="{{ __('Story cover preview') }}"></template>
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" x-ref="coverInput" @change="uploadCover($event)" class="sr-only" id="cover-upload" tabindex="-1">
                 <div class="editor-cover-actions"><button class="text-link" type="button" @click="$refs.coverInput.click()" :disabled="uploading || !ready"><x-icon name="image-plus" size="19" /><span x-text="uploading ? @js(__('Uploading image…')) : ($wire.coverImage ? @js(__('Change cover')) : @js(__('Add a cover image')))"></span></button><button type="button" class="text-link" x-show="$wire.coverImage" @click="removeCover()" :disabled="uploading">{{ __('Remove cover') }}</button></div>
-                <p class="editor-help">{{ __('Optional. JPG, PNG, WebP or AVIF, up to 5 MB.') }}</p>
+                <p class="editor-help">{{ __('Optional. JPG, PNG, WebP or AVIF, up to 5 MB. The full image appears in your story; thumbnails may be cropped.') }}</p>
                 @error('coverImage')<p class="field-error">{{ $message }}</p>@enderror
             </div>
             <p x-show="uploadError" x-text="uploadError" x-cloak class="field-error editor-upload-error" role="alert"></p>
@@ -69,12 +70,11 @@
             @error('bodyHtml')<p class="field-error" role="alert">{{ $message }}</p>@enderror
         </div>
         <aside class="editor-sidebar">
-            <section><h2>{{ __('Publish settings') }}</h2>
+            <section id="editor-publish-settings" tabindex="-1"><div class="editor-section-heading"><h2>{{ __('Publish settings') }}</h2><a class="text-link editor-back-jump" href="#editor-top">{{ __('Back to editor') }} <x-icon name="arrow-up" size="16" /></a></div>
                 @if($post?->status === 'published')<a class="text-link editor-public-link" href="{{ $post->url }}" target="_blank" rel="noopener">{{ __('View published story') }} <x-icon name="external-link" size="15" /></a>@endif
                 <fieldset class="editor-topics"><legend>{{ __('Topics') }}</legend><p class="editor-help">{{ __('Choose up to 5 topics where readers can find your story.') }}</p><div>@foreach($categories as $category)<label class="checkbox"><input type="checkbox" value="{{ $category->id }}" wire:model="categoryIds" @change="markChanged()"><span>{{ $category->name }}</span></label>@endforeach</div>@error('categoryIds')<p class="field-error">{{ $message }}</p>@enderror</fieldset>
                 <div class="field"><label for="story-tags">{{ __('Tags') }}</label><input id="story-tags" class="form-input" wire:model="tagNames" @input="markChanged()" placeholder="{{ __('Creativity, everyday life') }}" maxlength="250" aria-describedby="tags-help"><small id="tags-help">{{ __('Up to 5 tags, separated by commas.') }}</small>@error('tagNames')<p class="field-error">{{ $message }}</p>@enderror</div>
                 <div class="field"><label for="story-slug">{{ __('Story URL') }}</label><input id="story-slug" class="form-input" wire:model="slug" @input="markChanged()" placeholder="{{ __('created-from-your-title') }}" maxlength="200" aria-describedby="slug-help" spellcheck="false"><small id="slug-help">{{ parse_url(config('app.url'), PHP_URL_HOST) }}{{ '/@'.auth()->user()->username }}/<span x-text="$wire.slug || '…'"></span></small>@error('slug')<p class="field-error">{{ $message }}</p>@enderror</div>
-                <label class="checkbox editor-premium"><input type="checkbox" wire:model="isPremium" @change="markChanged()"><span>{{ __('Members only') }}<small>{{ __('Members can read the full story. Everyone else sees a preview.') }}</small></span></label>
                 <details class="editor-schedule" @if($status === 'scheduled') open @endif><summary>{{ $status === 'scheduled' ? __('Publication schedule') : __('Schedule for later') }}</summary><div class="field"><label for="publish-date">{{ __('Date and time') }}</label><input id="publish-date" type="datetime-local" class="form-input" wire:model="publishedAt" @input="markChanged()" aria-describedby="schedule-help"><small id="schedule-help">{{ __('All times are in :timezone. Choose a future time.', ['timezone' => config('app.timezone')]) }}</small>@error('publishedAt')<p class="field-error">{{ $message }}</p>@enderror</div><p class="editor-help" x-show="$wire.status === 'published'">{{ __('Scheduling this story removes it from public view until the chosen time.') }}</p><button type="button" class="btn btn-outline" @click="submit('schedule')" :disabled="busy || uploading || !$wire.publishedAt || !ready"><x-icon name="calendar" size="15" /><span x-text="$wire.status === 'scheduled' ? @js(__('Update schedule')) : @js(__('Schedule story'))"></span></button></details>
                 @if($revisions->isNotEmpty())<details class="editor-revisions"><summary>{{ __('Revision history') }}</summary><p class="editor-help">{{ __('Restore an earlier title and story text. Your current text will be kept as another version.') }} {{ __('Times are shown in :timezone.', ['timezone' => config('app.timezone')]) }}</p><div class="stack">@foreach($revisions as $revision)<button type="button" class="text-link" @click="askToRestore({{ $revision->id }}, @js($revision->created_at->format('M j, g:i A')))" :disabled="busy"><x-icon name="history" size="15" /><span>{{ $revision->created_at->format('M j, g:i A') }}<small>{{ Str::limit($revision->title, 38) }}</small></span></button>@endforeach</div></details>@endif
             </section>

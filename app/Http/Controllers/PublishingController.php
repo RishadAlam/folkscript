@@ -43,32 +43,10 @@ class PublishingController extends Controller
     {
         $this->validateDiscoveryQuery($request);
         $query = mb_substr(trim((string) $request->query('q', '')), 0, 200);
-        $posts = app(PublicDiscoveryCache::class)->paginate($request, $request->routeIs('trending') ? 'trending' : 'discover', 12, function () use ($request, $query) {
-            $posts = Post::published();
-            if ($query !== '') {
-                $indexed = false;
-                if (config('scout.driver') === 'meilisearch') {
-                    try {
-                        $ids = Post::search(mb_substr($query, 0, 200))->take(500)->keys();
-                        $posts->whereIn('id', $ids);
-                        $indexed = true;
-                    } catch (\Throwable $exception) {
-                        report($exception);
-                    }
-                }
-                if (! $indexed) {
-                    $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], mb_substr($query, 0, 200)).'%';
-                    $posts->where(fn (Builder $q) => $q->where('title', 'like', $term)->orWhere('excerpt', 'like', $term)->orWhereHas('tags', fn (Builder $tags) => $tags->where('name', 'like', $term))->orWhereHas('author', fn (Builder $authors) => $authors->where('name', 'like', $term)));
-                }
-            }
-            if ($request->filled('topic')) {
-                $posts->whereHas('categories', fn (Builder $q) => $q->where('slug', $request->query('topic')));
-            }
-            if ($request->routeIs('trending')) {
-                $posts->orderByDesc('views');
-            }
-            return $posts->latest('published_at');
-        });
+        $posts = app(PublicDiscoveryCache::class)->paginate(
+            $request, $request->routeIs('trending') ? 'trending' : 'discover', 12,
+            fn () => app(\App\Services\PublicStorySearch::class)->query($query, $request->query('topic'), $request->routeIs('trending')),
+        );
         $topics = $this->topics();
         $writers = User::whereNull('suspended_at')->whereHas('posts', fn (Builder $q) => $q->published())->when($query !== '', fn ($q) => $q->where(fn ($names) => $names->where('name', 'like', '%'.$query.'%')->orWhere('bio', 'like', '%'.$query.'%')))->withCount(['posts' => fn ($q) => $q->published(), 'followers'])->paginate(12)->withQueryString();
         return view('discover', compact('posts', 'topics', 'query', 'writers'));
@@ -86,7 +64,6 @@ class PublishingController extends Controller
     public function article(Request $request, string $username, string $slug)
     {
         $post = Post::published()->withCard()->whereHas('author', fn (Builder $q) => $q->where('username', $username))->where('slug', $slug)->firstOrFail();
-        $canReadPremium = ! $post->is_premium || ($request->user() && ($request->user()->hasPremiumAccess() || $post->author_id === $request->user()->id));
         $isBookmarked = $request->user() ? $post->bookmarks()->where('user_id', $request->user()->id)->exists() : false;
         $hasReacted = $request->user() ? $post->reactions()->where('user_id', $request->user()->id)->exists() : false;
         $relatedPosts = Post::published()->withCard()->whereKeyNot($post->id)->whereHas('categories', fn (Builder $q) => $q->whereIn('categories.id', $post->categories->modelKeys()))->latest('published_at')->limit(3)->get();
@@ -95,11 +72,7 @@ class PublishingController extends Controller
             $post->increment('views');
             $request->session()->put('read_post_'.$post->id, true);
         }
-        if (! $canReadPremium) {
-            $post->body_html = null;
-            $post->body_json = null;
-        }
-        return view('article', compact('post', 'relatedPosts', 'comments', 'canReadPremium', 'isBookmarked', 'hasReacted'));
+        return view('article', compact('post', 'relatedPosts', 'comments', 'isBookmarked', 'hasReacted'));
     }
 
     public function profile(Request $request, string $username)

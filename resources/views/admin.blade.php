@@ -1,6 +1,6 @@
 @php
     $pages = [
-        'overview' => [__('Overview'), __('A clear view of your publication and what needs your attention.')],
+        'overview' => [__('Admin dashboard'), __('A clear view of your publication and what needs your attention.')],
         'reports' => [__('Reports'), __('Review concerns from readers and decide what happens next.')],
         'comments' => [__('Comments'), __('Keep conversations welcoming. Review, hide, or restore responses.')],
         'stories' => [__('Stories'), __('Find and manage writing across the publication.')],

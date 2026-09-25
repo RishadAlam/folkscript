@@ -33,7 +33,7 @@ final class SeoData
         }
         $this->image = self::absoluteImage($image ?: $post?->og_image_path ?: $post?->cover_image ?: '/og-default.png');
         $this->type = $post ? 'article' : $type;
-        $private = request()->is('dashboard*', 'series*', 'earnings*', 'payouts*', 'support*', 'write*', 'settings*', 'admin*', 'login', 'register', 'forgot-password', 'reset-password*', 'email/*', 'search', 'bookmarks', 'notifications', 'api/*');
+        $private = request()->is('dashboard*', 'series*', 'support*', 'write*', 'settings*', 'admin*', 'login', 'register', 'forgot-password', 'reset-password*', 'email/*', 'search', 'bookmarks', 'notifications', 'api/*');
         $unpublished = $post && ($post->status !== 'published' || ! $post->published_at || $post->published_at->isFuture());
         $this->robots = $robots ?: (($private || $unpublished) ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
         $this->schema = $this->buildSchema($unpublished ? null : $post, $author, $collection);
@@ -83,12 +83,11 @@ final class SeoData
 
         if ($post) {
             $post->loadMissing(['author', 'tags', 'categories']);
-            $article = ['@type' => 'BlogPosting', '@id' => self::postUrl($post).'#article', 'mainEntityOfPage' => $this->canonicalUrl, 'headline' => $post->title, 'description' => $this->description, 'image' => [$this->image], 'datePublished' => $post->published_at?->toIso8601String(), 'dateModified' => $post->updated_at?->toIso8601String(), 'author' => $this->person($post->author), 'publisher' => ['@id' => $organization['@id']], 'wordCount' => str_word_count(strip_tags($post->body_html ?? '')), 'keywords' => $post->tags->pluck('name')->all(), 'isAccessibleForFree' => ! $post->is_premium];
-            if ($post->is_premium) {
-                $article['hasPart'] = ['@type' => 'WebPageElement', 'isAccessibleForFree' => false, 'cssSelector' => '.premium-content'];
-            }
-            // Never serialize the body: a crawler must not bypass a membership gate.
-            $comments = $post->comments()->where('status', 'visible')->with('user')->latest()->limit(10)->get();
+            $article = ['@type' => 'BlogPosting', '@id' => self::postUrl($post).'#article', 'mainEntityOfPage' => $this->canonicalUrl, 'headline' => $post->title, 'description' => $this->description, 'image' => [$this->image], 'datePublished' => $post->published_at?->toIso8601String(), 'dateModified' => $post->updated_at?->toIso8601String(), 'author' => $this->person($post->author), 'publisher' => ['@id' => $organization['@id']], 'wordCount' => str_word_count(strip_tags($post->body_html ?? '')), 'keywords' => $post->tags->pluck('name')->all(), 'isAccessibleForFree' => true];
+            $comments = $post->comments()->where('status', 'visible')
+                ->where(fn ($query) => $query->whereNull('parent_id')
+                    ->orWhereHas('parent', fn ($parent) => $parent->where('status', 'visible')->whereNull('parent_id')))
+                ->with('user')->latest()->limit(10)->get();
             if ($comments->isNotEmpty()) {
                 $article['comment'] = $comments->map(fn ($comment) => ['@type' => 'Comment', 'text' => strip_tags($comment->body), 'dateCreated' => $comment->created_at->toIso8601String(), 'author' => $comment->user ? $this->person($comment->user) : ['@type' => 'Person', 'name' => 'Deleted account']])->all();
             }

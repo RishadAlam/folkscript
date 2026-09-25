@@ -9,7 +9,7 @@ class PostPolicy
 {
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->suspended_at) { return false; }
+        if ($user->suspended_at || ! $user->hasVerifiedEmail()) { return false; }
         return $user->hasAnyRole(['editor', 'admin', 'super-admin']) ? true : null;
     }
     public function create(User $user): bool { return $user->canWrite(); }

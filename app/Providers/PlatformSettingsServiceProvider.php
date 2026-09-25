@@ -11,11 +11,11 @@ class PlatformSettingsServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        // Composer and installation/cache commands must boot before a database exists.
+        // Installation/cache commands and the test launcher boot before their database exists.
         // Runtime requests and workers still surface genuine database failures.
         if ($this->app->runningInConsole()) {
             $command = (new ArgvInput)->getFirstArgument() ?? (basename($_SERVER['argv'][0] ?? '') === 'artisan' ? 'list' : '');
-            if (in_array($command, ['list', 'help', 'about', 'package:discover', 'key:generate', 'vendor:publish', 'config:cache', 'config:clear', 'route:cache', 'route:clear', 'view:cache', 'view:clear', 'optimize', 'optimize:clear'], true)
+            if (in_array($command, ['list', 'help', 'about', 'test', 'package:discover', 'key:generate', 'vendor:publish', 'config:cache', 'config:clear', 'route:cache', 'route:clear', 'view:cache', 'view:clear', 'optimize', 'optimize:clear'], true)
                 || str_starts_with($command, 'migrate')) {
                 return;
             }

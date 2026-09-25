@@ -81,7 +81,7 @@ class AccountController extends Controller
 
     public function password(Request $request)
     {
-        $data = $request->validateWithBag('passwordChange', ['current_password' => ['required', 'current_password'], 'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()]]);
+        $data = $request->validateWithBag('passwordChange', ['current_password' => ['bail', 'required', 'string', 'current_password'], 'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()]]);
         $request->user()->forceFill(['password' => Hash::make($data['password'])])->save();
         Auth::logoutOtherDevices($data['password']);
         if (config('session.driver') === 'database') {
@@ -135,10 +135,10 @@ class AccountController extends Controller
 
     public function destroy(Request $request)
     {
-        $request->validateWithBag('accountDeletion', ['password' => ['required', 'current_password'], 'confirmation' => ['required', 'in:DELETE']]);
+        $request->validateWithBag('accountDeletion', ['password' => ['bail', 'required', 'string', 'current_password'], 'confirmation' => ['required', 'in:DELETE']]);
         $user = $request->user();
-        if ($user->subscribed('default') || $user->hasRole('super-admin')) {
-            return back()->withErrors(['confirmation' => 'Cancel your membership or transfer platform ownership before deleting this account.'], 'accountDeletion');
+        if ($user->hasRole('super-admin')) {
+            return back()->withErrors(['confirmation' => 'Transfer platform ownership before deleting this account.'], 'accountDeletion');
         }
         $user->tokens()->delete();
         Auth::logout();

@@ -1,16 +1,20 @@
 @import 'tailwindcss';
+@import './fonts.css';
 @import './editorial.css';
 @import './accounts.css';
 @import './platform.css';
 @import './refinements.css';
 @import './editor.css';
 @import './admin.css';
+@import './typography.css';
+@import './avatar.css';
+@import './reader-tools.css';
 @source '../views';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Fraunces Variable', Georgia, serif;
-    --font-serif: 'Fraunces Variable', Georgia, serif;
+    --font-sans: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
 }

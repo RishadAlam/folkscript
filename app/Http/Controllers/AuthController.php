@@ -38,7 +38,7 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'These details do not match an active account.']);
         }
         if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
-            $request->session()->put(['login.id' => $user->id, 'login.remember' => $request->boolean('remember'), 'login.expires' => now()->addMinutes(5)->timestamp]);
+            $request->session()->put(['login.id' => $user->id, 'login.remember' => $request->boolean('remember'), 'login.expires' => now()->addMinutes(5)->timestamp, 'login.auth_hash' => $this->authenticationHash($user)]);
             return redirect()->route('two-factor.login');
         }
         return $this->authenticate($request, $user, $request->boolean('remember'));
@@ -46,7 +46,9 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->merge(['email' => Str::lower(trim($request->input('email', '')))]);
+        if (is_string($request->input('email'))) {
+            $request->merge(['email' => Str::lower(trim($request->input('email')))]);
+        }
         $data = $request->validate([
             'name' => ['required', 'string', 'max:80'],
             'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9_]+$/', 'unique:users,username', 'not_in:admin,api,settings,login,register,folkscript'],
@@ -60,7 +62,9 @@ class AuthController extends Controller
         event(new Registered($user));
         Auth::login($user);
         $request->session()->regenerate();
-        return redirect()->route('verification.notice')->with('status', 'Your account is ready. Check your email to start writing.');
+        return redirect()->route('verification.notice')->with('status', $this->emailDeliveryAvailable()
+            ? 'Your account is ready. Check your email to start writing.'
+            : 'Your account is ready. Email delivery is unavailable on this installation. Contact the site administrator to verify your account.');
     }
 
     public function logout(Request $request)
@@ -74,13 +78,16 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => ['required', 'email']]);
+        if (! $this->emailDeliveryAvailable()) {
+            return back()->with('status', 'Password reset email is unavailable on this installation. Contact the site administrator for help signing in.');
+        }
         Password::sendResetLink(['email' => Str::lower($request->string('email')->toString())]);
         return back()->with('status', 'If an account uses that email, a password reset link is on its way.');
     }
 
     public function resetPassword(Request $request)
     {
-        $data = $request->validate(['token' => ['required'], 'email' => ['required', 'email'], 'password' => ['required', 'confirmed', PasswordRule::min(10)->letters()->numbers()]]);
+        $data = $request->validate(['token' => ['required', 'string'], 'email' => ['required', 'email'], 'password' => ['required', 'confirmed', PasswordRule::min(10)->letters()->numbers()]]);
         $status = Password::reset($data, function (User $user, string $password) {
             $user->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
             $user->tokens()->delete();
@@ -97,6 +104,9 @@ class AuthController extends Controller
 
     public function sendVerification(Request $request)
     {
+        if (! $this->emailDeliveryAvailable()) {
+            return back()->with('status', 'Verification email is unavailable on this installation. Contact the site administrator to verify your account.');
+        }
         if (! $request->user()->hasVerifiedEmail()) {
             $request->user()->sendEmailVerificationNotification();
         }
@@ -105,7 +115,7 @@ class AuthController extends Controller
 
     public function confirmPassword(Request $request)
     {
-        $request->validate(['password' => ['required', 'current_password']]);
+        $request->validate(['password' => ['bail', 'required', 'string', 'current_password']]);
         $request->session()->passwordConfirmed();
         return redirect()->intended('/settings')->with('status', 'Password confirmed. You can now continue with your changes.');
     }
@@ -114,8 +124,9 @@ class AuthController extends Controller
     {
         $data = $request->validate(['code' => ['nullable', 'string', 'max:10'], 'recovery_code' => ['nullable', 'string', 'max:100']]);
         $user = User::find($request->session()->get('login.id'));
-        if (! $user || $user->suspended_at || ! $user->two_factor_confirmed_at || $request->session()->get('login.expires', 0) < now()->timestamp) {
-            $request->session()->forget(['login.id', 'login.remember', 'login.expires']);
+        if (! $user || $user->suspended_at || ! $user->two_factor_confirmed_at || $request->session()->get('login.expires', 0) < now()->timestamp
+            || ! hash_equals($this->authenticationHash($user), (string) $request->session()->get('login.auth_hash', ''))) {
+            $request->session()->forget(['login.id', 'login.remember', 'login.expires', 'login.auth_hash']);
             return redirect()->route('login')->withErrors(['email' => 'Your sign-in session expired. Please sign in again.']);
         }
         $valid = false;
@@ -133,7 +144,7 @@ class AuthController extends Controller
             throw ValidationException::withMessages([$field => $message]);
         }
         $remember = (bool) $request->session()->get('login.remember');
-        $request->session()->forget(['login.id', 'login.remember', 'login.expires']);
+        $request->session()->forget(['login.id', 'login.remember', 'login.expires', 'login.auth_hash']);
         return $this->authenticate($request, $user, $remember);
     }
 
@@ -174,13 +185,23 @@ class AuthController extends Controller
         }
         if ($user->suspended_at) { abort(403, 'This account is suspended.'); }
         if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
-            $request->session()->put(['login.id' => $user->id, 'login.remember' => false, 'login.expires' => now()->addMinutes(5)->timestamp]);
+            $request->session()->put(['login.id' => $user->id, 'login.remember' => false, 'login.expires' => now()->addMinutes(5)->timestamp, 'login.auth_hash' => $this->authenticationHash($user)]);
             return redirect()->route('two-factor.login');
         }
         return $this->authenticate($request, $user, false);
     }
 
     private function ensureProvider(string $provider): void { abort_unless(in_array($provider, ['google', 'github'], true), 404); }
+
+    private function authenticationHash(User $user): string
+    {
+        return hash_hmac('sha256', $user->getAuthPassword(), config('app.key'));
+    }
+
+    private function emailDeliveryAvailable(): bool
+    {
+        return ! in_array(config('mail.default'), ['log', 'array'], true);
+    }
 
     private function authenticate(Request $request, User $user, bool $remember)
     {

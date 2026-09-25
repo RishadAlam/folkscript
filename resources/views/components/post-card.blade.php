@@ -3,7 +3,7 @@
 <article {{ $attributes->merge(['class' => 'story-card'.($compact ? ' story-card-compact' : '')]) }}>
     <a href="{{ $post->url }}" class="story-image" tabindex="-1" aria-hidden="true"><img src="{{ $post->cover_url }}" alt="" width="640" height="420" loading="lazy"></a>
     <div class="story-card-copy">
-      <div class="story-author"><a href="{{ '/@'.$post->author->username }}"><x-avatar :user="$post->author" size="tiny" /><span>{{ $post->author->name }}</span></a>@if($post->is_premium)<span class="member-label"><x-icon name="lock" size="12" /> {{ __('Members') }}</span>@endif</div>
+      <div class="story-author"><a href="{{ '/@'.$post->author->username }}"><x-avatar :user="$post->author" size="tiny" /><span>{{ $post->author->name }}</span></a></div>
       <{{ $heading }} class="story-title"><a href="{{ $post->url }}">{{ $post->title }}</a></{{ $heading }}><p class="story-excerpt">{{ $post->excerpt }}</p>
       <div class="story-meta"><div>@if($category = $post->categories->first())<a href="/topic/{{ $category->slug }}">{{ $category->name }}</a><span class="meta-dot">·</span>@endif<span>{{ trans_choice('ui.reading_minutes', $post->reading_time) }}</span></div>
       @auth

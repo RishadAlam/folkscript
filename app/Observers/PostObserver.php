@@ -12,7 +12,7 @@ class PostObserver implements ShouldHandleEventsAfterCommit
     public function saved(Post $post): void
     {
         // Reading a page increments views; that must not regenerate cards or sitemaps.
-        if ($post->wasRecentlyCreated || $post->wasChanged(['author_id', 'title', 'slug', 'excerpt', 'body_html', 'cover_image', 'status', 'is_premium', 'published_at', 'meta_title', 'meta_description', 'canonical_url'])) {
+        if ($post->wasRecentlyCreated || $post->wasChanged(['author_id', 'title', 'slug', 'excerpt', 'body_html', 'cover_image', 'status', 'published_at', 'meta_title', 'meta_description', 'canonical_url'])) {
             app(PublicDiscoveryCache::class)->invalidate();
             app(SeoPublisher::class)->publish($post);
         }

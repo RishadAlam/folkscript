@@ -1,4 +1,4 @@
-@props(['comment', 'canReport' => true])
+@props(['comment'])
 @auth
 <div class="comment-tools">
     @can('delete', $comment)
@@ -7,7 +7,7 @@
         <button type="submit" aria-label="{{ __('Remove response by :name', ['name' => $comment->user->name]) }}">{{ __('Remove') }}</button>
     </form>
     @endcan
-    @if($canReport && auth()->id() !== $comment->user_id)
+    @if(auth()->id() !== $comment->user_id)
     <details class="comment-report" @if($errors->getBag('commentReport')->any() && (string)old('comment_id') === (string)$comment->id) open @endif>
         <summary>{{ __('Report') }}<span class="sr-only"> {{ __('response by :name', ['name' => $comment->user->name]) }}</span></summary>
         <form method="POST" action="/comments/{{ $comment->id }}/report" class="stack">

@@ -26,9 +26,7 @@ class ApiController extends Controller
     {
         $story = Post::query()->published()->with(['author', 'tags', 'categories'])->findOrFail($post);
         $data = $this->resource($story);
-        if (! $story->is_premium) {
-            $data['body_html'] = $story->body_html;
-        }
+        $data['body_html'] = $story->body_html;
 
         return response()->json(['data' => $data]);
     }
@@ -62,6 +60,6 @@ class ApiController extends Controller
 
     private function resource(Post $post): array
     {
-        return ['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'excerpt' => $post->excerpt, 'url' => SeoData::postUrl($post), 'cover_image' => $post->cover_image ? SeoData::absoluteImage($post->cover_image) : null, 'is_premium' => (bool) $post->is_premium, 'reading_time' => $post->reading_time, 'published_at' => $post->published_at?->toIso8601String(), 'updated_at' => $post->updated_at?->toIso8601String(), 'author' => ['name' => $post->author->name, 'username' => $post->author->username, 'url' => url('/@'.$post->author->username)], 'tags' => $post->tags->map->only(['name', 'slug']), 'topics' => $post->categories->map->only(['name', 'slug'])];
+        return ['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'excerpt' => $post->excerpt, 'url' => SeoData::postUrl($post), 'cover_image' => $post->cover_image ? SeoData::absoluteImage($post->cover_image) : null, 'reading_time' => $post->reading_time, 'published_at' => $post->published_at?->toIso8601String(), 'updated_at' => $post->updated_at?->toIso8601String(), 'author' => ['name' => $post->author->name, 'username' => $post->author->username, 'url' => url('/@'.$post->author->username)], 'tags' => $post->tags->map->only(['name', 'slug']), 'topics' => $post->categories->map->only(['name', 'slug'])];
     }
 }
