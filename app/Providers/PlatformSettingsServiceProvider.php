@@ -23,11 +23,17 @@ class PlatformSettingsServiceProvider extends ServiceProvider
 
         $defaults = collect(SiteSetting::CONFIG_KEYS)->mapWithKeys(fn ($key) => [$key => config($key)])->all();
         $apply = static function () use ($defaults): void {
+            $previousSender = config('mail.from');
             config($defaults);
             foreach (SiteSetting::values() as $key => $value) {
                 if (isset(SiteSetting::CONFIG_KEYS[$key])) {
                     config([SiteSetting::CONFIG_KEYS[$key] => $value]);
                 }
+            }
+            // Resolved mailers retain their sender even after configuration changes.
+            if ($previousSender !== config('mail.from') && app()->resolved('mail.manager')) {
+                app('mail.manager')->forgetMailers();
+                app()->forgetInstance('mailer');
             }
         };
 

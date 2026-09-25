@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Domain\Seo\SitemapBuilder;
+use App\Jobs\RegenerateSitemaps;
 use App\Models\Post;
 use App\Models\Redirect;
 use App\Models\Tag;
@@ -99,7 +101,13 @@ class PostService
             return $post;
         });
         if ($tagsChanged || $categoriesChanged) {
-            DB::afterCommit(fn () => app(PublicDiscoveryCache::class)->invalidate());
+            DB::afterCommit(function () use ($categoriesChanged): void {
+                app(PublicDiscoveryCache::class)->invalidate();
+                if ($categoriesChanged) {
+                    app(SitemapBuilder::class)->invalidate();
+                    RegenerateSitemaps::dispatch();
+                }
+            });
         }
         if ($tagsChanged && config('scout.driver') === 'meilisearch') {
             DB::afterCommit(function () use ($saved): void {

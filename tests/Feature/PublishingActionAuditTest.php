@@ -2,17 +2,23 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Seo\SitemapBuilder;
 use App\Livewire\PostEditor;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Report;
 use App\Models\Series;
+use App\Models\SiteSetting;
 use App\Models\Tag;
 use App\Models\User;
 use App\Notifications\CommunityNotification;
+use App\Providers\PlatformSettingsServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -479,6 +485,43 @@ class PublishingActionAuditTest extends TestCase
         config(['analytics.plausible_script_url' => '', 'analytics.plausible_endpoint' => '']);
         $this->patchJson('/admin/settings', [...$settings, 'analytics_enabled' => true])->assertUnprocessable()->assertJsonValidationErrors('analytics_enabled');
         $this->patchJson('/admin/settings', [...$settings, 'mail_from_name' => "Name\r\nBcc: attacker", 'google_verification' => '<script>'])->assertUnprocessable()->assertJsonValidationErrors(['mail_from_name', 'google_verification']);
+    }
+
+    public function test_worker_uses_updated_sender_settings_after_a_mailer_has_already_sent_mail(): void
+    {
+        config(['mail.default' => 'array', 'mail.from' => ['address' => 'before@example.test', 'name' => 'Before']]);
+        (new PlatformSettingsServiceProvider($this->app))->boot();
+        $first = Mail::raw('Before settings change', fn ($message) => $message->to('reader@example.test')->subject('Before'));
+        $this->assertSame('before@example.test', $first->getOriginalMessage()->getFrom()[0]->getAddress());
+
+        SiteSetting::updateOrCreate(['key' => 'mail_from_address'], ['value' => 'after@example.test']);
+        SiteSetting::updateOrCreate(['key' => 'mail_from_name'], ['value' => 'Updated publication']);
+        event(new JobProcessing('sync', new SyncJob($this->app, '{"job":"settings-check"}', 'sync', 'default')));
+
+        $second = Mail::raw('After settings change', fn ($message) => $message->to('reader@example.test')->subject('After'));
+        $sender = $second->getOriginalMessage()->getFrom()[0];
+        $this->assertSame('after@example.test', $sender->getAddress());
+        $this->assertSame('Updated publication', $sender->getName());
+    }
+
+    public function test_changing_only_story_categories_refreshes_cached_topic_sitemaps(): void
+    {
+        $author = $this->user();
+        $post = $this->story($author);
+        $old = Category::create(['name' => 'Before', 'slug' => 'before-category']);
+        $new = Category::create(['name' => 'After', 'slug' => 'after-category']);
+        $post->categories()->attach($old);
+        $builder = app(SitemapBuilder::class);
+        $this->assertStringContainsString('/topic/before-category', $builder->section('topics'));
+        $this->assertStringNotContainsString('/topic/after-category', $builder->section('topics'));
+
+        $this->actingAs($author)->putJson('/posts/'.$post->id, [
+            ...$post->only(['title', 'slug', 'excerpt', 'body_html', 'status', 'published_at']),
+            'category_ids' => [$new->id],
+        ])->assertOk();
+
+        $this->assertStringContainsString('/topic/after-category', $builder->section('topics'));
+        $this->assertStringNotContainsString('/topic/before-category', $builder->section('topics'));
     }
 
     public function test_removed_paid_product_endpoints_are_not_available(): void
