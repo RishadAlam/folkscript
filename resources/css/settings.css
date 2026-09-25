@@ -90,9 +90,11 @@
 .settings-profile-block>.muted { margin-bottom: 24px; }
 .settings-pane .settings-profile-block h3 { font-size: 1.125rem; margin-bottom: 10px; }
 .settings-link-list { display: grid; gap: 20px; }
-.settings-link-row { display: flex; align-items: flex-start; gap: 12px; min-width: 0; margin: 0; padding: 0 0 20px; border: 0; border-bottom: 1px solid var(--rule); }
-.settings-link-fields { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr); gap: 14px; flex: 1; min-width: 0; }
-.settings-pane .settings-remove-link { margin-top: 30px; padding-inline: 12px; gap: 6px; flex: 0 0 auto; }
+.settings-link-row { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr) auto; gap: 8px 12px; min-width: 0; margin: 0; padding: 0 0 20px; border: 0; border-bottom: 1px solid var(--rule); }
+.settings-link-fields { display: grid; grid-column: 1 / span 2; grid-row: 1 / span 3; grid-template-columns: subgrid; grid-template-rows: subgrid; min-width: 0; }
+.settings-link-fields>.field { display: grid; grid-template-rows: subgrid; grid-row: 1 / span 3; min-width: 0; }
+.settings-pane .settings-link-fields .form-input, .settings-pane .settings-link-fields .field-error { margin: 0; }
+.settings-pane .settings-remove-link { grid-column: 3; grid-row: 2; align-self: stretch; margin: 0; padding-inline: 12px; gap: 6px; }
 .settings-link-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
 .settings-link-actions button:disabled { cursor: not-allowed; }
 .settings-cover-frame { position: relative; aspect-ratio: 3.5; background: var(--surface); border: 1px solid var(--rule); border-radius: 5px; overflow: hidden; margin-bottom: 20px; }
@@ -108,9 +110,11 @@
     .settings-pane .form-grid { grid-template-columns: 1fr; }
     .settings-pane .two-factor-setup { grid-template-columns: 1fr; }
     .settings-pane .security-row { flex-wrap: wrap; gap: 12px; }
-    .settings-link-row { flex-direction: column; gap: 12px; }
-    .settings-link-fields { width: 100%; grid-template-columns: 1fr; }
-    .settings-pane .settings-remove-link { margin-top: 0; }
+    .settings-link-row { display: flex; flex-direction: column; gap: 12px; }
+    .settings-link-fields { width: 100%; grid-template-columns: 1fr; grid-template-rows: none; gap: 14px; }
+    .settings-link-fields>.field { display: block; grid-row: auto; }
+    .settings-pane .settings-link-fields .form-input, .settings-pane .settings-link-fields .field-error { margin-top: 8px; }
+    .settings-pane .settings-remove-link { align-self: flex-start; }
 }
 @media (max-width: 700px) {
     .settings-page { padding-block: 28px 50px; }

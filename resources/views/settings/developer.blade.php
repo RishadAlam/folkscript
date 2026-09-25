@@ -29,14 +29,12 @@
             <p class="field-help">{{ __('Confirm your password before creating a token that can access your private account data.') }}</p>
             <a href="{{ route('settings.confirm-access', ['section' => 'developer']) }}" class="btn btn-outline">{{ __('Confirm password to create a token') }}</a>
         @else
-            <form method="post" action="{{ route('settings.tokens.create') }}" class="inline-form">
+            <form method="post" action="{{ route('settings.tokens.create') }}" class="field-action-form">
                 @csrf
-                <label class="field">
-                    {{ __('Token name') }}
-                    <input aria-invalid="{{ $errors->getBag('default')->has('token_name') ? 'true' : 'false' }}" aria-describedby="settings15-help settings15-error" class="form-input" name="token_name" value="{{ old('token_name') }}" maxlength="60" placeholder="{{ __('My reading app') }}" required>
-                    <span class="field-help" id="settings15-help">{{ __('Use a name that helps you recognize the app. Up to 60 characters.') }}</span>
-                    <x-field-error name="token_name" bag="default" id="settings15-error" />
-                </label>
+                <label class="field-label" for="token-name">{{ __('Token name') }}</label>
+                <input id="token-name" aria-invalid="{{ $errors->getBag('default')->has('token_name') ? 'true' : 'false' }}" aria-describedby="settings15-help settings15-error" class="form-input" name="token_name" value="{{ old('token_name') }}" maxlength="60" placeholder="{{ __('My reading app') }}" required>
+                <span class="field-help" id="settings15-help">{{ __('Use a name that helps you recognize the app. Up to 60 characters.') }}</span>
+                <x-field-error name="token_name" bag="default" id="settings15-error" />
                 <button class="btn btn-primary" type="submit">{{ __('Create token') }}</button>
             </form>
         @endif
