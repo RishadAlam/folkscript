@@ -1,7 +1,7 @@
 @props(['post', 'compact' => false, 'heading' => 'h3'])
 @php($heading = in_array($heading, ['h2', 'h3']) ? $heading : 'h3')
 <article {{ $attributes->merge(['class' => 'story-card'.($compact ? ' story-card-compact' : '')]) }}>
-    <a href="{{ $post->url }}" class="story-image" tabindex="-1" aria-hidden="true"><img src="{{ $post->cover_url }}" alt="" width="640" height="420" loading="lazy"></a>
+    <a href="{{ $post->url }}" class="story-image" tabindex="-1" aria-hidden="true"><img data-image-tones src="{{ $post->cover_url }}" alt="" width="640" height="420" loading="lazy"></a>
     <div class="story-card-copy">
       <div class="story-author"><a href="{{ '/@'.$post->author->username }}"><x-avatar :user="$post->author" size="tiny" /><span>{{ $post->author->name }}</span></a></div>
       <{{ $heading }} class="story-title"><a href="{{ $post->url }}">{{ $post->title }}</a></{{ $heading }}><p class="story-excerpt">{{ $post->excerpt }}</p>

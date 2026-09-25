@@ -1,0 +1,4 @@
+/* Image colors fill only the space left by object-fit: contain. */
+img[data-image-tones][data-image-tones-ready] {
+    background-image: var(--image-tone-fill);
+}

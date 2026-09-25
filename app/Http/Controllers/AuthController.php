@@ -38,10 +38,10 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'These details do not match an active account.']);
         }
         if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
-            $request->session()->put(['login.id' => $user->id, 'login.remember' => $request->boolean('remember'), 'login.expires' => now()->addMinutes(5)->timestamp, 'login.auth_hash' => $this->authenticationHash($user)]);
+            $request->session()->put(['login.id' => $user->id, 'login.remember' => $request->boolean('remember'), 'login.expires' => now()->addMinutes(5)->timestamp, 'login.auth_hash' => $this->authenticationHash($user), 'login.password_confirmed' => true]);
             return redirect()->route('two-factor.login');
         }
-        return $this->authenticate($request, $user, $request->boolean('remember'));
+        return $this->authenticate($request, $user, $request->boolean('remember'), true);
     }
 
     public function register(Request $request)
@@ -72,7 +72,9 @@ class AuthController extends Controller
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return $request->input('redirect_to') === 'password-reset'
+            ? redirect()->route('password.request')
+            : redirect('/');
     }
 
     public function forgotPassword(Request $request)
@@ -99,7 +101,9 @@ class AuthController extends Controller
     public function verify(EmailVerificationRequest $request)
     {
         $request->fulfill();
-        return redirect('/dashboard')->with('status', 'Email verified. Your next story starts here.');
+        return $request->user()->canWrite()
+            ? redirect('/dashboard')->with('status', 'Email verified. Your next story starts here.')
+            : redirect('/bookmarks')->with('status', 'Email verified. Your reading list is ready.');
     }
 
     public function sendVerification(Request $request)
@@ -120,15 +124,22 @@ class AuthController extends Controller
         return redirect()->intended('/settings')->with('status', 'Password confirmed. You can now continue with your changes.');
     }
 
+    public function twoFactorPage(Request $request)
+    {
+        if (! $this->pendingTwoFactorUser($request)) {
+            return $this->expiredTwoFactorChallenge($request);
+        }
+
+        return view('auth.two-factor');
+    }
+
     public function twoFactor(Request $request)
     {
-        $data = $request->validate(['code' => ['nullable', 'string', 'max:10'], 'recovery_code' => ['nullable', 'string', 'max:100']]);
-        $user = User::find($request->session()->get('login.id'));
-        if (! $user || $user->suspended_at || ! $user->two_factor_confirmed_at || $request->session()->get('login.expires', 0) < now()->timestamp
-            || ! hash_equals($this->authenticationHash($user), (string) $request->session()->get('login.auth_hash', ''))) {
-            $request->session()->forget(['login.id', 'login.remember', 'login.expires', 'login.auth_hash']);
-            return redirect()->route('login')->withErrors(['email' => 'Your sign-in session expired. Please sign in again.']);
+        $user = $this->pendingTwoFactorUser($request);
+        if (! $user) {
+            return $this->expiredTwoFactorChallenge($request);
         }
+        $data = $request->validate(['code' => ['nullable', 'string', 'max:10'], 'recovery_code' => ['nullable', 'string', 'max:100']]);
         $valid = false;
         if (! empty($data['recovery_code'])) {
             $matched = collect($user->recoveryCodes())->first(fn ($code) => hash_equals($code, $data['recovery_code']));
@@ -144,8 +155,8 @@ class AuthController extends Controller
             throw ValidationException::withMessages([$field => $message]);
         }
         $remember = (bool) $request->session()->get('login.remember');
-        $request->session()->forget(['login.id', 'login.remember', 'login.expires', 'login.auth_hash']);
-        return $this->authenticate($request, $user, $remember);
+        $passwordConfirmed = (bool) $request->session()->get('login.password_confirmed');
+        return $this->authenticate($request, $user, $remember, $passwordConfirmed);
     }
 
     public function socialRedirect(string $provider)
@@ -185,13 +196,32 @@ class AuthController extends Controller
         }
         if ($user->suspended_at) { abort(403, 'This account is suspended.'); }
         if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
-            $request->session()->put(['login.id' => $user->id, 'login.remember' => false, 'login.expires' => now()->addMinutes(5)->timestamp, 'login.auth_hash' => $this->authenticationHash($user)]);
+            $request->session()->put(['login.id' => $user->id, 'login.remember' => false, 'login.expires' => now()->addMinutes(5)->timestamp, 'login.auth_hash' => $this->authenticationHash($user), 'login.password_confirmed' => false]);
             return redirect()->route('two-factor.login');
         }
-        return $this->authenticate($request, $user, false);
+        return $this->authenticate($request, $user, false, false);
     }
 
     private function ensureProvider(string $provider): void { abort_unless(in_array($provider, ['google', 'github'], true), 404); }
+
+    private function pendingTwoFactorUser(Request $request): ?User
+    {
+        $user = User::find($request->session()->get('login.id'));
+        if (! $user || $user->suspended_at || ! $user->hasEnabledTwoFactorAuthentication()
+            || $request->session()->get('login.expires', 0) < now()->timestamp
+            || ! hash_equals($this->authenticationHash($user), (string) $request->session()->get('login.auth_hash', ''))) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    private function expiredTwoFactorChallenge(Request $request)
+    {
+        $request->session()->forget('login');
+
+        return redirect()->route('login')->withErrors(['email' => 'Your sign-in session expired. Please sign in again.']);
+    }
 
     private function authenticationHash(User $user): string
     {
@@ -203,11 +233,15 @@ class AuthController extends Controller
         return ! in_array(config('mail.default'), ['log', 'array'], true);
     }
 
-    private function authenticate(Request $request, User $user, bool $remember)
+    private function authenticate(Request $request, User $user, bool $remember, bool $passwordConfirmed)
     {
         Auth::login($user, $remember);
         $request->session()->regenerate();
-        $request->session()->passwordConfirmed();
+        $request->session()->forget(['login', 'auth.password_confirmed_at']);
+        // A provider login proves identity, but does not confirm a Folkscript password.
+        if ($passwordConfirmed) {
+            $request->session()->passwordConfirmed();
+        }
         return redirect()->intended('/dashboard');
     }
 }

@@ -131,6 +131,24 @@
 .admin-search-field>.form-input { padding-left:40px; width:100%; }
 .admin-list-toolbar .admin-status-select { width:170px; }
 .admin-result-count { color:var(--muted); font-size:0.875rem; margin-bottom:12px; }
+.admin-access-intro { margin-bottom:24px; max-width:78ch; }
+.admin-access-intro>p { color:var(--muted); font-size:0.875rem; line-height:1.7; margin-bottom:6px; }
+.admin-role-guide { margin-top:8px; }
+.admin-role-guide>summary { display:flex; align-items:center; gap:8px; cursor:pointer; min-height:44px; width:fit-content; font-size:0.875rem; text-decoration:underline; text-underline-offset:4px; }
+.admin-role-guide>summary::-webkit-details-marker { display:none; }
+.admin-role-guide[open]>summary>.icon { transform:rotate(90deg); }
+.admin-role-guide dl { margin-block:10px; border-top:1px solid var(--rule); }
+.admin-role-guide dl>div { display:grid; grid-template-columns:145px minmax(0,1fr); gap:18px; padding:13px 0; border-bottom:1px solid var(--rule); font-size:0.875rem; line-height:1.65; }
+.admin-role-guide dt { font-weight:550; }
+.admin-role-guide dd,.admin-role-guide>p { color:var(--muted); }
+.admin-role-guide>p { font-size:0.875rem; line-height:1.7; }
+.admin-people-filters { display:grid; grid-template-columns:minmax(190px,1fr) minmax(155px,.65fr) minmax(175px,.7fr) auto; gap:14px; align-items:end; margin-bottom:22px; }
+.admin-people-filters .field { min-width:0; margin:0; }
+.admin-people-filters .field>span { display:block; font-size:0.875rem; margin-bottom:7px; }
+.admin-people-filters .form-input { width:100%; min-height:50px; }
+.admin-filter-actions { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; }
+.admin-filter-actions .btn { white-space:nowrap; min-height:50px; }
+.admin-access-help { color:var(--muted); font-size:0.875rem; line-height:1.65; }
 .admin-page .admin-table { min-width:0; width:100%; table-layout:fixed; margin:0; }
 .admin-page .admin-table th { padding:13px 14px; background:var(--soft); font-size:0.875rem; font-weight:550; }
 .admin-page .admin-table td { font-size:0.875rem; padding:18px 14px; vertical-align:top; overflow-wrap:anywhere; }
@@ -146,9 +164,9 @@
 .admin-story-controls .text-button { font-size:0.875rem; min-height:44px; flex-shrink:0; white-space:nowrap; }
 .admin-story-controls .admin-confirm>summary { min-height:44px; padding:11px 0; font-size:0.875rem; color:var(--muted); }
 .admin-cell-label { display:none; }
-.admin-page .admin-people-table th:first-child { width:40%; }
+.admin-page .admin-people-table th:first-child { width:34%; }
 .admin-page .admin-people-table th:nth-child(2) { width:22%; }
-.admin-page .admin-people-table th:last-child { width:38%; }
+.admin-page .admin-people-table th:last-child { width:44%; }
 .admin-person-cell>strong { font-size:0.9375rem; font-weight:550; }
 .admin-person-cell .table-secondary { font-size:0.875rem; margin-top:5px; }
 .admin-table .admin-profile-link { display:inline-flex; min-height:44px; align-items:center; font-size:0.875rem; text-decoration:underline; text-underline-offset:4px; }
@@ -183,7 +201,8 @@
 .admin-taxonomy-create>summary::-webkit-details-marker { display:none; }
 .admin-taxonomy-create[open] { background:var(--surface); padding:12px 18px 20px; border:1px solid var(--rule); border-radius:7px; }
 .admin-taxonomy-form { display:flex; flex-direction:column; gap:18px; align-items:flex-start; margin-top:18px; }
-.admin-taxonomy-form .field { font-size:0.875rem; width:100%; }
+.admin-taxonomy-form .field { font-size:0.875rem; width:100%; margin:0; }
+.admin-taxonomy-form .field-error { display:block; }
 .admin-taxonomy-form .form-input { margin-top:7px; }
 .admin-taxonomy-form textarea { min-height:90px; }
 .admin-page .audit-list>div { grid-template-columns:120px minmax(0,1fr); gap:24px; font-size:0.875rem; padding:18px 0; }
@@ -200,6 +219,7 @@
 .admin-content .platform-note { font-size:0.875rem; }
 .platform-settings-form .platform-check .field-error { color:var(--error); font-size:0.875rem; }
 @media(max-width:1180px) {
+ .admin-people-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
  .admin-workspace { grid-template-columns:208px minmax(0,1fr); }
  .admin-sidebar { padding-inline:12px; }
  .admin-brand { padding-inline:8px; }
@@ -251,6 +271,8 @@
  .admin-page .taxonomy-grid { grid-template-columns:1fr; gap:34px; }
 }
 @media(max-width:480px) {
+ .admin-people-filters { grid-template-columns:minmax(0,1fr); }
+ .admin-role-guide dl>div { grid-template-columns:minmax(0,1fr); gap:4px; }
  .admin-topbar { padding-inline:18px; gap:12px; }
  .admin-breadcrumb { font-size:0.875rem; }
  .admin-breadcrumb>.icon,.admin-breadcrumb>strong { display:none; }
@@ -286,9 +308,11 @@
  .admin-recent-story>.admin-row-action { font-size:0.875rem; }
  .admin-page .audit-list>div { grid-template-columns:1fr; gap:7px; padding:16px 0; font-size:0.875rem; }
  .admin-footer { flex-direction:column; gap:5px; }
- .admin-content .platform-save { gap:10px; align-items:stretch; }
- .admin-content .platform-save p { display:none; }
+ .admin-content .platform-save { flex-direction:column; gap:10px; align-items:stretch; }
+ .admin-content .platform-save p { margin:0; }
  .admin-content .platform-save .btn { width:100%; }
  .platform-settings-nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:16px; row-gap:0; overflow:visible; white-space:normal; }
  .platform-settings-nav a { line-height:1.45; }
 }
+
+.admin-decision-help{font-size:0.875rem;line-height:1.65;color:var(--muted);max-width:75ch;margin-top:18px}

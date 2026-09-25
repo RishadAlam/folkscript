@@ -32,7 +32,7 @@
                 <input type="hidden" name="analytics_enabled" value="0"><label class="platform-check"><input aria-invalid="{{ $errors->has('analytics_enabled') ? 'true' : 'false' }}" aria-describedby="analytics-enabled-error" type="checkbox" name="analytics_enabled" value="1" @checked(old('analytics_enabled', $settings['analytics_enabled']))><span><strong>{{ __('Enable audience analytics') }}</strong><span class="field-help">{{ __('Tracking honors the browser’s Do Not Track preference.') }}</span><x-field-error name="analytics_enabled" id="analytics-enabled-error" /></span></label>
             </div>
         </section>
-        <div class="platform-save"><p class="muted">{{ __('Save all changes on this page. Updates are recorded in the activity log.') }}</p><button class="btn btn-primary" type="submit">{{ __('Save settings') }}</button></div>
+        <div class="platform-save"><p class="muted">{{ __('Save all changes on this page. Updates are recorded in the activity log.') }}</p><button class="btn btn-primary" type="submit">{{ __('Save all settings') }}</button></div>
     </form>
 </div>
 </x-admin-layout>

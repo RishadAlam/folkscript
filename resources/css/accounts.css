@@ -87,3 +87,20 @@
 
 /* Keep read and unread activity on the same text and icon axes. */
 .notifications-page .notification-item{padding-inline:16px}
+
+/* Give tablet authentication the same focused form layout as smaller screens. */
+@media (min-width:641px) and (max-width:900px) {
+    .auth-shell { display:block; min-height:0; padding-block:48px 64px; }
+    .auth-shell .auth-aside { display:none; }
+    .auth-shell .auth-form-panel { max-width:560px; margin-inline:auto; padding-block:0; }
+}
+/* Keep actions on the input row; supporting text never sets button position. */
+.field-action-form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 14px; align-items:start; margin-top:24px; }
+.field-action-form>.field-label { grid-column:1 / -1; margin:0; }
+.field-action-form>.form-input { grid-column:1; grid-row:2; min-width:0; width:100%; }
+.field-action-form>.btn { grid-column:2; grid-row:2; align-self:stretch; white-space:normal; }
+.field-action-form>.field-help, .field-action-form>.field-error { grid-column:1; margin:0; }
+@media(max-width:700px) {
+    .field-action-form { grid-template-columns:minmax(0,1fr); }
+    .field-action-form>.btn { grid-column:1; grid-row:auto; justify-self:start; margin-top:8px; }
+}

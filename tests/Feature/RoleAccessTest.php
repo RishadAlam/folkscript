@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class RoleAccessTest extends SecurityTestCase
@@ -129,10 +130,61 @@ class RoleAccessTest extends SecurityTestCase
     public function test_admin_filters_reject_malformed_values_and_missing_account_is_not_found(): void
     {
         $this->actingAs($this->account('admin'));
-        foreach (['view[]=people', 'view=unknown', 'view=people&users_page=-1', 'view=people&user_status=unknown', 'q[]=invalid'] as $query) {
+        foreach (['view[]=people', 'view=unknown', 'view=people&users_page=-1', 'view=people&user_status=unknown', 'user_role=unknown', 'user_role[]=reader', 'q[]=invalid'] as $query) {
             $this->get('/admin?'.$query)->assertBadRequest();
         }
         $this->patch('/admin/users/999999', ['role' => 'reader'])->assertNotFound();
+    }
+
+    public function test_role_filters_match_the_highest_role_and_combine_with_account_status(): void
+    {
+        $actor = $this->account('admin');
+        $reader = $this->account('reader');
+        $writer = $this->account('author');
+        $writer->assignRole('reader');
+        $suspendedWriter = $this->account('author', ['suspended_at' => now()]);
+        $suspendedWriter->assignRole('reader');
+        $this->actingAs($actor)->get('/admin?view=people&user_role=reader')
+            ->assertOk()->assertViewHas('users', fn ($users) => $users->pluck('id')->all() === [$reader->id]);
+        $this->get('/admin?user_role=author&user_status=active')
+            ->assertOk()->assertViewHas('section', 'people')
+            ->assertViewHas('users', fn ($users) => $users->pluck('id')->all() === [$writer->id]);
+        $this->get('/admin?view=people&user_role=author&user_status=suspended')
+            ->assertOk()->assertViewHas('users', fn ($users) => $users->pluck('id')->all() === [$suspendedWriter->id]);
+    }
+
+    public function test_managed_reader_role_survives_email_verification_and_role_changes_are_audited(): void
+    {
+        $actor = $this->account('admin');
+        $reader = $this->account('reader', ['email_verified_at' => null]);
+        $this->actingAs($actor)->patch('/admin/users/'.$reader->id.'?user_role=reader&user_status=unverified', [
+            'role' => 'reader', 'suspended' => '0',
+        ])->assertRedirect('/admin?view=people&user_status=unverified&user_role=reader');
+        $this->assertNotNull($reader->fresh()->access_role_assigned_at);
+        $this->assertDatabaseHas('activity_log', ['description' => 'Updated account access', 'subject_id' => $reader->id]);
+        $this->post('/logout')->assertRedirect('/');
+        $verification = URL::temporarySignedRoute('verification.verify', now()->addMinutes(20), ['id' => $reader->id, 'hash' => sha1($reader->email)]);
+        $this->actingAs($reader->fresh())->get($verification)
+            ->assertRedirect('/bookmarks')->assertSessionHas('status', 'Email verified. Your reading list is ready.');
+        $this->assertTrue($reader->fresh()->hasVerifiedEmail());
+        $this->assertSame(['reader'], $reader->fresh()->getRoleNames()->all());
+        $this->assertFalse($reader->fresh()->canWrite());
+    }
+
+    public function test_access_validation_returns_to_filters_and_explains_the_affected_account(): void
+    {
+        $actor = $this->account('admin');
+        $target = $this->account('reader');
+        $url = '/admin/users/'.$target->id.'?user_role=reader';
+        $this->actingAs($actor)->patch($url, ['role' => ['admin'], 'suspended' => 'invalid', 'access_person' => $target->id])
+            ->assertRedirect('/admin?view=people&user_role=reader');
+        $this->get('/admin?view=people&user_role=reader')->assertOk()
+            ->assertSee('Changes weren’t saved.')
+            ->assertSee('role-error-'.$target->id, false)
+            ->assertSee('access-error-'.$target->id, false)
+            ->assertSee('Compare roles and permissions');
+        $this->assertNull($target->fresh()->access_role_assigned_at);
+        $this->assertSame(['reader'], $target->fresh()->getRoleNames()->all());
     }
 
     #[DataProvider('accountRoles')]
@@ -168,7 +220,8 @@ class RoleAccessTest extends SecurityTestCase
         $actor = $this->account('super-admin');
         $target = $this->account();
         $this->actingAs($actor)->confirmPassword()->post('/admin/users/'.$target->id.'/support')->assertRedirect();
-        $this->get('/dashboard')->assertOk();
+        $this->get('/dashboard')->assertRedirect('/bookmarks');
+        $this->get('/bookmarks')->assertOk();
         foreach (['/settings', '/admin', '/email/verify'] as $path) {
             $this->get($path)->assertForbidden();
         }

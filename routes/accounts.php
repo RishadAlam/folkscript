@@ -15,7 +15,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1,password-email')->name('password.email');
     Route::get('/reset-password/{token}', fn (Request $request, string $token) => view('auth.reset-password', ['token' => $token, 'email' => $request->query('email')]))->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:6,1,password-reset')->name('password.update');
-    Route::view('/two-factor-challenge', 'auth.two-factor')->name('two-factor.login');
+    Route::get('/two-factor-challenge', [AuthController::class, 'twoFactorPage'])->name('two-factor.login');
     Route::post('/two-factor-challenge', [AuthController::class, 'twoFactor'])->middleware('throttle:6,1,two-factor-login');
     Route::get('/auth/{provider}/redirect', [AuthController::class, 'socialRedirect'])->name('social.redirect');
     Route::get('/auth/{provider}/callback', [AuthController::class, 'socialCallback'])->name('social.callback');
@@ -30,6 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::view('/confirm-password', 'auth.confirm-password')->name('password.confirm');
     Route::post('/confirm-password', [AuthController::class, 'confirmPassword'])->middleware('throttle:6,1,password-confirm');
     Route::get('/settings', [AccountController::class, 'edit'])->name('settings');
+    Route::get('/settings/confirm-access', [AccountController::class, 'confirmAccess'])->name('settings.confirm-access');
+    Route::patch('/settings/preferences', [AccountController::class, 'preferences'])->name('settings.preferences');
     Route::post('/settings/pinned-story', [AccountController::class, 'pinStory'])->middleware('verified')->name('settings.pinned-story');
     Route::patch('/settings', [AccountController::class, 'update'])->name('settings.update');
     Route::put('/settings/password', [AccountController::class, 'password'])->middleware('throttle:6,1,password-change')->name('settings.password');

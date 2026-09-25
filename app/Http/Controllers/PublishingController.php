@@ -89,6 +89,10 @@ class PublishingController extends Controller
 
     public function dashboard(Request $request)
     {
+        if (! $request->user()->canWrite()) {
+            return redirect()->route('bookmarks');
+        }
+
         $query = $request->user()->posts();
         $stats = ['posts' => (clone $query)->count(), 'published' => (clone $query)->where('status', 'published')->count(), 'drafts' => (clone $query)->where('status', 'draft')->count(), 'views' => (int) (clone $query)->sum('views'), 'followers' => $request->user()->followers()->count(), 'reactions' => \App\Models\Reaction::whereHas('post', fn ($q) => $q->where('author_id', $request->user()->id))->count()];
         $posts = $query->withCard()->when($request->filled('status'), fn ($q) => $q->where('status', $request->query('status')))->latest()->paginate(10)->withQueryString();

@@ -65,12 +65,9 @@ final class SeoData
         if ($user->avatar) {
             $person['image'] = self::absoluteImage($user->avatar);
         }
-        $links = $user->social_links ?? [];
-        if (is_array($links)) {
-            $links = array_values(array_filter($links, fn ($link) => is_string($link) && filter_var($link, FILTER_VALIDATE_URL)));
-            if ($links) {
-                $person['sameAs'] = $links;
-            }
+        $links = array_column($user->publicProfileLinks(), 'url');
+        if ($links) {
+            $person['sameAs'] = $links;
         }
 
         return $person;

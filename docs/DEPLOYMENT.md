@@ -91,7 +91,21 @@ The supplied queue retry interval is 180 seconds; keep a worker's timeout shorte
 
 ## Upgrading to the free publishing model
 
-Back up the database and uploads before deploying. Run the forward migrations with `php artisan migrate --force`; never reset the database. The migration preserves users and stories, converts the obsolete paid reader role to `reader`, and removes payment tables and columns. Dependency installation removes the payment packages. Remove any old payment-provider secrets from the deployment environment; no payment service is used by this project. The migration refuses existing subscriptions, connected billing accounts, and non-demo financial records; retire and archive those records before retrying. Rebuild assets, clear/rebuild configuration and view caches, and restart queue workers. When using a persistent Scout engine such as Meilisearch, run `php artisan scout:import 'App\Models\Post'` to index the full text of formerly restricted stories. The local collection driver has no persistent index. See [free-publishing scope](FREE_PUBLISHING.md) for migration behavior and verified results.
+Back up the database and uploads before deploying. Run the forward migrations with `php artisan migrate --force`; never reset the database. The migration preserves users and stories, converts the obsolete paid reader role to `reader`, and removes payment tables and columns. Dependency installation removes the payment packages. Remove any old payment-provider secrets from the deployment environment; no payment service is used by this project.
+
+The migration refuses existing subscriptions, subscription items, connected billing accounts, and non-demo financial records; retire and archive those records before retrying. Only untouched pending demo allocations without a transfer or destination qualify for removal. The migration does not cancel external subscriptions or settle funds. Reversal requires restoring the pre-migration backup.
+
+Rebuild assets, clear/rebuild configuration and view caches, and restart queue workers. When using a persistent Scout engine such as Meilisearch, run `php artisan scout:import 'App\Models\Post'` to index the full text of formerly restricted stories. The local collection driver has no persistent index.
+
+## Authentication operations
+
+- Keep the server clock accurate; authenticator codes depend on time synchronization.
+- Fortify's two-factor replay protection uses the application cache. Use a shared, persistent cache for multi-worker or multi-server deployments.
+- Preserve `APP_KEY` across deployments and restores. Two-factor secrets and recovery codes are encrypted with it; replacing the key makes existing encrypted values unreadable.
+- Before launch, use a controlled account to check actual authenticator enrollment, sign-in, and recovery on the intended devices. Verify enabled Google/GitHub sign-in and real verification/password-reset delivery with the installation's credentials. Mocked provider callbacks and local tests do not establish live service behavior.
+- Interactive two-factor authentication does not challenge existing sessions or bearer API tokens. Manage and revoke those credentials separately; password changes and resets revoke API tokens.
+
+See [Authentication](AUTHENTICATION.md) for account setup and recovery behavior. Operators remain responsible for HTTPS, secure session cookies, reliable mail, backups, and access to recovery procedures.
 
 ## External services
 

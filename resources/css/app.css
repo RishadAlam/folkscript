@@ -9,12 +9,15 @@
 @import './typography.css';
 @import './avatar.css';
 @import './reader-tools.css';
+@import './settings.css';
+@import './api-docs.css';
+@import './image-tones.css';
 @source '../views';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-serif: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Lexend Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-serif: var(--font-sans);
 }

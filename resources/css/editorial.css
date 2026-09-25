@@ -20,7 +20,7 @@ html.dark{--paper:#141b2e;--surface:#1b253b;--ink:#f6f3ec;--muted:#b3bbca;--rule
 .avatar-button{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}.mobile-menu>button{display:flex;align-items:center;gap:12px;min-height:44px;padding:12px;background:transparent;border:0;width:100%;text-align:left}.mobile-menu>button:hover{background:var(--soft)}
 @media(max-width:600px){.header-actions>.icon-button{width:44px;height:44px}.form-input,.auth-form-panel input,.auth-single input{font-size:1rem}.mobile-menu-toggle{width:44px;height:44px}}
 
-.profile-cover{margin-top:28px}.profile-cover img{width:100%;aspect-ratio:3.5;object-fit:cover;border-radius:4px}.profile-socials{display:flex;flex-wrap:wrap;gap:18px;font-size:0.875rem;margin-top:15px}.profile-socials a{display:inline-flex;align-items:center;gap:5px;text-decoration:underline;text-underline-offset:3px}
+.profile-cover{margin-top:28px}.profile-cover img{width:100%;aspect-ratio:3.5;object-fit:contain;background:var(--surface);border-radius:4px}.profile-socials{display:flex;flex-wrap:wrap;gap:18px;font-size:0.875rem;margin-top:15px}.profile-socials a{display:inline-flex;align-items:center;gap:5px;text-decoration:underline;text-underline-offset:3px}
 
 @media(max-width:600px){.editor-sidebar .form-input{font-size:1rem}}
 
