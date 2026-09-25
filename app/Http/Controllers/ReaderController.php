@@ -29,10 +29,8 @@ class ReaderController extends Controller
         $posts = $author->posts()->published()->with('author')->latest('published_at')->paginate(8)->appends($request->only(['page']));
         $source = $this->source($request, url('/@'.$author->username));
         $extra = $author->location ? '<p>'.e($author->location).'</p>' : '';
-        foreach ($author->social_links ?? [] as $name => $url) {
-            if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL) && in_array(parse_url($url, PHP_URL_SCHEME), ['http', 'https'], true)) {
-                $extra .= '<p>'.$markdown->link(ucfirst($name), $url).'</p>';
-            }
+        foreach ($author->publicProfileLinks() as $link) {
+            $extra .= '<p>'.$markdown->link($link['label'], $link['url']).'</p>';
         }
         $pinned = $author->pinnedPost;
         if ($pinned && $pinned->author_id === $author->id) {

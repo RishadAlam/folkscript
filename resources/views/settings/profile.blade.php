@@ -30,38 +30,12 @@
             <span class="field-help" id="settings4-help">{{ __('Up to 500 characters. Visible on your public profile.') }}</span>
             <x-field-error name="bio" id="settings4-error" />
         </label>
-        <div class="form-grid">
-            <label class="field">{{ __('Location') }}
-                <input aria-invalid="{{ $errors->has('location') ? 'true' : 'false' }}" aria-describedby="settings5-error" class="form-input" name="location" value="{{ old('location', $user->location) }}" maxlength="100" placeholder="{{ __('City, country') }}">
-                <x-field-error name="location" id="settings5-error" />
-            </label>
-            <label class="field">{{ __('Website') }}
-                <input aria-invalid="{{ $errors->has('website') ? 'true' : 'false' }}" aria-describedby="settings6-error" class="form-input" type="url" name="website" maxlength="255" value="{{ old('website', $user->social_links['website'] ?? '') }}" placeholder="https://">
-                <x-field-error name="website" id="settings6-error" />
-            </label>
-        </div>
-        <details class="settings-disclosure settings-profile-extras" @if($errors->hasAny(['github', 'linkedin', 'cover_image'])) open @endif>
-            <summary>{{ __('Social links & profile cover') }}</summary>
-            <div class="stack">
-                <div class="form-grid">
-                    <label class="field">{{ __('GitHub profile') }}
-                        <input aria-invalid="{{ $errors->has('github') ? 'true' : 'false' }}" aria-describedby="settings7-error" class="form-input" type="url" name="github" maxlength="255" value="{{ old('github', $user->social_links['github'] ?? '') }}" placeholder="https://github.com/yourname">
-                        <x-field-error name="github" id="settings7-error" />
-                    </label>
-                    <label class="field">{{ __('LinkedIn profile') }}
-                        <input aria-invalid="{{ $errors->has('linkedin') ? 'true' : 'false' }}" aria-describedby="settings8-error" class="form-input" type="url" name="linkedin" maxlength="255" value="{{ old('linkedin', $user->social_links['linkedin'] ?? '') }}" placeholder="https://linkedin.com/in/yourname">
-                        <x-field-error name="linkedin" id="settings8-error" />
-                    </label>
-                </div>
-                @if($user->cover_image)<img class="settings-cover-preview" src="{{ $user->cover_image }}" alt="{{ __('Your current profile cover') }}" loading="lazy">@endif
-                <label class="field">{{ __('Profile cover') }}
-                    <input aria-invalid="{{ $errors->has('cover_image') ? 'true' : 'false' }}" aria-describedby="settings9-help settings9-error" class="form-input" type="file" name="cover_image" accept="image/jpeg,image/png,image/webp">
-                    <span class="field-help" id="settings9-help">{{ __('Recommended: 1400 × 400 px (3.5:1). JPG, PNG, or WebP, up to 6 MB. This is the banner on your profile, separate from story covers.') }}</span>
-                    <x-field-error name="cover_image" id="settings9-error" />
-                </label>
-                @if($user->cover_image)<label class="check-label"><input type="checkbox" name="remove_cover_image" value="1" @checked(old('remove_cover_image'))>{{ __('Remove current profile cover') }}</label>@endif
-            </div>
-        </details>
+        <label class="field">{{ __('Location') }}
+            <input aria-invalid="{{ $errors->has('location') ? 'true' : 'false' }}" aria-describedby="settings5-error" class="form-input" name="location" value="{{ old('location', $user->location) }}" maxlength="100" placeholder="{{ __('City, country') }}">
+            <x-field-error name="location" id="settings5-error" />
+        </label>
+        @include('settings.profile-links')
+        @include('settings.profile-cover')
         <div class="settings-actions settings-save-bar"><button class="btn btn-primary" type="submit">{{ __('Save profile') }}</button><span class="field-help" data-settings-unsaved hidden role="status">{{ __('Unsaved changes') }}</span></div>
     </form>
 </section>

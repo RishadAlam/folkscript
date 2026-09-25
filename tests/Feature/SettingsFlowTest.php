@@ -8,6 +8,62 @@ use Spatie\Permission\Models\Permission;
 
 class SettingsFlowTest extends SecurityTestCase
 {
+    public function test_custom_profile_links_preserve_order_and_multiple_accounts_on_the_same_platform(): void
+    {
+        $user = $this->account(attributes: ['social_links' => ['website' => 'https://writer.example/']]);
+        $links = [
+            ['label' => 'my portfolio', 'url' => 'https://writer.example/work'],
+            ['label' => 'Mastodon', 'url' => 'https://social.example/@personal'],
+            ['label' => 'Mastodon', 'url' => 'https://social.example/@work'],
+        ];
+        $this->actingAs($user)->from('/settings?section=profile')->patch('/settings', [
+            'name' => $user->name, 'username' => $user->username, 'links_present' => 1,
+            'links' => [...$links, ['label' => '', 'url' => '']],
+        ])->assertRedirect('/settings?section=profile')->assertSessionHasNoErrors();
+        $this->assertSame($links, $user->fresh()->social_links);
+        $this->get('/settings')->assertOk()->assertSee('my portfolio')->assertSee('https://social.example/@work');
+    }
+
+    public function test_profile_edits_preserve_omitted_links_and_explicitly_removing_all_links_clears_them(): void
+    {
+        $links = ['website' => 'https://writer.example/', 'instagram' => 'https://instagram.com/writer'];
+        $user = $this->account(attributes: ['social_links' => $links]);
+        $profile = ['name' => $user->name, 'username' => $user->username];
+        $this->actingAs($user)->patch('/settings', $profile)->assertSessionHasNoErrors();
+        $this->assertSame($links, $user->fresh()->social_links);
+        $this->patch('/settings', $profile + ['links_present' => 1])->assertSessionHasNoErrors();
+        $this->assertSame([], $user->fresh()->social_links);
+    }
+
+    public function test_invalid_custom_links_do_not_replace_existing_profile_data(): void
+    {
+        $saved = ['website' => 'https://writer.example/'];
+        $user = $this->account(attributes: ['social_links' => $saved]);
+        $this->actingAs($user)->from('/settings?section=profile')->patch('/settings', [
+            'name' => 'Not saved', 'username' => $user->username, 'links_present' => 1,
+            'links' => [
+                ['label' => '', 'url' => 'https://writer.example/'],
+                ['label' => 'Missing address', 'url' => ''],
+                ['label' => 'Unsafe', 'url' => 'javascript:alert(1)'],
+                ['label' => 'Private', 'url' => 'https://user:secret@writer.example/'],
+            ],
+        ])->assertSessionHasErrors(['links.0.label', 'links.1.url', 'links.2.url', 'links.3.url']);
+        $this->assertSame($saved, $user->fresh()->social_links);
+        $this->assertSame($user->name, $user->fresh()->name);
+    }
+
+    public function test_removing_all_links_stays_empty_when_another_profile_field_needs_correction(): void
+    {
+        $saved = ['website' => 'https://writer.example/'];
+        $user = $this->account(attributes: ['social_links' => $saved]);
+        $this->actingAs($user)->from('/settings?section=profile')->patch('/settings', [
+            'name' => '', 'username' => $user->username, 'links_present' => 1,
+        ])->assertRedirect('/settings?section=profile');
+        $this->get('/settings?section=profile')->assertOk()->assertSee('The name field is required.')
+            ->assertDontSee('https://writer.example/');
+        $this->assertSame($saved, $user->fresh()->social_links);
+    }
+
     public function test_profile_edits_do_not_reset_a_separately_saved_email_preference(): void
     {
         $user = $this->account(attributes: ['newsletter_enabled' => true]);

@@ -57,6 +57,49 @@ class User extends Authenticatable implements MustVerifyEmail, HasMedia
         return collect($parts)->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: '?';
     }
 
+    /** @return array<int, array{label: string, url: string}> */
+    public function publicProfileLinks(): array
+    {
+        $links = $this->social_links;
+        if (! is_array($links)) {
+            return [];
+        }
+
+        $publicLinks = [];
+        foreach ($links as $key => $link) {
+            if (is_array($link)) {
+                $label = $link['label'] ?? null;
+                $url = $link['url'] ?? null;
+            } else {
+                // Older profiles stored platform names as JSON object keys.
+                $label = match ($key) {
+                    'website' => 'Website',
+                    'github' => 'GitHub',
+                    'linkedin' => 'LinkedIn',
+                    default => $key,
+                };
+                $url = $link;
+            }
+
+            if (! is_string($label) || trim($label) === '' || preg_match('/[\x00-\x1F\x7F]/', $label) || ! is_string($url)) {
+                continue;
+            }
+            $url = trim($url);
+            if (! filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+            $parts = parse_url($url);
+            if (! is_array($parts) || ! in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)
+                || array_key_exists('user', $parts) || array_key_exists('pass', $parts)) {
+                continue;
+            }
+
+            $publicLinks[] = ['label' => $label, 'url' => $url];
+        }
+
+        return $publicLinks;
+    }
+
     public function getAvatarUrlAttribute(): ?string
     {
         $avatar = trim($this->avatar ?? '');

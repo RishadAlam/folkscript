@@ -96,17 +96,47 @@ class AccountController extends Controller
             'website' => ['nullable', 'url:http,https', 'max:255'],
             'github' => ['nullable', 'url:http,https', 'max:255'],
             'linkedin' => ['nullable', 'url:http,https', 'max:255'],
+            'links_present' => ['nullable', 'boolean'],
+            'links' => ['nullable', 'array', 'max:10'],
+            'links.*' => ['array:label,url'],
+            'links.*.label' => ['nullable', 'required_with:links.*.url', 'string', 'max:40', 'not_regex:/[\x00-\x1F\x7F]/'],
+            'links.*.url' => ['bail', 'nullable', 'required_with:links.*.label', 'url:http,https', 'max:500', function ($attribute, $value, $fail) {
+                $parts = is_string($value) ? parse_url($value) : false;
+                if (is_array($parts) && (array_key_exists('user', $parts) || array_key_exists('pass', $parts))) {
+                    $fail('Use a public link without a username or password in the address.');
+                }
+            }],
             'newsletter_enabled' => ['nullable', 'boolean'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096', 'dimensions:max_width=6000,max_height=6000'],
             'cover_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:6144', 'dimensions:max_width=8000,max_height=8000'],
             'remove_avatar' => ['nullable', 'boolean'],
             'remove_cover_image' => ['nullable', 'boolean'],
-        ], ['username.not_in' => 'This username is reserved. Choose a different username.']);
-        $data['social_links'] = array_filter(['website' => $data['website'] ?? null, 'github' => $data['github'] ?? null, 'linkedin' => $data['linkedin'] ?? null]);
+        ], [
+            'username.not_in' => 'This username is reserved. Choose a different username.',
+            'links.max' => 'Add up to 10 links. Remove a link before adding another.',
+            'links.*.label.required_with' => 'Give this link a label so readers know where it leads.',
+            'links.*.label.not_regex' => 'Use a label without line breaks or control characters.',
+            'links.*.url.required_with' => 'Add the full address for this link, starting with https://.',
+            'links.*.url.url' => 'Enter a valid public web address starting with https:// or http://.',
+        ]);
+        if ($request->boolean('links_present') || $request->has('links')) {
+            $data['social_links'] = collect($data['links'] ?? [])
+                ->filter(fn ($link) => filled($link['label'] ?? null) && filled($link['url'] ?? null))
+                ->map(fn ($link) => ['label' => $link['label'], 'url' => $link['url']])->values()->all();
+        } elseif ($request->hasAny(['website', 'github', 'linkedin'])) {
+            // Older clients can still update their fixed fields without erasing other links.
+            $links = $user->publicProfileLinks();
+            foreach (['website' => 'Website', 'github' => 'GitHub', 'linkedin' => 'LinkedIn'] as $field => $label) {
+                if (! $request->has($field)) { continue; }
+                $links = array_values(array_filter($links, fn ($link) => mb_strtolower($link['label']) !== $field));
+                if (filled($data[$field] ?? null)) { $links[] = ['label' => $label, 'url' => $data[$field]]; }
+            }
+            $data['social_links'] = $links;
+        }
         if ($request->has('newsletter_enabled')) {
             $data['newsletter_enabled'] = $request->boolean('newsletter_enabled');
         }
-        unset($data['website'], $data['github'], $data['linkedin']);
+        unset($data['website'], $data['github'], $data['linkedin'], $data['links'], $data['links_present']);
         foreach (['avatar', 'cover_image'] as $field) {
             unset($data[$field], $data['remove_'.$field]);
             if ($request->hasFile($field)) {

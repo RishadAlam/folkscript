@@ -134,7 +134,8 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .quote-maker p, .quote-maker label, .quote-maker small { font-size:0.875rem; }
 .profile-details { font-size:0.875rem; flex-wrap: wrap; }
 .profile-socials { font-size:0.875rem; }
-.profile-socials a { min-height: 36px; }
+.profile-socials a { min-height: 44px; max-width: 100%; min-width: 0; }
+.profile-socials a>span { min-width: 0; overflow-wrap: anywhere; }
 .profile-header p { font-size:1rem; }
 .profile-header>div, .collection-link>div, .writer-discovery { min-width: 0; }
 .profile-header .form-actions .btn { margin-top: 0; }
