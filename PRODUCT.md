@@ -17,10 +17,10 @@ A free, open-source, nonprofit publishing platform. Every published story is fre
 Provide publishing, rich editing, accounts, community, search, administration, SEO and feeds. There are no paid tiers, subscriptions, paywalls, earnings ledgers, or payment integrations. External production credentials and domain ownership are not supplied. Example editorial content and accounts must be documented as demo data.
 
 ## Brand Commitments
-Preserve supplied Folkscript SVG assets. Ink navy #1E2A47, ink black #141B2E, white light-mode paper #FFFFFF, neutral panels #F8F9FB, soft grouping #F1F3F6, dividers #DFE3E9, slate #8B9BC0, restrained amber #D9A441. Dark mode retains its warm foreground #F6F3EC. Lexend Variable throughout headings, reading, controls, supporting copy, and administration; monospace for code. Keep the supplied SVG lettering unchanged. Use scalable rem text sizes, a 1rem interface body, and a .875rem metadata floor.
+Use the Folkscript book-and-speech mark with its outlined lowercase Lexend 600 wordmark. Choose the transparent light, dark, or monochrome SVG for its background; keep the lockup at least 120px wide and the standalone mark at least 16px wide, with clear space of at least half the mark's width. Do not stretch the artwork or add a tiny tagline. Ink navy #1E2A47, ink black #141B2E, white light-mode paper #FFFFFF, neutral panels #F8F9FB, soft grouping #F1F3F6, dividers #DFE3E9, slate #8B9BC0, restrained amber #D9A441. Dark mode retains its warm foreground #F6F3EC. Lexend Variable throughout headings, reading, controls, supporting copy, and administration; monospace for code. Use scalable rem text sizes, a 1rem interface body, and a .875rem metadata floor.
 
 ## Evidence on Hand
-Supplied brand assets are in public/images, with provenance recorded in docs/ASSETS.md. Seeded stories and audience metrics are demonstration data.
+Brand vectors are in public/images, with usage guidance in docs/brand/README.md and provenance recorded in docs/ASSETS.md. The previous identity is preserved in Git history. Seeded stories and audience metrics are demonstration data.
 
 ## Product Principles
 Writing and reading lead. Authors own their voice. Powerful tools stay understandable. Authentication and permissions are enforced server-side. Unconfigured external services have honest, actionable states.

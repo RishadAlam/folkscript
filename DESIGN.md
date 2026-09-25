@@ -181,7 +181,7 @@ components:
 
 Folkscript uses the quiet authority of a literary journal: clear Lexend titles, white pages, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with neutral panels, denser forms, and clearer task groupings.
 
-Preserve the supplied Folkscript SVG assets. Lexend Variable supplies headings, prose, controls, supporting text, and administration. Size, weight, measure, and spacing distinguish sustained reading from interface tasks. Supplied SVG wordmarks retain their original embedded type declarations. Photography remains rectangular and editorial. Story covers stay fully visible, with no decorative paper texture.
+Use the Folkscript SVG identity: two open book pages, with the gold right page forming a speech-bubble tail, paired with an outlined lowercase Lexend 600 wordmark. Lexend Variable supplies headings, prose, controls, supporting text, and administration. Size, weight, measure, and spacing distinguish sustained reading from interface tasks. The logo's outlined lettering renders independently of installed fonts. Photography remains rectangular and editorial. Story covers stay fully visible, with no decorative paper texture.
 
 **Key Characteristics:**
 
@@ -200,14 +200,14 @@ The light palette combines a white page with subtle neutral surfaces, cool ink, 
 ### Primary
 
 - **Ink navy** (`ink`) is the light-theme text and primary action color. Fixed navy closing-invitation blocks retain their dark treatment in both themes.
-- **Amber** (`amber`) appears in supplied marks, notification dots, text selection, and the reading progress line. Saved and appreciated text use the higher-contrast `accent-readable` role, which switches to `dark-accent-readable` in dark mode.
+- **Amber** (`amber`) appears in the logo's right page, notification dots, text selection, and the reading progress line. Saved and appreciated text use the higher-contrast `accent-readable` role, which switches to `dark-accent-readable` in dark mode.
 
 ### Neutral
 
 - **Paper** (`paper`, `#ffffff`) is the white light-theme page background and reversed text on navy surfaces. **Editorial surface** (`surface`, `#f8f9fb`) distinguishes panels and dropdowns; **soft surface** (`soft`, `#f1f3f6`) groups featured stories, notes, tags, and empty states.
 - **Muted ink** (`muted`) carries supporting copy and metadata. **Rule** (`rule`) divides navigation, lists, sections, and fields.
 - **Ink black** (`ink-black`) becomes the dark page background. Dark-mode foreground ink remains the original warm `#f6f3ec`, independently of the light-theme white page; `dark-surface`, `dark-muted`, `dark-rule`, and `dark-soft` replace corresponding light variables.
-- **Slate** (`slate`) belongs to the supplied dark wordmark. It is not the current light-theme body or metadata color.
+- **Slate** (`slate`) remains a secondary palette token. The dark logo uses warm foreground `#f6f3ec` and amber; slate is not the current light-theme body or metadata color.
 - **Avatar paper** and **avatar ink** supply the fallback for unknown initials. Named avatars use a stable hue derived from the first uppercase initial (Unicode code point × 137, modulo 360). Light mode pairs a pale background (45% saturation, 88% lightness) with dark initials (45%, 25%); dark mode pairs a deeper background (32%, 25%) with pale initials (42%, 88%). The shared treatment applies to public, account, and admin avatars. Uploaded photos still cover the initials, which remain available if the image fails to load.
 
 ### Status
@@ -218,7 +218,7 @@ The light palette combines a white page with subtle neutral surfaces, cool ink, 
 
 ## Typography
 
-Lexend Variable supplies every text role: editorial headings, article and legal prose, the writing editor, navigation, controls, metadata, comments, settings, and administration. The shared family keeps reading and account tasks coherent; size, weight, spacing, and line length establish their different rhythms. Code keeps a monospace stack, and supplied SVG wordmarks retain their original lettering.
+Lexend Variable supplies every text role: editorial headings, article and legal prose, the writing editor, navigation, controls, metadata, comments, settings, and administration. The shared family keeps reading and account tasks coherent; size, weight, spacing, and line length establish their different rhythms. Code keeps a monospace stack; the SVG wordmark uses outlined lowercase Lexend at weight 600.
 
 The normal variable face is self-hosted from `@fontsource-variable/lexend`, with Latin, Latin Extended, and Vietnamese assets separated by `unicode-range`. Extended and Vietnamese subsets load when the rendered characters need them. Faces use `font-display: swap` and support weights 100–900. One normal Latin font file is preloaded in each application shell. System fonts back up Lexend. Lexend has no true italic face; browser-synthesized oblique is permitted for semantic emphasis and quotations, while weight synthesis is disabled. Keep `public/fonts/lexend-LICENSE.txt` with the font assets.
 
@@ -233,7 +233,13 @@ Use `rem` for type sizes so user text preferences can scale the hierarchy. The p
 
 Administration retains its compact hierarchy in Lexend: page headings are 1.875rem (30px), reducing to 1.6875rem (27px) at 480px; panel headings are 1.25rem (20px). Tables, breadcrumbs, status text, and supporting labels stay at least .875rem. Tabular numerals remain on counts and numerical data.
 
-**The Shared Typeface Rule.** Use Lexend for headings, sustained reading, and interface work. Establish roles through size, weight, measure, and spacing. Keep code monospace and supplied SVG lettering unchanged; do not introduce a separate editorial family.
+**The Shared Typeface Rule.** Use Lexend for headings, sustained reading, and interface work. Establish roles through size, weight, measure, and spacing. Keep code monospace and use the outlined SVG wordmark; do not introduce a separate editorial family.
+
+## Brand identity
+
+Use `public/images/folkscript-web-primary.svg` on light surfaces and `folkscript-web-dark.svg` on dark surfaces. Both have transparent backgrounds; the monochrome `folkscript-web-mono.svg` uses navy throughout for single-color applications on light surfaces. The `folkscript-logo-primary.svg` and `folkscript-logo-dark.svg` files are matching compact lockup aliases, without taglines. Standalone light and dark marks are available separately; the app icon places the reversed mark on navy.
+
+Keep a full lockup at least 120px wide and a standalone mark at least 16px wide. Preserve the aspect ratio and leave clear space around the artwork of at least half the mark's width. Do not stretch, crop, retype the wordmark, or attach a tiny tagline. Use a standalone mark when the full lockup cannot fit. See [Brand assets and usage](docs/brand/README.md) for the inventory and preview; [Asset sources](docs/ASSETS.md) records the authored SVG symbol, bundled Lexend lettering license, and vector-derived PNGs. The previous identity remains in Git history.
 
 ## Layout
 
@@ -287,7 +293,7 @@ Standard fields use paper, an ink caret, a rule border, the field radius, and a 
 
 ### Navigation and theme
 
-The masthead uses the supplied light or dark SVG, text links, search, theme, account actions, and a ruled lower edge. Height steps from 94px to 82px at 900px and 74px at 600px. The hamburger appears at 900px and below; narrow-screen sign-in and writing actions move into expanded navigation. Without a saved selection, the theme follows the device preference, including changes while the page is open. An explicit light or dark selection takes precedence and is saved locally when storage is available. The initial theme is applied before styles load. The separate header theme button hides at 600px; mobile navigation contains its own theme control. Escape closes the mobile menu and returns focus to its trigger. Account navigation exposes notifications and role-appropriate writing tools. The skip link moves keyboard focus to the main region.
+The masthead uses the transparent light or dark Folkscript wordmark, text links, search, theme, account actions, and a ruled lower edge. Height steps from 94px to 82px at 900px and 74px at 600px. The hamburger appears at 900px and below; narrow-screen sign-in and writing actions move into expanded navigation. Without a saved selection, the theme follows the device preference, including changes while the page is open. An explicit light or dark selection takes precedence and is saved locally when storage is available. The initial theme is applied before styles load. The separate header theme button hides at 600px; mobile navigation contains its own theme control. Escape closes the mobile menu and returns focus to its trigger. Account navigation exposes notifications and role-appropriate writing tools. The skip link moves keyboard focus to the main region.
 
 ### Article reading and motion
 
@@ -333,7 +339,7 @@ Field labels, inputs, supporting text, and actions occupy distinct layout rows. 
 
 ### Do:
 
-- **Do** preserve the supplied Folkscript marks and distinguish reading and interface roles within Lexend.
+- **Do** use the Folkscript SVG variants with their minimum sizes and clear space, and distinguish reading and interface roles within Lexend.
 - **Do** use semantic CSS variables so light and dark themes remain coherent.
 - **Do** give stories and authors visual priority through type, photography, and spacing.
 - **Do** maintain the 68ch prose cap, 700px desktop article measure, and responsive reading gutters.

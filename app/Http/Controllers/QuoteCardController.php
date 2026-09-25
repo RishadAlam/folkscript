@@ -58,6 +58,9 @@ class QuoteCardController extends Controller
         $author = $escape($this->fitLine($post->author->name, 1035 / 25));
         $title = $escape($this->fitLine($post->title, 1035 / 19));
         $accessibleTitle = $escape('A quote from '.$post->title.' by '.$post->author->name);
+        // This bundled path-only SVG remains self-contained inside downloaded cards.
+        $logo = preg_replace('~<\?xml[^>]*\?>~', '', file_get_contents(public_path('images/folkscript-web-primary.svg')));
+        $logo = preg_replace('~<svg\b[^>]*>~', '<svg xmlns="http://www.w3.org/2000/svg" x="78" y="68" width="234" height="48" viewBox="0 0 312 64" aria-hidden="true">', $logo, 1);
 
         return '<?xml version="1.0" encoding="UTF-8"?>'
             .'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">'
@@ -65,8 +68,8 @@ class QuoteCardController extends Controller
             .'<metadata>'.$escape(file_get_contents(public_path('fonts/lexend-LICENSE.txt'))).'</metadata>'
             .'<style><![CDATA['.$fontCss.']]></style>'
             .'<rect width="1200" height="630" fill="#FFFFFF"/>'
+            .$logo
             .'<g fill="#1E2A47" font-family="Lexend Variable, system-ui, sans-serif">'
-            .'<text x="78" y="108" font-size="36"><tspan font-weight="700">Folk</tspan>script<tspan fill="#D9A441">.</tspan></text>'
             .'<text x="1122" y="102" font-size="16" text-anchor="end" fill="#606B81">A thought worth keeping.</text>'
             .'<path d="M78 148H1122" stroke="#1E2A47" stroke-opacity=".2"/>'
             .'<text font-size="'.$fontSize.'">'.$text.'</text>'

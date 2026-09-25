@@ -63,7 +63,7 @@
 @unless($admin)
 <header class="site-header" @click.outside="menuOpen=false" @focusout="if (!$el.contains($event.relatedTarget)) menuOpen=false" @keydown.escape.window="if(menuOpen){menuOpen=false;$refs.mobileToggle.focus()}">
   <div class="masthead page-shell">
-    <a href="/" class="brand" aria-label="{{ __('Folkscript home') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="190" height="42"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="190" height="42"></a>
+    <a href="/" class="brand" aria-label="{{ __('Folkscript home') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="312" height="64"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="312" height="64"></a>
     <nav class="desktop-nav" aria-label="{{ __('Main navigation') }}"><a href="/explore" @class(['active' => request()->is('explore')]) @if(request()->is('explore')) aria-current="page" @endif>{{ __('Explore') }}</a><a href="/trending" @class(['active' => request()->is('trending')]) @if(request()->is('trending')) aria-current="page" @endif>{{ __('Trending') }}</a><a href="/about" @class(['active' => request()->is('about')]) @if(request()->is('about')) aria-current="page" @endif>{{ __('Our story') }}</a></nav>
     <div class="header-actions">
       <a class="icon-button" href="/explore" aria-label="{{ __('Search stories') }}"><x-icon name="search" /></a>
@@ -107,7 +107,7 @@
 <footer class="site-footer">
     <div class="page-shell footer-inner">
         <div class="footer-brand">
-            <a href="/" class="footer-wordmark"><strong>Folk</strong>script<span>.</span></a>
+            <a href="/" class="footer-wordmark" aria-label="{{ __('Folkscript home') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="312" height="64"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="312" height="64"></a>
             @if(filled(config('folkscript.tagline')))<p>{{ config('folkscript.tagline') }}</p>@endif
         </div>
         <nav aria-label="{{ __('Footer navigation') }}">

@@ -1,10 +1,12 @@
 /* Only public, versioned assets are cached. Story, account and API responses stay on the network. */
-const CACHE = 'folkscript-public-v3';
+const CACHE = 'folkscript-public-v4';
 const OFFLINE = '/offline.html';
 const SHELL = [
     OFFLINE,
     '/favicon.svg',
     '/manifest.webmanifest',
+    '/images/folkscript-web-primary.svg',
+    '/images/folkscript-web-dark.svg',
     '/fonts/lexend-latin-wght-normal.woff2',
     '/fonts/lexend-latin-ext-wght-normal.woff2',
     '/fonts/lexend-vietnamese-wght-normal.woff2',

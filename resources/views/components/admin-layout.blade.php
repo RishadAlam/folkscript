@@ -2,7 +2,7 @@
 <x-layout :title="$title.' · Administration'" :admin="true">
     <div class="admin-workspace">
         <aside class="admin-sidebar">
-            <a href="{{ route('admin') }}" class="admin-brand" aria-label="{{ __('Folkscript administration') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="170" height="38"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="170" height="38"></a>
+            <a href="{{ route('admin') }}" class="admin-brand" aria-label="{{ __('Folkscript administration') }}"><img class="logo-light" src="/images/folkscript-web-primary.svg" alt="Folkscript" width="312" height="64"><img class="logo-dark" src="/images/folkscript-web-dark.svg" alt="Folkscript" width="312" height="64"></a>
             <nav aria-label="{{ __('Administration') }}"><x-admin-navigation :section="$section" :counts="$counts" /></nav>
             <div class="admin-sidebar-account">
                 <a href="{{ route('settings') }}" class="admin-account-link"><x-avatar :user="auth()->user()" size="small" /><span><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->hasRole('super-admin') ? __('Platform owner') : (auth()->user()->hasRole('admin') ? __('Administrator') : __('Editor')) }}</small></span></a>

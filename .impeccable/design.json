@@ -229,7 +229,7 @@
   ],
   "narrative": {
     "northStar": "The Independent Literary Quarterly",
-    "overview": "Folkscript uses the quiet authority of a literary journal: clear Lexend titles, white pages, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with neutral panels, denser forms, and clearer task groupings.\n\nPreserve the supplied Folkscript SVG assets. Lexend Variable supplies headings, prose, controls, supporting text, and administration. Size, weight, measure, and spacing distinguish sustained reading from interface tasks. Supplied SVG wordmarks retain their original embedded type declarations. Photography remains rectangular and editorial, with restrained crops and no decorative paper texture.",
+    "overview": "Folkscript uses the quiet authority of a literary journal: clear Lexend titles, white pages, ink navy, fine rules, and generous reading space. Stories, photographs, and authors provide the visual interest. Account, editor, and administration screens carry the same identity with neutral panels, denser forms, and clearer task groupings.\n\nUse the Folkscript SVG identity: two open book pages, with the gold right page forming a speech-bubble tail, paired with an outlined lowercase Lexend 600 wordmark. Lexend Variable supplies headings, prose, controls, supporting text, and administration. Size, weight, measure, and spacing distinguish sustained reading from interface tasks. The logo's outlined lettering renders independently of installed fonts. Photography remains rectangular and editorial, with restrained crops and no decorative paper texture.",
     "keyCharacteristics": [
       "One Lexend Variable family across editorial reading, headings, and interface tasks; monospace for code.",
       "White pages, subtle neutral panels, and navy ink, paired with coherent dark surfaces.",
@@ -245,7 +245,7 @@
       },
       {
         "name": "The Shared Typeface Rule",
-        "body": "Use Lexend for headings, sustained reading, and interface work. Establish roles through size, weight, measure, and spacing. Keep code monospace and supplied SVG lettering unchanged; do not introduce a separate editorial family.",
+        "body": "Use Lexend for headings, sustained reading, and interface work. Establish roles through size, weight, measure, and spacing. Keep code monospace and use the outlined SVG wordmark; do not introduce a separate editorial family.",
         "section": "typography"
       },
       {
@@ -255,7 +255,7 @@
       }
     ],
     "dos": [
-      "**Do** preserve the supplied Folkscript marks and distinguish reading and interface roles within Lexend.",
+      "**Do** use the Folkscript SVG variants with their minimum sizes and clear space, and distinguish reading and interface roles within Lexend.",
       "**Do** use semantic CSS variables so light and dark themes remain coherent.",
       "**Do** give stories and authors visual priority through type, photography, and spacing.",
       "**Do** maintain the 68ch prose cap, 700px desktop article measure, and responsive reading gutters.",

@@ -80,7 +80,8 @@ a:not(.btn):not(.icon-button):not(.brand):not(.story-image):hover { text-underli
 .closing-invitation p { font-size:1rem; }
 .footer-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 24px 32px; padding-block: 32px 20px; }
 .footer-brand { min-width: 0; }
-.footer-wordmark { display: inline-flex; align-items: baseline; min-height: 44px; line-height: 1.5; }
+.footer-wordmark { display: inline-flex; align-items: center; width: 192px; max-width: 100%; min-height: 44px; }
+.footer-wordmark img { width: 100%; height: auto; }
 .footer-inner>div:first-child p, .footer-inner>nav, .footer-fine { font-size:0.875rem; line-height: 1.65; }
 .footer-inner>div:first-child p { max-width: 38ch; margin-top: 6px; }
 .footer-inner>nav { align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 4px 28px; padding-top: 0; }
