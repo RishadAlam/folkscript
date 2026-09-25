@@ -1,5 +1,6 @@
 // Public interactions progressively enhance ordinary, CSRF-protected forms.
 let feedbackTimer;
+const pendingActions = new Set();
 window.addEventListener('folkscript:feedback', () => {
     clearTimeout(feedbackTimer);
     const region = document.getElementById('action-feedback');
@@ -25,21 +26,31 @@ document.addEventListener('submit', async event => {
     const kind = form.dataset.toggleAction;
     const stateKey = { bookmark: 'bookmarked', follow: 'following', react: 'reacted' }[kind];
     if (!stateKey) return;
+    if (pendingActions.has(form.action)) return;
+    pendingActions.add(form.action);
     const hadFocus = form.contains(document.activeElement);
-    button.disabled = true;
-    form.setAttribute('aria-busy', 'true');
+    const matchingForms = [...document.querySelectorAll('[data-toggle-action]')].filter(other => other.action === form.action);
+    const controls = matchingForms.map(other => other.querySelector('button')).filter(Boolean);
+    const disabledBefore = new Map(controls.map(control => [control, control.disabled]));
+    controls.forEach(control => { control.disabled = true; });
+    matchingForms.forEach(other => other.setAttribute('aria-busy', 'true'));
     try {
         const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
         if (!response.ok) {
-            const messages = { 401: 'Sign in to continue.', 419: 'Your session expired. Refresh this page, then try again.', 429: 'Please wait a moment before trying again.' };
+            const failure = await response.json().catch(() => ({}));
+            if (response.status === 403 && failure?.message === 'Your email address is not verified.') {
+                throw new Error('Verify your email from Settings, then try this action again.');
+            }
+            const messages = { 401: 'Sign in to continue.', 403: 'This action is unavailable for your account. Check your account access in Settings.', 404: 'This story or profile is no longer available. Refresh the page to see the latest content.', 419: 'Your session expired. Refresh this page, then try again.', 429: 'Please wait a moment before trying again.' };
             throw new Error(messages[response.status] || 'This change could not be saved. Please try again.');
         }
-        const data = await response.json();
-        if (typeof data[stateKey] !== 'boolean') throw new Error('This change could not be confirmed. Please refresh the page.');
+        const data = await response.json().catch(() => { throw new Error('This change could not be confirmed. Refresh the page and try again.'); });
+        if (typeof data?.[stateKey] !== 'boolean') throw new Error('This change could not be confirmed. Please refresh the page.');
         const enabled = data[stateKey];
         document.querySelectorAll('[data-toggle-action]').forEach(other => {
             if (other.action !== form.action) return;
             const control = other.querySelector('button');
+            if (!control) return;
             control.setAttribute('aria-pressed', String(enabled));
             control.classList.toggle('engaged', enabled);
             if (kind === 'follow' && control.classList.contains('btn')) { control.classList.toggle('btn-outline', enabled); control.classList.toggle('btn-primary', !enabled); }
@@ -113,7 +124,9 @@ document.addEventListener('submit', async event => {
     } catch (error) {
         feedback(error instanceof TypeError ? 'You seem to be offline. Reconnect and try again.' : error.message, true);
     } finally {
-        button.disabled = false;
-        form.removeAttribute('aria-busy');
+        pendingActions.delete(form.action);
+        controls.forEach(control => { control.disabled = disabledBefore.get(control); });
+        matchingForms.forEach(other => other.removeAttribute('aria-busy'));
+        if (hadFocus && button.isConnected && document.activeElement === document.body) button.focus({ preventScroll: true });
     }
 });

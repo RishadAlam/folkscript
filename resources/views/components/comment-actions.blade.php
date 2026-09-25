@@ -1,8 +1,8 @@
 @props(['comment'])
-@auth
+@if(auth()->user()?->hasVerifiedEmail())
 <div class="comment-tools">
     @can('delete', $comment)
-    <form method="POST" action="/comments/{{ $comment->id }}" onsubmit="return confirm('Remove this response from the conversation?')">
+    <form method="POST" action="/comments/{{ $comment->id }}" onsubmit="return confirm(@js($comment->parent_id ? __('Remove this reply from the conversation?') : __('Remove this response and its replies from the conversation?')))">
         @csrf @method('DELETE')
         <button type="submit" aria-label="{{ __('Remove response by :name', ['name' => $comment->user->name]) }}">{{ __('Remove') }}</button>
     </form>
@@ -21,4 +21,4 @@
     </details>
     @endif
 </div>
-@endauth
+@endif
